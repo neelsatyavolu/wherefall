@@ -29,7 +29,7 @@ function originOf(value: string): string | null {
 
 const appUrl = z
   .string('is not set')
-  .refine((value) => originOf(value) !== null, 'must be the origin of the site, as https://wherefall.vercel.app')
+  .refine((value) => originOf(value) !== null, 'must be the origin of the site, as https://wherefall.n3el.dev')
   .transform((value) => originOf(value) ?? value);
 
 const schema = z.object({

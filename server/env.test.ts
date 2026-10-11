@@ -45,21 +45,21 @@ describe('parseEnv', () => {
   });
 
   it('reads the address of the site as its origin, and takes it to be this machine outside production when it is left out', () => {
-    expect(withExtra({ APP_URL: 'https://wherefall.vercel.app' }).APP_URL).toBe('https://wherefall.vercel.app');
-    expect(withExtra({ APP_URL: 'https://wherefall.vercel.app/' }).APP_URL).toBe('https://wherefall.vercel.app');
+    expect(withExtra({ APP_URL: 'https://wherefall.n3el.dev' }).APP_URL).toBe('https://wherefall.n3el.dev');
+    expect(withExtra({ APP_URL: 'https://wherefall.n3el.dev/' }).APP_URL).toBe('https://wherefall.n3el.dev');
     expect(withExtra({ APP_URL: 'http://localhost:5173' }).APP_URL).toBe('http://localhost:5173');
     expect(withExtra({ APP_URL: '' }).APP_URL).toBe('http://localhost:3000');
     expect(withExtra({}).APP_URL).toBe('http://localhost:3000');
   });
 
-  it.each(['wherefall.vercel.app', 'ftp://wherefall.vercel.app', 'https://wherefall.vercel.app/play', 'https://wherefall.vercel.app/?a=1', 'https://user@wherefall.vercel.app', 'not a url'])(
+  it.each(['wherefall.n3el.dev', 'ftp://wherefall.n3el.dev', 'https://wherefall.n3el.dev/play', 'https://wherefall.n3el.dev/?a=1', 'https://user@wherefall.n3el.dev', 'not a url'])(
     'says what the address of the site has to be when it is %s',
     (value) => {
-      expect(() => withExtra({ APP_URL: value })).toThrow('APP_URL: must be the origin of the site, as https://wherefall.vercel.app');
+      expect(() => withExtra({ APP_URL: value })).toThrow('APP_URL: must be the origin of the site, as https://wherefall.n3el.dev');
     },
   );
 
-  const PRODUCTION = { RESEND_API_KEY: 're_made_up', APP_URL: 'https://wherefall.vercel.app' };
+  const PRODUCTION = { RESEND_API_KEY: 're_made_up', APP_URL: 'https://wherefall.n3el.dev' };
 
   it.each<Record<string, string>>([{ VERCEL_ENV: 'production' }, { NODE_ENV: 'production' }, { VERCEL_ENV: 'production', NODE_ENV: 'production' }])(
     'needs both the key and the address in production (%j), and names whichever is missing or empty',
@@ -91,7 +91,7 @@ describe('parseEnv', () => {
   });
 
   it('never repeats the address of the site in the error either', () => {
-    expect(() => withExtra({ APP_URL: 'https://wherefall.vercel.app/secret-path' })).toThrow(
+    expect(() => withExtra({ APP_URL: 'https://wherefall.n3el.dev/secret-path' })).toThrow(
       expect.objectContaining({ message: expect.not.stringContaining('secret-path') }),
     );
   });

@@ -1,6 +1,6 @@
 # Wherefall
 
-Live at https://wherefall.vercel.app. The game was called Plonk until 2026-10-11: the folder, the Vercel project, the cookie and the browser storage keys keep that name, and https://plonk-two.vercel.app still serves it.
+Live at https://wherefall.n3el.dev. The game was called Plonk until 2026-10-11: the folder, the Vercel project, the cookie and the browser storage keys keep that name, and https://wherefall.vercel.app and https://plonk-two.vercel.app still serve it.
 
 A free street-view guessing game. You are dropped into a street panorama somewhere on Earth, you can look around and walk the street, and you put a pin on the map where you think you are. Up to 5,000 points a round. Playing takes a free account (a username and a password); the leaderboards, community maps, profiles and About are open to everyone.
 
@@ -105,3 +105,7 @@ e2e-live/      scripts that drive real browsers against a deployed site
 ```
 
 Design decisions and the route to Google Street View imagery are in `docs/superpowers/specs/2026-10-10-plonk-design.md`.
+
+## License
+
+The code is [MIT](LICENSE). The street imagery and map data it shows belong to their providers: Panoramax photos to their contributors (CC BY-SA 4.0), Google Street View to Google, and the maps to OpenStreetMap contributors and the tile providers named on the map.
