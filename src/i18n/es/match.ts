@@ -4,16 +4,10 @@ import type { Part } from '../index.ts';
 /** Wave 5: guests, parties, 2v2, chat and the queues. Every key of `../en/match.ts`, or the type check fails. */
 export const match: Part<typeof english> = {
   // Invitados: jugar sin cuenta, y lo que añade una cuenta
-  'guest.play': 'Jugar como invitado',
   'guest.signUp': 'Crear cuenta',
   'guest.label': 'Sesión de invitado',
-  'guest.playingAs': 'Juegas como {name}',
-  'guest.making': 'Entrando como invitado',
-  'guest.offer':
-    'Aquí no hace falta cuenta: juega como invitado y tendrás un nombre para todo el día. Una cuenta guarda tus resultados y añade los duelos clasificatorios, el 2v2, tus propias salas, los amigos, el chat y la creación de mapas.',
   'guest.needsAccount':
-    'Esto requiere una cuenta. Juegas como {name}: un invitado puede jugar partidas normales y unirse a salas. Una cuenta guarda tus resultados y añade los duelos clasificatorios, el 2v2, tus propias salas, los amigos, el chat y la creación de mapas. Es gratis y solo pide un nombre de usuario y una contraseña.',
-  'guest.ended': 'Tu sesión de invitado ha terminado. Una sesión de invitado dura 24 horas.',
+    'Esto requiere una cuenta. Estás como {name}, un invitado, y un invitado ya no puede jugar. Una cuenta guarda tus resultados y abre todos los modos, los amigos, el chat y la creación de mapas. Es gratis y solo pide un nombre de usuario y una contraseña.',
   'guest.chatNote': 'Los invitados pueden enviar reacciones. Para escribir mensajes hace falta una cuenta.',
   'session.ended': 'Tu sesión se ha cerrado.',
 

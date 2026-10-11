@@ -9,7 +9,6 @@ import { SEEN_MS, openScene, revealScene } from './match-scenes.ts';
 import { lobbyTitle, settingsLine } from './party-helpers.ts';
 import { SocialServer } from './social-server.ts';
 import {
-  AS_GUEST,
   GUEST,
   LOPSIDED_SEED,
   PHONE,
@@ -35,7 +34,7 @@ import {
 } from './wave6-online-helpers.ts';
 
 // Wave 6 online: places on three continents in the public kinds (item 2), a refused set drawn again,
-// the request made as a reveal ends (item 26), "Allow guests" (item 7), the typical wait in a queue
+// the request made as a reveal ends (item 26), a party without "Allow guests" (item 7, withdrawn), the typical wait in a queue
 // (item 8), a report's category (item 10) and a server that says to slow down (item 27), and at the
 // end the new screens in German and Russian on a phone.
 
@@ -81,16 +80,6 @@ test('a public game still ends on three continents when a spare stands in for a 
   expect(ids(posted!)).toEqual(ids(spreadDraw(LOPSIDED_SEED, 0, [lost])));
   expect(ids(posted!)).not.toContain(lost);
   expect(continentCount(posted!)).toBeGreaterThanOrEqual(3);
-});
-
-test('a guest who is the one to pick the places of a public game posts them like anyone', async ({ page }) => {
-  const { server } = await asVisitor(page, true);
-  await page.goto('/#unranked');
-  await page.getByRole('button', { name: 'Find a match' }).click();
-  server.state = { ...PREPARING.unranked(), you: { ...AS_GUEST, isResolver: true }, players: [...guestInside(), ...PREPARING.unranked().players.slice(1)] };
-  server.matchFound('m9');
-  await roundReady(page);
-  expect(postedPlaces(server).map(ids)).toEqual([ids(spreadDraw(LOPSIDED_SEED))]);
 });
 
 // --- a set of places the server will not take --------------------------------------------------------
@@ -183,76 +172,45 @@ test('a player whose picture is late gets the round as soon as it is there', asy
   await expect(page.getByRole('button', { name: 'Guess', exact: true })).toBeEnabled();
 });
 
-// --- item 7: Allow guests -----------------------------------------------------------------------------
+// --- item 7, withdrawn: a party is for accounts, and has no setting that says otherwise ---------------
 
-test('a host closes a party to guests when making it, and opens it again from the lobby', async ({ page }) => {
+test('a party is made and changed without a word about guests', async ({ page }) => {
   const server = await asNeel(page);
   await page.goto('/#create');
-  const guests = page.getByRole('group', { name: 'Allow guests' });
-  await expect(guests.getByRole('radio', { name: 'Yes' })).toBeChecked();
-  await expect(page.getByText('A guest plays without an account. With this off, only players who are signed in can join.')).toBeVisible();
-  await guests.getByRole('radio', { name: 'No' }).check();
+  await expect(page.getByRole('group', { name: 'Teams' })).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Allow guests' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Create party' }).click();
-  expect(server.posted('create')).toEqual([{ action: 'create', settings: { map: 'world', mode: 'move', timeLimit: 60, rounds: 5, communication: 'chat', teams: 'none', guests: false } }]);
+  expect(server.posted('create')).toEqual([{ action: 'create', settings: { map: 'world', mode: 'move', timeLimit: 60, rounds: 5, communication: 'chat', teams: 'none', guests: true } }]);
 
   await expect(lobbyTitle(page)).toBeVisible();
-  await expect(settingsLine(page)).toContainText('accounts only');
-  // a guest who was let in before stays: the host is told, and has Kick
-  const stays = page.getByText('Guests who are already here stay. You can remove them from the list of players.');
-  await expect(stays).toBeHidden();
-  server.addGuest(4821);
-  await expect(stays).toBeVisible();
-
-  await page.getByRole('button', { name: 'Change settings' }).click();
-  const inLobby = page.getByRole('form', { name: 'Party settings' }).getByRole('group', { name: 'Allow guests' });
-  await expect(inLobby.getByRole('radio', { name: 'No' })).toBeChecked();
-  await inLobby.getByRole('radio', { name: 'Yes' }).check();
-  await page.getByRole('button', { name: 'Save settings' }).click();
-  expect(server.posted('configure')).toEqual([{ action: 'configure', matchId: 'm1', settings: expect.objectContaining({ guests: true }) }]);
   await expect(settingsLine(page)).not.toContainText('accounts only');
-  await expect(stays).toBeHidden();
+  await page.getByRole('button', { name: 'Change settings' }).click();
+  const form = page.getByRole('form', { name: 'Party settings' });
+  await expect(form.getByRole('group', { name: 'Teams' })).toBeVisible();
+  await expect(form.getByRole('group', { name: 'Allow guests' })).toHaveCount(0);
 });
 
-for (const allowed of [false, true]) {
-  test(`a visitor who opens the link of a party with guests ${allowed ? 'allowed is in its lobby' : 'off is told it is for accounts, with the way to sign up'}`, async ({ page }) => {
-    const { server } = await asVisitor(page);
-    server.state = hostedParty(allowed);
-    await page.goto('/?party=ABC123');
-    await page.getByRole('button', { name: 'Play as a guest' }).click();
-    await page.getByRole('button', { name: 'Join party' }).click();
-    expect(server.posts).toEqual([{ action: 'guest' }, { action: 'join', code: 'ABC123' }]);
-    if (allowed) {
-      await expect(lobbyTitle(page)).toBeVisible();
-      return;
-    }
-    const notice = page.locator('.status-box');
-    await expect(notice.locator('.status-box-label')).toHaveText('Accounts only');
-    await expect(notice).toContainText('This party is for players with an account. Sign up to join it: it is free and takes a username and a password.');
-    await expect(notice.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '#account');
-    // asking again as a guest would be refused again: the form is gone
-    await expect(page.getByRole('button', { name: 'Join party' })).toHaveCount(0);
-    await expect(lobbyTitle(page)).toHaveCount(0);
-  });
-}
-
-test('a guest already in the lobby stays when the host turns guests off', async ({ page }) => {
-  const { server } = await asVisitor(page, true);
-  server.state = hostedParty(true, guestInside());
+test('a visitor who opens the link of a party is sent to sign in, and nothing is asked of the match server', async ({ page }) => {
+  const { server } = await asVisitor(page);
+  server.state = hostedParty(true);
   await page.goto('/?party=ABC123');
-  await page.getByRole('button', { name: 'Join party' }).click();
+  await expect(page.locator('.pane-title')).toHaveText('Join party');
+  await expect(page.locator('.notice')).toContainText('Multiplayer needs an account');
+  await expect(page.getByRole('button', { name: /Join party|Play as a guest/ })).toHaveCount(0);
+  expect(server.posts).toEqual([]);
+});
+
+test('a guest left in a lobby from before stays in its list, whatever the party says of guests', async ({ page }) => {
+  const server = await enterMatch(page, { ...ownLobby(), players: [...ownLobby().players, ...guestInside()] });
   await expect(lobbyTitle(page)).toBeVisible();
+  await expect(page.locator('.lobby-players .player-row')).toHaveCount(3);
 
   server.state = { ...server.state, settings: settings({ guests: false }) };
-  await expect(settingsLine(page)).toContainText('accounts only');
   const polls = server.polls;
   await expect.poll(() => server.polls).toBeGreaterThan(polls + 1);
-  await expect(lobbyTitle(page)).toBeVisible();
-  await expect(page.locator('.lobby-players .player-row')).toHaveCount(2);
-  await expect(page.locator('.status-box')).toHaveCount(0);
-  // the note about guests who stay is the host's
-  await expect(page.locator('.lobby-guests')).toBeHidden();
-  expect(server.posted('leave')).toHaveLength(0);
-  expect(GUEST).toBe(server.state.you.username);
+  await expect(page.locator('.lobby-players .player-row')).toHaveCount(3);
+  await expect(page.locator('.lobby-players')).toContainText(GUEST);
+  await expect(settingsLine(page)).not.toContainText('accounts only');
 });
 
 // --- item 8: the typical wait of a queue ----------------------------------------------------------------
@@ -374,19 +332,6 @@ for (const code of ['de', 'ru'] as const) {
       }
     });
 
-    test('the notice of a party for accounts only is in the language and fits', async ({ page }) => {
-      const { server } = await asVisitor(page);
-      await page.addInitScript((language) => localStorage.setItem('plonk.language', language), code);
-      server.state = hostedParty(false);
-      await page.goto('/?party=ABC123');
-      await page.getByRole('button', { name: say['guest.play'] }).click();
-      // on a phone the menu button is named for the pane too: the form's own button is the one in the page
-      await page.getByRole('main').getByRole('button', { name: say['party.join.submit'], exact: true }).click();
-      await expect(page.locator('.status-box')).toContainText(say['party.accountsOnly']!);
-      await page.waitForLoadState('networkidle');
-      await expectTranslated(page, code, [GUEST]);
-    });
-
     test('the question before a report, with its categories, is in the language and fits', async ({ page }) => {
       await SocialServer.install(page);
       await enterMatch(page, finishedParty(), code);
@@ -401,16 +346,15 @@ for (const code of ['de', 'ru'] as const) {
       expect([box.x >= 0, box.x + box.width <= PHONE.width, box.y >= 0, box.y + box.height <= PHONE.height]).toEqual([true, true, true, true]);
     });
 
-    test('the party form with Allow guests, and a lobby closed to guests, are in the language and fit', async ({ page }) => {
+    test('the party form, and a lobby with a guest left in it, are in the language and fit', async ({ page }) => {
       const server = await asNeel(page, code);
       await page.goto('/#create');
-      await expect(page.getByRole('group', { name: say['party.guests'] }).getByRole('radio')).toHaveCount(2);
+      await expect(page.getByRole('group', { name: say['party.teams'] }).getByRole('radio')).toHaveCount(3);
       await page.waitForLoadState('networkidle');
       await expectTranslated(page, code);
 
-      await enterMatch(page, { ...ownLobby(), settings: settings({ guests: false }), players: [...ownLobby().players, ...guestInside()] }, code, server);
-      await expect(settingsLine(page)).toContainText(say['party.line.accountsOnly']!);
-      await expect(page.getByText(say['party.guests.stay']!)).toBeVisible();
+      await enterMatch(page, { ...ownLobby(), players: [...ownLobby().players, ...guestInside()] }, code, server);
+      await expect(page.locator('.lobby-players')).toContainText(GUEST);
       await page.waitForLoadState('networkidle');
       await expectTranslated(page, code, ['neel', 'sam', GUEST, 'ABC123', ...EMOTES]);
     });

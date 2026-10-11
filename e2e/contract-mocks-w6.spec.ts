@@ -178,29 +178,30 @@ test('the daily is saved only when begun today, long enough ago, on the places o
   expect(data(await getDaily(1, send)).yours?.personalBest).toBe(false);
 });
 
-test("a visitor's daily is begun with a token, and a new account claims only what was begun so, on that day's places", async ({ page }) => {
+test("a visitor cannot begin the daily, and a new account claims only what a visitor's start once began, on that day's places", async ({ page }) => {
   const daily = await DailyServer.install(page, 'none');
   const send = await open(page);
   const result = (day: string, token: string, places = dailyPlaces(day)) => ({ daily: day, token, rounds: places.map((place) => roundOn(place, 3000)) });
 
-  const today = data(await startDaily(send));
-  expect(today).toEqual({ state: 'started', token: expect.any(String) });
+  // playing takes an account: the start is refused, and the daily stays as it was
+  expect(await startDaily(send)).toEqual(refused(SIGN_IN));
   expect(data(await getDaily(1, send)).state).toBe('open');
   daily.session = 'guest';
-  const asGuest = data(await startDaily(send)).token!;
-  expect(asGuest).not.toBe(today.token);
-  daily.startsRefused = true;
-  expect(await startDaily(send)).toEqual(refused('Too many dailies started in the last hour. Try again later.'));
+  expect(await startDaily(send)).toEqual(refused(GUESTS));
+  // a token as a start was answered with while a visitor could play: this browser kept it with today's result
+  const today = { token: daily.tokenFor(daily.date) };
 
   // the account is made, and offers what the browser kept
   daily.session = 'account';
+  daily.startsRefused = true;
+  expect(await startDaily(send)).toEqual(refused('Too many dailies started in the last hour. Try again later.'));
   const kept = [
     result('2026-10-10', daily.tokenFor('2026-10-10')),
     // begun on another day than it says; never begun at all; begun, on places that are not that day's
-    result('2026-10-09', today.token!),
+    result('2026-10-09', today.token),
     result('2026-10-08', 'daily.made.up'),
     result('2026-10-07', daily.tokenFor('2026-10-07'), dailyPlaces('2026-10-06')),
-    result(daily.date, today.token!),
+    result(daily.date, today.token),
   ];
   expect(await claimDaily(kept, send)).toEqual({ ok: true, data: { claimed: ['2026-10-10', daily.date] } });
   const after = data(await getDaily(1, send));
@@ -293,8 +294,8 @@ test('a session ends from elsewhere, and everywhere: after that the browser is a
   expect(await reportPlayer('kit', 'chat', '', send)).toEqual(refused(SIGN_IN));
   expect(await getMaps({ list: 'mine' }, send)).toEqual(refused(SIGN_IN));
   expect(await claimDaily([{ daily: daily.date, token: 'x', rounds: [] }], send)).toEqual(refused(SIGN_IN));
-  // what a visitor may ask still answers: the daily is begun as a visitor begins it
-  expect(data(await startDaily(send)).token).not.toBeNull();
+  expect(await startDaily(send)).toEqual(refused(SIGN_IN));
+  // what a visitor may ask still answers
   expect(data(await getLeaderboard('rating', 'all', false, send)).you).toBeNull();
 
   // signing in again gives a session that counts; "Sign out everywhere" ends this browser's too
@@ -487,13 +488,13 @@ test('places are taken from the resolver alone, checked in the server\'s order, 
   match.state = preparing({ settings: settings({ rounds: 2 }) });
   expect(data(await postPlaces('m1', europe.slice(0, 2), send)).phase).toBe('playing');
 
-  // a guest who is the resolver of a public game posts them like anyone
+  // a guest left from before playing took an account posts nothing, resolver or not
   match.session = 'guest';
   match.state = matchState({ kind: 'unranked', code: null, phase: 'preparing', settings: KIND_SETTINGS.unranked, you: viewer({ username: 'Guest #4821', guest: true, isResolver: true }), players: [guest(4821), player('sam')] });
-  expect(data(await postPlaces('m1', spread, send))).toMatchObject({ phase: 'playing', places: [spread[0]] });
+  expect(await postPlaces('m1', spread, send)).toEqual(refused(GUESTS));
 });
 
-test('a party for accounts only turns a guest away, the ranked search stops widening at 400, and a queue names its typical wait', async ({ page }) => {
+test('no party lets a guest in, the ranked search stops widening at 400, and a queue names its typical wait', async ({ page }) => {
   const match = await MatchServer.install(page);
   const send = await open(page);
   const chosen = { map: 'world', mode: 'move', timeLimit: 60, rounds: 5 } as const;
@@ -504,17 +505,15 @@ test('a party for accounts only turns a guest away, the ranked search stops wide
   expect(data(await createParty({ ...chosen, guests: false }, send)).settings.guests).toBe(false);
   expect(await configureParty('m1', { ...chosen, guests: 'no' as unknown as boolean }, send)).toEqual(refused('Choose a map, a mode, 1 to 20 rounds, and no timer or 10 to 300 seconds a round.'));
 
+  // a guest left from before playing took an account is turned away whatever the party's setting says
   match.session = 'guest';
-  match.state = matchState({ settings: settings({ guests: false }), you: viewer({ username: 'Guest #4821', guest: true }), players: [player('sam')] });
-  expect(await joinParty('ABC123', send)).toEqual(refused(REFUSALS.accountsOnly));
-  // a game under way turns a guest away as its lobby does
-  match.state = { ...match.state, phase: 'playing' };
-  expect(await joinParty('ABC123', send)).toEqual(refused(REFUSALS.accountsOnly));
-  // a guest already in when the host turned it off stays
+  for (const guests of [false, true]) {
+    match.state = matchState({ settings: settings({ guests }), you: viewer({ username: 'Guest #4821', guest: true }), players: [player('sam')] });
+    expect(await joinParty('ABC123', send)).toEqual(refused(GUESTS));
+  }
+  // one already in a party stays in its list until they leave
   match.state = matchState({ settings: settings({ guests: false }), you: viewer({ username: 'Guest #4821', guest: true }), players: [player('sam'), guest(4821)] });
   expect(data(await getMatch('m1', send)).players.map((each) => each.username)).toEqual(['sam', 'Guest #4821']);
-  match.state = matchState({ settings: settings({ guests: true }), you: viewer({ username: 'Guest #4821', guest: true }), players: [player('sam')] });
-  expect(data(await joinParty('ABC123', send)).players).toHaveLength(2);
 
   match.session = 'account';
   expect(data(await getQueue(send))).toMatchObject({ queued: false, kind: null, typicalWaitSeconds: null });

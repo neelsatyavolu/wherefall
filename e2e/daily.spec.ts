@@ -5,13 +5,12 @@ import { GamesServer } from './games-server.ts';
 import { playLocalGame, roundReady } from './helpers.ts';
 import { signIn } from './match-server.ts';
 
-/** The daily and the games it is saved to, seen by "neel", or by a visitor when `username` is null. */
-async function setUp(page: Page, username: string | null = 'neel') {
+/** The daily and the games it is saved to, seen by "neel". */
+async function setUp(page: Page) {
   await mockServices(page);
-  await signIn(page, username);
-  const daily = await DailyServer.install(page, username === null ? 'none' : 'account');
+  await signIn(page, 'neel');
+  const daily = await DailyServer.install(page);
   const games = await GamesServer.install(page, daily);
-  games.session = daily.session;
   return { daily, games };
 }
 
@@ -116,19 +115,4 @@ test('a result that was already in when the game ends is the one that stays', as
   await expect(page.getByRole('region', { name: 'Game summary' })).toContainText("Your first result today stays on the leaderboard as neel's.");
   expect(games.saved).toHaveLength(1);
   expect(daily.rounds).toEqual([5000, 5000, 4999]);
-});
-
-test('a visitor can play the daily and is told the result stays in this browser, off the leaderboard', async ({ page }) => {
-  const { games } = await setUp(page, null);
-  await page.goto('/#daily');
-
-  await expect(page.getByText('You are not signed in. You can play once today. The result is kept in this browser, off the leaderboard, and moves to your account if you create one.')).toBeVisible();
-  await expect(page.getByRole('main').getByRole('link', { name: 'Sign in or create an account' })).toHaveAttribute('href', '#account');
-  await playButton(page).click();
-  await playLocalGame(page, 3);
-
-  await expect(page.getByRole('region', { name: 'Game summary' })).toContainText(
-    'You are not signed in, so this result is not on the leaderboard. It is kept in this browser and moves to your account if you create one.',
-  );
-  expect(games.saved).toHaveLength(0);
 });

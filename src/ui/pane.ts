@@ -1,9 +1,8 @@
 import './account.css';
 import { getAccount, type AccountState } from '../account/client.ts';
 import { t } from '../i18n/index.ts';
-import { playAsGuest } from '../multiplayer/client.ts';
 import { el } from './dom.ts';
-import { guestLine, guestNotice, visitorChoice } from './guest-parts.ts';
+import { guestNotice } from './guest-parts.ts';
 import { hrefFor } from './nav.ts';
 import { announceSessionEnded } from './session-ended.ts';
 import { bannedBox, errorBox } from './status-box.ts';
@@ -61,88 +60,76 @@ interface Gate {
   lede: string;
   /** shown under the lede to everyone, such as a mode's fixed settings */
   facts?: readonly string[];
-  /** what the notice says needs an account: "Multiplayer", "Friends" */
+  /** what the notice says needs an account: "Multiplayer", "Friends", "Playing" */
   what: string;
-}
-
-/** Who a pane is built for: a signed-in player, or a guest by the name the server gave them. Never both. */
-export interface Who {
-  account: Account | null;
-  guest: string | null;
 }
 
 /** What a gate hands the pane it lets in. */
 export interface GateTools {
-  /** true when the visitor became a guest on this very pane a moment ago: they asked to play, so the pane may start */
-  fresh: boolean;
   /** the server said the session is over (`REFUSALS.signIn`): the pane is closed and the way back in is shown */
   ended: () => void;
 }
 
+/** Where a gate shows what it has to say, and what it does for a player it lets in. */
+interface Door {
+  /** shown in the pane's place: the line while the server is asked, its error, or the notice for someone it is closed to */
+  shut: (shown: HTMLElement) => void;
+  open: (account: Account) => void;
+  /** true once the pane has been left: an answer that comes after is dropped */
+  left: () => boolean;
+}
+
 /**
- * The account check every online pane opens with. Everyone is told what the pane is. A signed-in
- * player gets the pane itself, and so does a guest when `guests` is set; any other guest is told
- * what signing up adds, and a visitor is sent to the account pane or, when `guests` is set, offered
- * a game as a guest as well. Nobody is shown a control the server would refuse.
+ * The account check every pane that plays opens with: playing takes an account. A signed-in player
+ * is let in; a visitor is sent to the account pane, and a guest left from before playing took an
+ * account is told what signing up adds. A pane of online play is closed to a banned account as
+ * well; playing alone is not. `note` says why a player is seeing the notice again.
  */
-function gated(gate: Gate, guests: boolean, build: (who: Who, tools: GateTools) => Pane, onSession?: () => void): Pane {
+async function admit(gate: Gate, online: boolean, door: Door, note = ''): Promise<void> {
+  door.shut(statusLine(t('pane.checkingAccount')));
+  const result = await getAccount();
+  if (door.left()) {
+    return;
+  }
+  if (!result.ok) {
+    door.shut(errorBox(result.error, () => void admit(gate, online, door, note)));
+    return;
+  }
+  const { account, guest } = result.data;
+  if (!account) {
+    door.shut(guest === null ? signInNotice(gate.what, note) : guestNotice(guest));
+  } else if (online && account.banned) {
+    door.shut(bannedNotice());
+  } else {
+    door.open(account);
+  }
+}
+
+/**
+ * A pane of online play, which only a signed-in player can use. Everyone is told what the pane is;
+ * nobody is shown a control the server would refuse.
+ */
+export function accountOnly(gate: Gate, build: (account: Account, tools: GateTools) => Pane): Pane {
   const body = el('div', { class: 'pane-body' });
   let inner: Pane | null = null;
   let disposed = false;
 
-  function open(who: Who, fresh: boolean): void {
-    const ended = () => {
-      inner?.dispose?.();
-      inner = null;
-      // the sidebar stops showing the account: through the pane's own way of saying so, or the one every screen shares
-      (onSession ?? announceSessionEnded)();
-      void load(t(who.guest === null ? 'session.ended' : 'guest.ended'));
-    };
-    inner = build(who, { fresh, ended });
-    body.replaceChildren(...(who.guest === null ? [] : [guestLine(who.guest)]), inner.node);
-  }
-
-  /** Makes this browser a guest, then asks who it is again: a browser already signed in is told its own name. */
-  async function becomeGuest(): Promise<string | null> {
-    const made = await playAsGuest();
-    if (disposed) {
-      return null;
-    }
-    if (!made.ok) {
-      return made.error;
-    }
-    onSession?.();
-    void load('', true);
-    return null;
-  }
-
-  async function load(note = '', fresh = false): Promise<void> {
-    body.replaceChildren(statusLine(t('pane.checkingAccount')));
-    const result = await getAccount();
-    if (disposed) {
-      return;
-    }
-    if (!result.ok) {
-      body.replaceChildren(errorBox(result.error, () => void load(note, fresh)));
-      return;
-    }
-    const { account, guest } = result.data;
-    if (account) {
-      if (account.banned) {
-        body.replaceChildren(bannedNotice());
-      } else {
-        open({ account, guest: null }, false);
-      }
-    } else if (guest === null) {
-      body.replaceChildren(guests ? visitorChoice(note, becomeGuest) : signInNotice(gate.what, note));
-    } else if (guests) {
-      open({ account: null, guest }, fresh);
-    } else {
-      body.replaceChildren(guestNotice(guest));
-    }
-  }
-
-  void load();
+  const door: Door = {
+    shut: (shown) => body.replaceChildren(shown),
+    open: (account) => {
+      const ended = () => {
+        inner?.dispose?.();
+        inner = null;
+        // the sidebar stops showing the account
+        announceSessionEnded();
+        void admit(gate, true, door, t('session.ended'));
+      };
+      inner = build(account, { ended });
+      body.replaceChildren(inner.node);
+    },
+    left: () => disposed,
+  };
+  void admit(gate, true, door);
 
   const facts = (gate.facts ?? []).map(factLine);
   return {
@@ -154,16 +141,31 @@ function gated(gate: Gate, guests: boolean, build: (who: Who, tools: GateTools) 
   };
 }
 
-/** A pane only a signed-in player can use. A guest is told what signing up adds; a visitor is sent to the account pane. */
-export function accountOnly(gate: Gate, build: (account: Account, tools: GateTools) => Pane): Pane {
-  // the gate only lets an account through
-  return gated(gate, false, (who, tools) => build(who.account!, tools));
-}
-
 /**
- * A pane a guest can use too: public unranked games and joining a party. A visitor is offered a
- * game as a guest beside signing in. `onSession` is called when who the browser is has changed.
+ * A pane that starts a game alone, which takes an account too. The pane is built whole, under its
+ * own name, for a signed-in player; until the server has said who is looking, and for anyone it
+ * does not know, `gate` gives the name and the line it stands under.
  */
-export function guestsWelcome(gate: Gate, build: (who: Who, tools: GateTools) => Pane, onSession?: () => void): Pane {
-  return gated(gate, true, build, onSession);
+export function playersOnly(gate: Gate, build: () => Pane): Pane {
+  // a stack like any other of the column, so what it holds keeps the pane's measure
+  const host = el('div', { class: 'pane-body' });
+  let inner: Pane | null = null;
+  let disposed = false;
+
+  void admit(gate, false, {
+    shut: (shown) => host.replaceChildren(pane(gate.title, gate.lede, shown)),
+    open: () => {
+      inner = build();
+      host.replaceChildren(inner.node);
+    },
+    left: () => disposed,
+  });
+
+  return {
+    node: host,
+    dispose: () => {
+      disposed = true;
+      inner?.dispose?.();
+    },
+  };
 }

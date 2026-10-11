@@ -4,16 +4,10 @@ import type { Part } from '../index.ts';
 /** Wave 5: guests, parties, 2v2, chat and the queues. Every key of `../en/match.ts`, or the type check fails. */
 export const match: Part<typeof english> = {
   // Gäste: ohne Konto spielen, und was ein Konto dazubringt
-  'guest.play': 'Als Gast spielen',
   'guest.signUp': 'Konto erstellen',
   'guest.label': 'Gastsitzung',
-  'guest.playingAs': 'Du spielst als {name}',
-  'guest.making': 'Du wirst als Gast angemeldet',
-  'guest.offer':
-    'Hier brauchst du kein Konto: Spiel als Gast und du bekommst einen Namen für den Tag. Ein Konto speichert deine Ergebnisse und bringt Wertungsduelle, 2v2, eigene Partys, Freunde, Chat und das Erstellen von Karten.',
   'guest.needsAccount':
-    'Dafür brauchst du ein Konto. Du spielst als {name}: Als Gast kannst du Matches ohne Wertung spielen und Partys beitreten. Ein Konto speichert deine Ergebnisse und bringt Wertungsduelle, 2v2, eigene Partys, Freunde, Chat und das Erstellen von Karten. Es ist kostenlos und braucht nur einen Benutzernamen und ein Passwort.',
-  'guest.ended': 'Deine Gastsitzung ist abgelaufen. Eine Gastsitzung dauert 24 Stunden.',
+    'Dafür brauchst du ein Konto. Du bist als {name} hier, als Gast, und als Gast kannst du nicht mehr spielen. Ein Konto speichert deine Ergebnisse und öffnet alle Modi, Freunde, Chat und das Erstellen von Karten. Es ist kostenlos und braucht nur einen Benutzernamen und ein Passwort.',
   'guest.chatNote': 'Gäste können Reaktionen senden. Für Nachrichten brauchst du ein Konto.',
   'session.ended': 'Du bist nicht mehr angemeldet.',
 

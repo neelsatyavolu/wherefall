@@ -63,12 +63,4 @@ export const party: Part<typeof english> = {
   'chat.teamTag': 'Team',
 
   // Wave 6
-  'party.guests': 'Gäste zulassen',
-  'party.guests.on': 'Ja',
-  'party.guests.off': 'Nein',
-  'party.guests.note': 'Ein Gast spielt ohne Konto. Ist das aus, können nur angemeldete Spieler beitreten.',
-  'party.guests.stay': 'Gäste, die schon hier sind, bleiben. Du kannst sie in der Spielerliste entfernen.',
-  'party.line.accountsOnly': 'nur mit Konto',
-  'party.accountsOnly.label': 'Nur mit Konto',
-  'party.accountsOnly': 'Diese Party ist nur für Spieler mit Konto. Erstelle eins, um beizutreten: Es ist kostenlos und braucht nur einen Benutzernamen und ein Passwort.',
 };

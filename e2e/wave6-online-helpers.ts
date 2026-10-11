@@ -79,20 +79,16 @@ export async function enterMatch(page: Page, state: MatchState, code = 'en', ser
 /** A party of "neel", its host, and "sam", in its lobby. */
 export const ownLobby = (): MatchState => matchState({ players: [player('neel'), player('sam')] });
 
-/** A browser with no session, or one that already holds a guest's, and the two servers that know it. */
-export async function asVisitor(page: Page, guestAlready = false): Promise<{ accounts: AccountServer; server: MatchServer }> {
+/** A browser with no session, and the two servers that know it. */
+export async function asVisitor(page: Page): Promise<{ accounts: AccountServer; server: MatchServer }> {
   const accounts = await AccountServer.install(page, null);
   const server = await MatchServer.install(page);
-  server.account = accounts;
-  server.session = guestAlready ? 'guest' : 'none';
-  if (guestAlready) {
-    accounts.becomeGuest(GUEST);
-  }
+  server.session = 'none';
   await mockServices(page);
   return { accounts, server };
 }
 
-/** A party in its lobby with "sam" its host, for a visitor or a guest to open by its code. */
+/** A party in its lobby with "sam" its host, for a visitor to open by its code. */
 export const hostedParty = (allowGuests: boolean, inside: MatchState['players'] = []): MatchState =>
   matchState({ settings: settings({ guests: allowGuests }), you: AS_GUEST, players: [player('sam'), ...inside] });
 

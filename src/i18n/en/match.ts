@@ -1,16 +1,10 @@
 /** Wave 5, English: guests, parties, 2v2, chat and the queues. Keys as in `../en.ts`. */
 export const match = {
   // Guests: playing without an account, and what an account adds
-  'guest.play': 'Play as a guest',
   'guest.signUp': 'Sign up',
   'guest.label': 'Guest session',
-  'guest.playingAs': 'Playing as {name}',
-  'guest.making': 'Setting you up as a guest',
-  'guest.offer':
-    'No account is needed here: play as a guest and you get a name for the day. An account keeps your results and adds ranked duels, 2v2, parties of your own, friends, chat and map making.',
   'guest.needsAccount':
-    'This needs an account. You are playing as {name}: a guest can play public unranked matches and join parties. An account keeps your results and adds ranked duels, 2v2, parties of your own, friends, chat and map making. It is free and takes a username and a password.',
-  'guest.ended': 'Your guest session has ended. A guest session lasts 24 hours.',
+    'This needs an account. You are here as {name}, a guest, and a guest can no longer play. An account keeps your results and opens every mode, friends, chat and map making. It is free and takes a username and a password.',
   'guest.chatNote': 'Guests can send reactions. Writing messages needs an account.',
   'session.ended': 'You are no longer signed in.',
 

@@ -5,8 +5,9 @@ import { play, roundReady, scrollsSideways } from './helpers.ts';
 import { CATALOGS, expectTranslated, type Catalog } from './language-checks.ts';
 import { boxOf, boxesOf, clashes, smallTargets } from './match-boxes.ts';
 
-// Wave 6, item 4: a new visitor's first minutes. The welcome before the home screen, the tutorial's
-// line of fact with each result, and the screen the tutorial ends on.
+// Wave 6, item 4, as it stands now that playing takes an account: the welcome a new visitor gets
+// before the home screen, which leads to an account; and the tutorial a signed-in player is offered,
+// with its line of fact at each result and the screen it ends on.
 
 const EN = CATALOGS.en!;
 const PHONE = { width: 390, height: 800 };
@@ -20,11 +21,20 @@ const title = (page: Page) => page.locator('.pane-title');
 const summary = (page: Page, say: Catalog = EN) => page.getByRole('region', { name: say['summary.label'] });
 const result = (page: Page, say: Catalog = EN) => page.getByRole('region', { name: say['result.label'] });
 const stored = (page: Page, key: string) => page.evaluate((name) => localStorage.getItem(name), key);
+/** what a visitor is shown on a pane that plays, in place of its controls */
+const gate = (page: Page, say: Catalog = EN) => page.locator('.pane-section .notice').getByRole('link', { name: say['common.signIn'] });
 
 /** A browser that has never been here, and nobody signed in. */
 async function newVisitor(page: Page): Promise<void> {
   await mockServices(page, { welcome: 'show' });
   await signIn(page, null);
+}
+
+/** A signed-in player, on the pane that offers the tutorial again; then the tutorial, begun. */
+async function startTutorial(page: Page, say: Catalog = EN): Promise<void> {
+  await mockServices(page);
+  await page.goto('/#account');
+  await page.getByRole('button', { name: say['common.playTutorial'] }).click();
 }
 
 /** One guess in the round on screen, through to its result. */
@@ -51,16 +61,17 @@ async function throughTutorial(page: Page, say: Catalog = EN): Promise<void> {
 
 // --- the welcome ------------------------------------------------------------------------------------
 
-test('a new visitor on the home page is welcomed first: what Wherefall is, and two choices', async ({ page }) => {
+test('a new visitor on the home page is welcomed first: what Wherefall is, that playing takes an account, and two choices', async ({ page }) => {
   await newVisitor(page);
   await page.goto('/');
   await expect(welcome(page)).toBeVisible();
   await expect(welcome(page).getByRole('heading', { name: 'Wherefall' })).toBeVisible();
   await expect(welcome(page)).toContainText('put a pin on the map');
+  await expect(welcome(page)).toContainText('Playing takes a free account');
   // one accent action, the other a ghost
-  await expect(welcome(page).getByRole('button')).toHaveText(['Show me how', 'Skip']);
-  await expect(welcome(page).locator('.button.accent')).toHaveText(['Show me how']);
-  await expect(welcome(page).locator('.button.ghost')).toHaveText(['Skip']);
+  await expect(welcome(page).getByRole('button')).toHaveText(['Sign in or create an account', 'Look around first']);
+  await expect(welcome(page).locator('.button.accent')).toHaveText(['Sign in or create an account']);
+  await expect(welcome(page).locator('.button.ghost')).toHaveText(['Look around first']);
   // it stands before the home screen, not over it
   await expect(page.locator('.shell')).toHaveCount(0);
 });
@@ -72,33 +83,46 @@ test('a visitor the server cannot be asked about is welcomed all the same', asyn
   await expect(welcome(page)).toBeVisible();
 });
 
-test('Skip goes to the home screen, and the welcome never returns', async ({ page }) => {
+test('"Look around first" goes to the home screen, where playing asks for an account, and the welcome never returns', async ({ page }) => {
   await newVisitor(page);
   await page.goto('/');
-  await welcome(page).getByRole('button', { name: 'Skip' }).click();
+  await welcome(page).getByRole('button', { name: 'Look around first' }).click();
   await expect(title(page)).toHaveText('Singleplayer');
   await expect(welcome(page)).toHaveCount(0);
-  // the how-to box stays for whoever skipped: three lines, and the tutorial still on offer
-  await expect(howTo(page).getByRole('button', { name: 'Play the tutorial' })).toBeVisible();
+  await expect(gate(page)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start game' })).toHaveCount(0);
 
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Start game' })).toBeVisible();
+  await expect(gate(page)).toBeVisible();
   await expect(welcome(page)).toHaveCount(0);
 });
 
-// --- the tutorial from the welcome: a fact a result, and the ways on --------------------------------
+test('"Sign in or create an account" goes to the account pane, and the welcome never returns', async ({ page }) => {
+  await newVisitor(page);
+  await page.goto('/');
+  await welcome(page).getByRole('button', { name: 'Sign in or create an account' }).click();
+  await expect(page).toHaveURL(/#account$/);
+  await expect(page.getByLabel('Username')).toBeVisible();
+  // the tutorial is a game: it is not offered to someone with no account
+  await expect(page.getByRole('button', { name: 'Play the tutorial' })).toHaveCount(0);
+
+  await page.goto('/');
+  await expect(gate(page)).toBeVisible();
+  await expect(welcome(page)).toHaveCount(0);
+});
+
+// --- the tutorial, for a signed-in player: a fact a result, and the ways on --------------------------
 
 const WAYS = [
   { name: 'Singleplayer', address: /\/$/, lands: (page: Page) => expect(title(page)).toHaveText('Singleplayer') },
   { name: 'Daily challenge', address: /#daily$/, lands: (page: Page) => expect(title(page)).toHaveText('Daily challenge') },
-  { name: 'Sign up', address: /#account$/, lands: (page: Page) => expect(page.getByLabel('Username')).toBeVisible() },
 ] as const;
 
 for (const way of WAYS) {
-  test(`"Show me how" runs the tutorial, each result has its fact, and ${way.name} leads where it says`, async ({ page }) => {
-    await newVisitor(page);
+  test(`the how-to box runs the tutorial, each result has its fact, and ${way.name} leads where it says`, async ({ page }) => {
+    await mockServices(page);
     await page.goto('/');
-    await welcome(page).getByRole('button', { name: 'Show me how' }).click();
+    await howTo(page).getByRole('button', { name: 'Play the tutorial' }).click();
     await expect(page.getByRole('complementary', { name: 'Tutorial' })).toContainText('Look around');
 
     await guess(page);
@@ -110,33 +134,31 @@ for (const way of WAYS) {
     await expect(result(page)).toContainText('Italy');
     await page.getByRole('button', { name: 'See summary' }).click();
 
-    // the tutorial's own end: its two rounds, that it is not saved, and three ways on in place of Play again
+    // the tutorial's own end: its two rounds, that it is not saved, and two ways on in place of Play again
     await expect(summary(page).locator('tbody tr')).toHaveCount(2);
     await expect(summary(page)).toContainText('That was the tutorial. It is not saved and does not count for stats.');
-    await expect(summary(page).getByRole('button')).toHaveText(['Singleplayer', 'Daily challenge', 'Sign up']);
+    await expect(summary(page).getByRole('button')).toHaveText(['Singleplayer', 'Daily challenge']);
     await expect(summary(page).locator('.button.accent')).toHaveText(['Singleplayer']);
-    await expect(summary(page).locator('.button.ghost')).toHaveText(['Daily challenge', 'Sign up']);
+    await expect(summary(page).locator('.button.ghost')).toHaveText(['Daily challenge']);
 
     await summary(page).getByRole('button', { name: way.name }).click();
     await expect(page).toHaveURL(way.address);
     await way.lands(page);
 
-    // seen: the welcome is done with, and so is the how-to box
+    // played through: the how-to box is done with
     await page.goto('/');
     await expect(page.getByRole('button', { name: 'Start game' })).toBeVisible();
-    await expect(welcome(page)).toHaveCount(0);
     await expect(howTo(page)).toHaveCount(0);
   });
 }
 
-test('leaving the tutorial part way is an answer too: the welcome does not come back', async ({ page }) => {
-  await newVisitor(page);
+test('leaving the tutorial part way leaves the how-to box where it was', async ({ page }) => {
+  await mockServices(page);
   await page.goto('/');
-  await welcome(page).getByRole('button', { name: 'Show me how' }).click();
+  await howTo(page).getByRole('button', { name: 'Play the tutorial' }).click();
   await roundReady(page);
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Start game' })).toBeVisible();
-  await expect(welcome(page)).toHaveCount(0);
   // the tutorial was not played through, so the how-to box is still there
   await expect(howTo(page)).toBeVisible();
 });
@@ -144,7 +166,7 @@ test('leaving the tutorial part way is an answer too: the welcome does not come 
 // --- who is not welcomed ---------------------------------------------------------------------------
 
 const LINKS = [
-  { what: 'a challenge link', address: CHALLENGE, shows: (page: Page) => expect(page.getByRole('button', { name: 'Play challenge' })).toBeVisible() },
+  { what: 'a challenge link', address: CHALLENGE, shows: (page: Page) => expect(title(page)).toHaveText(EN['nav.item.singleplayer']) },
   { what: 'a party link', address: '/?party=ABC123', shows: (page: Page) => expect(title(page)).toHaveText(EN['nav.item.join']) },
   { what: 'a profile', address: '/?user=sam', shows: (page: Page) => expect(page.locator('.menu-current')).toHaveText(EN['home.profile']) },
   { what: 'a community map', address: '/?community=paris-walks', shows: (page: Page) => expect(page.locator('.nav-item[aria-current="page"]')).toHaveText(EN['nav.item.maps']) },
@@ -173,7 +195,7 @@ test('a signed-in player is never welcomed, signed out later or not', async ({ p
 
   await signIn(page, null);
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Start game' })).toBeVisible();
+  await expect(gate(page)).toBeVisible();
   await expect(welcome(page)).toHaveCount(0);
 });
 
@@ -185,27 +207,15 @@ for (const [what, key, value] of [
     await page.addInitScript(([name, kept]) => localStorage.setItem(name, kept), [key, value] as const);
     await newVisitor(page);
     await page.goto('/');
-    await expect(page.getByRole('button', { name: 'Start game' })).toBeVisible();
+    await expect(gate(page)).toBeVisible();
     await expect(welcome(page)).toHaveCount(0);
   });
 }
 
 // --- replayed from the account pane -----------------------------------------------------------------
 
-test('a visitor replaying the tutorial from the account pane ends on the same three ways on', async ({ page }) => {
-  await mockServices(page);
-  await signIn(page, null);
-  await page.goto('/#account');
-  await page.getByRole('button', { name: 'Play the tutorial' }).click();
-  await throughTutorial(page);
-  await expect(summary(page).getByRole('button')).toHaveText(['Singleplayer', 'Daily challenge', 'Sign up']);
-});
-
-test('a signed-in player replaying it is offered Singleplayer and the daily challenge, not Sign up', async ({ page }) => {
-  await mockServices(page);
-  await signIn(page, 'neel');
-  await page.goto('/#account');
-  await page.getByRole('button', { name: 'Play the tutorial' }).click();
+test('a signed-in player replaying it from the account pane is offered Singleplayer and the daily challenge', async ({ page }) => {
+  await startTutorial(page);
   await throughTutorial(page);
   await expect(summary(page)).toContainText('That was the tutorial. It is not saved and does not count for stats.');
   await expect(summary(page).getByRole('button')).toHaveText(['Singleplayer', 'Daily challenge']);
@@ -243,9 +253,7 @@ for (const viewport of [PHONE, DESKTOP]) {
 
   test(`over a tutorial result at ${size} the tip, the fact and the panel keep clear of one another`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await newVisitor(page);
-    await page.goto('/');
-    await welcome(page).getByRole('button', { name: 'Show me how' }).click();
+    await startTutorial(page);
     await guess(page);
     await expect(page.locator('.coach')).toBeVisible();
     const fact = result(page).locator('.place-fact');
@@ -264,13 +272,11 @@ for (const viewport of [PHONE, DESKTOP]) {
     }
   });
 
-  test(`the tutorial's end at ${size}: three ways on, each whole, on one line and in reach`, async ({ page }) => {
+  test(`the tutorial's end at ${size}: two ways on, each whole, on one line and in reach`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await newVisitor(page);
-    await page.goto('/');
-    await welcome(page).getByRole('button', { name: 'Show me how' }).click();
+    await startTutorial(page);
     await throughTutorial(page);
-    await expect(summary(page).getByRole('button')).toHaveCount(3);
+    await expect(summary(page).getByRole('button')).toHaveCount(2);
     await page.waitForTimeout(400);
     expect(await clashes(page, ['.hud', '.panel-host > *'])).toEqual([]);
     expect(await clashes(page, ['.tutorial-ways .button'])).toEqual([]);
@@ -291,9 +297,7 @@ for (const viewport of [PHONE, DESKTOP]) {
 test('on a short phone a tutorial result still leaves the map room for the place and the guess, between the tip and the sheet', async ({ page }) => {
   // a phone's browser with its bars showing
   await page.setViewportSize({ width: 390, height: 664 });
-  await newVisitor(page);
-  await page.goto('/');
-  await welcome(page).getByRole('button', { name: 'Show me how' }).click();
+  await startTutorial(page);
   await guess(page);
   await expect(page.locator('.coach')).toBeVisible();
   // the fit comes to rest
@@ -308,16 +312,27 @@ test('on a short phone a tutorial result still leaves the map room for the place
 // --- languages ---------------------------------------------------------------------------------------
 
 for (const code of ['de', 'ru'] as const) {
-  test(`${code}: the welcome, a tutorial result and the tutorial's end are in the language on a phone`, async ({ page }) => {
+  test(`${code}: the welcome is in the language on a phone`, async ({ page }) => {
     const say = CATALOGS[code]!;
     await page.setViewportSize(PHONE);
     await page.addInitScript((language) => localStorage.setItem('plonk.language', language), code);
     await newVisitor(page);
     await page.goto('/');
-    await expect(welcome(page, say).getByRole('button')).toHaveText([say['welcome.tutorial'], say['welcome.skip']]);
+    await expect(welcome(page, say).getByRole('button')).toHaveText([say['common.signIn']!, say['welcome.look']!]);
     await expectTranslated(page, code);
+    expect(await clashes(page, ['.welcome .button'])).toEqual([]);
+    expect(await smallTargets(page, '.welcome')).toEqual([]);
 
-    await welcome(page, say).getByRole('button', { name: say['welcome.tutorial'] }).click();
+    await welcome(page, say).getByRole('button', { name: say['welcome.look'] }).click();
+    await expect(gate(page, say)).toBeVisible();
+    await expectTranslated(page, code);
+  });
+
+  test(`${code}: a tutorial result and the tutorial's end are in the language on a phone`, async ({ page }) => {
+    const say = CATALOGS[code]!;
+    await page.setViewportSize(PHONE);
+    await page.addInitScript((language) => localStorage.setItem('plonk.language', language), code);
+    await startTutorial(page, say);
     await guess(page, say);
     await expect(result(page, say).locator('.place-fact')).toHaveText(say['tutorial.fact.eiffel']);
     await expectTranslated(page, code);
@@ -327,7 +342,7 @@ for (const code of ['de', 'ru'] as const) {
     await guess(page, say);
     await expect(result(page, say).locator('.place-fact')).toHaveText(say['tutorial.fact.colosseum']);
     await page.getByRole('button', { name: say['result.seeSummary'] }).click();
-    await expect(summary(page, say).getByRole('button')).toHaveText([say['nav.item.singleplayer'], say['nav.item.daily'], say['guest.signUp']]);
+    await expect(summary(page, say).getByRole('button')).toHaveText([say['nav.item.singleplayer']!, say['nav.item.daily']!]);
     await expectTranslated(page, code);
     const heights = (await boxesOf(page, ['.tutorial-ways .button'])).map((box) => Math.round(box.bottom - box.top));
     expect(new Set(heights).size).toBe(1);

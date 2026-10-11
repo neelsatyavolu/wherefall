@@ -88,7 +88,6 @@ test('a challenge link opens with any of the new times, and with the three older
 
 test('the streak takes the same times', async ({ page }) => {
   await mockServices(page);
-  await signIn(page, null);
   await page.goto('/#streak');
   await timeSlider(page).fill('20');
   await expect(timeShown(page)).toHaveText('20 sec');
@@ -233,30 +232,33 @@ test('a Continent Guesser run: the six continents every round, and a perfect sco
   expect(games.saved).toEqual([{ kind: 'continent', run: 'run.1.continent', rounds: Array.from({ length: GUESSER_ROUNDS }, () => ({ id: expect.stringMatching(/^ke-\d\d$/), answer: 'africa' })) }]);
 });
 
-test('signed out, a guesser is playable and the end screen says the score is not kept', async ({ page }) => {
+test('a session that ends during a guesser run leaves it playable, and the end screen says the score is not kept', async ({ page }) => {
   await mockServices(page);
   await mockPlaces(page, KENYA_ONLY);
-  await signIn(page, null);
+  await signIn(page, 'neel');
   const games = await GamesServer.install(page);
-  games.session = 'none';
 
   await page.goto('/#country');
-  await expect(page.getByText(/Your best score/)).toBeHidden();
   await page.getByRole('button', { name: 'Start game' }).click();
   const question = 'Which country is this?';
   for (let round = 1; round <= GUESSER_ROUNDS; round++) {
+    if (round === GUESSER_ROUNDS) {
+      // signed out from somewhere else, with one round left
+      await signIn(page, null);
+      games.session = 'none';
+    }
     await answer(page, question, 'Kenya', 'Kenya', round);
   }
   const summary = page.getByRole('region', { name: 'Game summary' });
   await expect(summary.locator('.figure-value')).toHaveText('10,000 / 10,000');
   await expect(summary).toContainText('You are not signed in, so this score is not kept.');
+  expect(games.starts).toHaveLength(1);
   expect(games.saved).toEqual([]);
 });
 
 test('a guesser place that will not load can be tried again or skipped, and the round stays the same', async ({ page }) => {
   await mockServices(page);
   await mockPlaces(page, KENYA_ONLY);
-  await signIn(page, null);
   let failures = 2;
   await page.route('https://img.plonk.test/**/sd.jpg', (route) => (failures-- > 0 ? route.abort() : route.fallback()));
 
@@ -324,7 +326,6 @@ test.describe('in a browser set to US English', () => {
 
   test('distances are in miles until the player chooses otherwise', async ({ page }) => {
     await mockServices(page, { units: 'browser' });
-    await signIn(page, null);
     await page.goto('/#account');
     await expect(page.getByRole('radio', { name: 'Miles' })).toBeChecked();
     expect(await stored(page, 'plonk.units')).toBeNull();
@@ -369,7 +370,6 @@ test.describe('in a browser set to anything else', () => {
 test('a second game from the pane avoids the places of the first, and a challenge link still repeats them', async ({ page }) => {
   const shown = await mockServices(page);
   await mockPlaces(page, TWELVE_PLACES);
-  await signIn(page, null);
 
   const playFromPane = async (): Promise<{ places: string[]; address: string }> => {
     const before = shown.length;
@@ -403,7 +403,6 @@ test('a guesser run steers clear of places already shown', async ({ page }) => {
   const shown = await mockServices(page);
   // twenty places: one run shows ten of them, so the next has exactly the other ten to take
   await mockPlaces(page, { ...KENYA_ONLY, locations: KENYA_ONLY.locations.slice(0, 20) });
-  await signIn(page, null);
 
   const run = async (): Promise<string[]> => {
     const before = shown.length;
@@ -462,7 +461,6 @@ for (const size of [
     await page.setViewportSize(size);
     await mockServices(page);
     await mockPlaces(page, KENYA_ONLY);
-    await signIn(page, null);
     await page.goto('/#country');
     await page.getByRole('button', { name: 'Start game' }).click();
     const panel = guesserPanel(page, 'Which country is this?');
@@ -534,7 +532,7 @@ for (const code of ['de', 'ru']) {
 
     for (const kind of ['country', 'continent'] as const) {
       test(`a ${kind} guesser round, its answer and its end are in the language`, async ({ page }) => {
-        await signIn(page, null);
+        await GamesServer.install(page);
         await page.goto(`/#${kind}`);
         await page.getByRole('button', { name: say['singleplayer.start'] }).click();
         const panel = guesserPanel(page, say[`guesser.${kind}.ask`]);
@@ -554,7 +552,8 @@ for (const code of ['de', 'ru']) {
           await next.locator('.guesser-option').first().click();
           await next.locator('[data-action="next"]').click();
         }
-        await expect(page.getByRole('region', { name: say['summary.label'] })).toContainText(say['guesser.save.signedOut']);
+        // the run is saved, and the end says where the player's best now stands
+        await expect(page.getByRole('region', { name: say['summary.label'] }).locator('.save-note')).toContainText(say['guesser.save.best'].split('{score}')[0]!.trim());
         await expectTranslated(page, code);
       });
     }

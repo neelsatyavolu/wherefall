@@ -158,6 +158,21 @@ export async function matchPost(request: Request, context: Context): Promise<Res
   return perform(action.data, player.userId, context);
 }
 
+/**
+ * Asking is a player's heartbeat, and what matches one who waits. A guest left from before playing
+ * took an account can do neither any more: they are taken out of the queue, or of the match they
+ * ask for, so that no account's game is made of them or waits on them, and are told why.
+ */
+async function turnAway(params: URLSearchParams, userId: string, { db, now }: Context): Promise<Response> {
+  const matchId = matchIdSchema.safeParse(params.get('id'));
+  if (params.has('queue')) {
+    await leaveQueue(db, userId, now);
+  } else if (matchId.success) {
+    await leaveMatch(db, userId, matchId.data, now);
+  }
+  return fail(GUESTS_CANNOT, 403);
+}
+
 /** `?id=` is a match's state and that player's heartbeat; `?queue=1` is their place in the queue and its heartbeat. */
 export async function matchGet(request: Request, context: Context): Promise<Response> {
   const player = await playerIn(request, context);
@@ -165,6 +180,9 @@ export async function matchGet(request: Request, context: Context): Promise<Resp
     return fail(SIGN_IN_FIRST, 401);
   }
   const params = new URL(request.url).searchParams;
+  if (player.guest) {
+    return turnAway(params, player.userId, context);
+  }
   if (params.has('queue')) {
     return ok(await pollQueue(context.db, player.userId, context.now));
   }

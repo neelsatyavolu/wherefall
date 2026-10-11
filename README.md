@@ -2,14 +2,14 @@
 
 Live at https://wherefall.vercel.app. The game was called Plonk until 2026-10-11: the folder, the Vercel project, the cookie and the browser storage keys keep that name, and https://plonk-two.vercel.app still serves it.
 
-A free street-view guessing game. You are dropped into a street panorama somewhere on Earth, you can look around and walk the street, and you put a pin on the map where you think you are. Up to 5,000 points a round.
+A free street-view guessing game. You are dropped into a street panorama somewhere on Earth, you can look around and walk the street, and you put a pin on the map where you think you are. Up to 5,000 points a round. Playing takes a free account (a username and a password); the leaderboards, community maps, profiles and About are open to everyone.
 
 What is in it:
 
 - **Solo:** singleplayer (world, four regions, any country with enough places, or a community map; 3, 5 or 10 rounds; timer off or 10 to 300 seconds; move, no-move, or no move/pan/zoom; up to two hints a game, each halving its round), country streak, Country Guesser and Continent Guesser, a tutorial, and a daily challenge (three rounds, one attempt a day, a streak, a leaderboard and a shareable result).
-- **Online:** ranked duels on a health system with ratings and leagues, public unranked games for up to 10 that can be joined under way, 2v2 with shared team health, and parties for up to 40 joined by code or friend invite, with host controls, team mode, chat and reactions. Visitors without an account can play public unranked and join parties as guests (a host can turn guests off).
+- **Online:** ranked duels on a health system with ratings and leagues, public unranked games for up to 10 that can be joined under way, 2v2 with shared team health, and parties for up to 40 joined by code or friend invite, with host controls, team mode, chat and reactions.
 - **Community:** maps anyone can make from places with Street View (search, likes, a preview of the places), leaderboards, friends with online status, public profiles, reports and a moderation pane.
-- **Account (optional):** XP and levels, progress charts, game history for every mode with a replay map, a country flag, kilometres or miles, sound volume, password change, a one-time recovery code for a forgotten password (there is no email), "Sign out everywhere", and account deletion with a 30-day restore window.
+- **Account (needed to play):** XP and levels, progress charts, game history for every mode with a replay map, a country flag, kilometres or miles, sound volume, password change, a one-time recovery code for a forgotten password (there is no email), "Sign out everywhere", and account deletion with a 30-day restore window.
 - **Everywhere:** five languages (English, Spanish, French, German, Russian), sounds, a pin map with streets, satellite, hybrid and terrain, and an installable app (web app manifest and service worker).
 - Every game has a challenge link that gives a friend the same places, and an Exit on every screen.
 
@@ -45,7 +45,7 @@ Moderators are the accounts named in the `MODERATORS` environment variable (comm
 
 ## Accounts
 
-An account is optional. Signed-in players get each finished game saved, and an account screen with games played, average and best round, perfect rounds, best game and recent games. The backend is ten Vercel Functions in `api/` over Postgres (code in `server/`); the account part is ported from Gambit: scrypt passwords, a signed HttpOnly session cookie, rate limits on sign-up, sign-in and saves, and an Origin check on writes. Sign-in is username and password only.
+An account is needed to play anything (`docs/superpowers/specs/2026-10-11-plonk-accounts-required.md`). Signed-in players get each finished game saved, and an account screen with games played, average and best round, perfect rounds, best game and recent games. The backend is ten Vercel Functions in `api/` over Postgres (code in `server/`); the account part is ported from Gambit: scrypt passwords, a signed HttpOnly session cookie, rate limits on sign-up, sign-in and saves, and an Origin check on writes. Sign-in is username and password only.
 
 The server does not store scores as the browser sends them: it looks each place up in its own copy of the two location sets (or the community map), and recomputes each round's distance and score from that place and the guess. Daily, streak and guesser runs begin with a start the server issues, and a finish that arrives faster than two seconds a round is refused. That stops made-up scores. It cannot stop a player who reads the answer out of their own browser, which no browser-rendered game can.
 
@@ -61,7 +61,7 @@ It needs `DATABASE_URL` and `SESSION_SECRET`, and in production `RESEND_API_KEY`
 
 ```bash
 pnpm install
-pnpm dev          # the game only; account calls fail quietly
+pnpm dev          # the pages only: nothing can be played, since the account check has no API to ask
 vercel dev        # the game and the account API (needs .env.local, see .env.example)
 ```
 

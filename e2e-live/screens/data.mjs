@@ -3,8 +3,6 @@
 import { FIVE_PLACES } from '../../e2e/match-server.ts';
 import { friend } from '../../e2e/social-server.ts';
 import { PARIS as PARIS_MAP, MINE } from '../../e2e/maps-server.ts';
-import { dailySeed } from '../../e2e/place-rules.ts';
-import { drawDaily } from '../../src/daily/draw.ts';
 import { destination } from '../../src/game/geo.ts';
 import { KIND_SETTINGS, PLACES, guest, matchState, player, rankedState, settings, teamRow, teamState, viewer } from '../../src/multiplayer/testing.ts';
 import { RATING, ago, countryOf, crowd, day, person } from './world.mjs';
@@ -52,27 +50,6 @@ export function recordsOf(days) {
   const scores = days.flatMap((each) => (each.score === null ? [] : [each.score]));
   return { played: scores.length, best: Math.max(0, ...scores), average: scores.length === 0 ? 0 : Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) };
 }
-
-/** The three places of a day's daily on a list of places, as the game draws them. */
-export const dailyPlacesOn = (places, date) =>
-  drawDaily(
-    places.locations.map(([id, lng, lat, country]) => ({ id, lng, lat, country })),
-    dailySeed(date),
-  );
-
-/**
- * A visitor's daily result as this browser keeps it: on the day's places, with the token the server
- * answered its start with, which is what lets an account made later take it over. With no token
- * and no places it is a result as a browser kept it before starts had tokens: shown, and offered
- * to nobody.
- */
-export const keptDaily = (date, scores, token = null, places = null) => {
-  const rounds = scores.map((score, index) => {
-    const place = places?.[index] ?? { country: 'FR', lng: 2, lat: 48 };
-    return { ...(places ? { id: place.id } : {}), country: place.country, distanceKm: 100, score, lng: place.lng, lat: place.lat, guessLng: place.lng + 0.5, guessLat: place.lat + 0.5, hinted: false };
-  });
-  return JSON.stringify({ started: date, ...(token ? { token } : {}), results: [{ daily: date, ...(token ? { token } : {}), rounds }], claim: null });
-};
 
 /** Maps for the lists: one liked, one the player's own, and a few more by others. */
 export function fillMaps(maps) {

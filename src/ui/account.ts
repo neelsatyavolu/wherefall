@@ -252,7 +252,7 @@ export function accountPane(onChange: () => void, onTutorial: () => void, resetT
     }
     signedIn = false;
     const arrived = () => void load(true, false, 'arrived');
-    body.replaceChildren(...(ended ? [endedNote()] : []), signInForm({ onSignedIn: arrived, onCode: showCode }, then === 'forgot'), ...settingsRows(onTutorial));
+    body.replaceChildren(...(ended ? [endedNote()] : []), signInForm({ onSignedIn: arrived, onCode: showCode }, then === 'forgot'), ...settingsRows(null));
   }
 
   // The session can end from another browser while this pane is open. Whichever part of the pane

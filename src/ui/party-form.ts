@@ -68,7 +68,7 @@ function roundsControl(legend: string, name: string, initial: number, onChange: 
   return el('fieldset', { class: 'choice-row time-control' }, el('legend', { class: 'label', text: legend }), readout, el('div', { class: 'time-row' }, less, input, more));
 }
 
-/** A party's settings in words, piece by piece: the map, the rounds, the time, the mode, what players may say, the teams when there are any, and that it takes accounts only when it does. */
+/** A party's settings in words, piece by piece: the map, the rounds, the time, the mode, what players may say, and the teams when there are any. */
 export function settingsParts(settings: MatchSettings): string[] {
   return [
     mapName(settings.map),
@@ -77,7 +77,6 @@ export function settingsParts(settings: MatchSettings): string[] {
     t(`settings.mode.${settings.mode}`),
     t(`party.line.${settings.communication}`),
     ...(settings.teams === 'none' ? [] : [t(`party.line.${settings.teams}`)]),
-    ...(settings.guests ? [] : [t('party.line.accountsOnly')]),
   ];
 }
 
@@ -137,18 +136,6 @@ export function partyForm(options: PartyFormOptions): HTMLElement {
       { class: 'party-field' },
       choiceRow<TeamMode>(t('party.teams'), `${name}-teams`, TEAM_MODES.map((value) => ({ value, name: t(`party.teams.${value}`) })), settings.teams, (teams) => update({ teams })),
       el('p', { class: 'fine', text: t('party.teams.note') }),
-    ),
-    el(
-      'div',
-      { class: 'party-field' },
-      choiceRow<boolean>(
-        t('party.guests'),
-        `${name}-guests`,
-        [true, false].map((value) => ({ value, name: t(value ? 'party.guests.on' : 'party.guests.off') })),
-        settings.guests,
-        (guests) => update({ guests }),
-      ),
-      el('p', { class: 'fine', text: t('party.guests.note') }),
     ),
     // creating a party is the pane's one forward action, kept in reach on a phone; the host's form in a lobby is a row where it stands
     ...(cancel ? [el('div', { class: 'actions' }, submit, cancel), error] : [actionBar(error, submit)]),

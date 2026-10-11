@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { accountReply, hasAccountAnswer } from './account-server.ts';
 import { servePlaces } from './place-rules.ts';
 
 /** Smallest valid JPEG (one grey pixel): stands in for every panorama image and tile. */
@@ -45,6 +46,13 @@ export interface MockOptions {
    * welcome, as it does in a browser that has never been here.
    */
   welcome?: 'seen' | 'show';
+  /**
+   * `player` (the default) answers `GET /api/account` as a signed-in player, "neel": nothing is
+   * played without an account, so a test that is not about who is looking starts with one. A test
+   * that says who is looking (`signIn`, an `AccountServer`), before this or after, is answered its
+   * way. `none` leaves the address alone.
+   */
+  account?: 'player' | 'none';
 }
 
 /**
@@ -66,6 +74,9 @@ export async function mockServices(page: Page, options: MockOptions = {}): Promi
   }
   if (options.welcome !== 'show') {
     await page.addInitScript(() => localStorage.setItem('plonk.welcome-seen', '1'));
+  }
+  if (options.account !== 'none' && !hasAccountAnswer(page)) {
+    await page.route('**/api/account', (route) => route.fulfill({ json: accountReply('neel') }));
   }
 
   await page.route('https://api.panoramax.xyz/api/search**', async (route) => {

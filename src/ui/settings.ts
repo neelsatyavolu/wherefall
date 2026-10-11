@@ -116,8 +116,9 @@ export function groupHead(title: string, note: string): HTMLElement {
 /**
  * The settings rows, in the order the account pane shows them: language, units, sound, tutorial.
  * They open with a heading that says they belong to this browser, which sets them apart from the
- * settings saved with the account.
+ * settings saved with the account. `onTutorial` is null for a visitor: the tutorial is a game, and
+ * playing takes an account.
  */
-export function settingsRows(onTutorial: () => void): HTMLElement[] {
-  return [groupHead(t('account.group.browser'), t('account.group.browser.note')), languageSetting(), unitsSetting(), soundSetting(), tutorialLink(onTutorial)];
+export function settingsRows(onTutorial: (() => void) | null): HTMLElement[] {
+  return [groupHead(t('account.group.browser'), t('account.group.browser.note')), languageSetting(), unitsSetting(), soundSetting(), ...(onTutorial ? [tutorialLink(onTutorial)] : [])];
 }

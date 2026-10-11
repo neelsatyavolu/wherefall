@@ -63,12 +63,4 @@ export const party: Part<typeof english> = {
   'chat.teamTag': 'equipo',
 
   // Wave 6
-  'party.guests': 'Permitir invitados',
-  'party.guests.on': 'Sí',
-  'party.guests.off': 'No',
-  'party.guests.note': 'Un invitado juega sin cuenta. Si lo desactivas, solo pueden entrar jugadores con la sesión iniciada.',
-  'party.guests.stay': 'Los invitados que ya están aquí se quedan. Puedes expulsarlos desde la lista de jugadores.',
-  'party.line.accountsOnly': 'solo con cuenta',
-  'party.accountsOnly.label': 'Solo con cuenta',
-  'party.accountsOnly': 'Esta sala es solo para jugadores con cuenta. Crea una para entrar: es gratis y solo pide un nombre de usuario y una contraseña.',
 };

@@ -138,16 +138,16 @@ async function lobbyPlayerScenes(run) {
     );
   });
 
-  await run.scene('lobby: a guest in it', { who: 'guest' }, async (s) => {
-    s.match.state = matchState({ you: s.match.state.you, players: [player('sam', { country: 'GB' }), player('ana', { country: 'BR' })] });
+  await run.scene('lobby: a guest left in it from before playing took an account', {}, async (s) => {
+    s.match.state = matchState({ you: s.match.state.you, players: [player('sam', { country: 'GB' }), player('ana', { country: 'BR' }), guest(4821)] });
     await s.capture(
-      'lobby-as-a-guest',
+      'lobby-with-a-guest-left-in-it',
       async () => {
         await openPane(s, '/?party=ABC123');
         await button(s, 'party.join.submit').click();
         await lobby(s).waitFor();
-        s.match.say('sam', 'hello guest');
-        await s.page.getByText('hello guest').waitFor();
+        s.match.say('sam', 'hello all');
+        await s.page.getByText('hello all').waitFor();
       },
       FULL,
     );

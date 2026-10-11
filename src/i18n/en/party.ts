@@ -67,12 +67,4 @@ export const party = {
   'chat.teamTag': 'team',
 
   // Wave 6
-  'party.guests': 'Allow guests',
-  'party.guests.on': 'Yes',
-  'party.guests.off': 'No',
-  'party.guests.note': 'A guest plays without an account. With this off, only players who are signed in can join.',
-  'party.guests.stay': 'Guests who are already here stay. You can remove them from the list of players.',
-  'party.line.accountsOnly': 'accounts only',
-  'party.accountsOnly.label': 'Accounts only',
-  'party.accountsOnly': 'This party is for players with an account. Sign up to join it: it is free and takes a username and a password.',
 } as const;

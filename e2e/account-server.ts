@@ -107,8 +107,15 @@ export const accountReply = (username: string | null, rating = 1000, change: Par
 /** `/api/account` for a browser that holds a guest session. */
 export const guestReply = (name = 'Guest #4821') => ({ success: true, data: { ...stateOf(null), guest: name } });
 
+/** the pages a test has already said who is looking on */
+const answered = new WeakSet<Page>();
+
+/** True once `signIn` or an `AccountServer` answers `/api/account` on the page: the fixture's own player is then not wanted. */
+export const hasAccountAnswer = (page: Page): boolean => answered.has(page);
+
 /** The quick way to be someone: answers `GET /api/account` and nothing else. For the account's actions use `AccountServer`. */
 export async function signIn(page: Page, username: string | null, rating = 1000, change: Partial<Account> = {}): Promise<void> {
+  answered.add(page);
   await page.route('**/api/account', (route) => route.fulfill({ json: accountReply(username, rating, change) }));
 }
 
@@ -156,6 +163,7 @@ export class AccountServer {
 
   static async install(page: Page, username: string | null = 'neel', rating = 1000, change: Partial<Account> = {}): Promise<AccountServer> {
     const server = new AccountServer(username, rating, change);
+    answered.add(page);
     await page.route('**/api/account**', (route) => server.handle(route));
     return server;
   }

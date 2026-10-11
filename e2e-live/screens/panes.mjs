@@ -1,11 +1,10 @@
 // The panes of the home screen: what a visitor, a guest and a signed-in player each see, and the
 // states a pane can be in.
 import { dailyEntries } from '../../e2e/daily-server.ts';
-import { PLACES_FIXTURE } from '../../e2e/fixtures.ts';
 import { historyGames } from '../../e2e/games-server.ts';
 import { PARIS, MINE } from '../../e2e/maps-server.ts';
 import { matchState, player } from '../../src/multiplayer/testing.ts';
-import { NO_FRIENDS, dailyHistory, dailyPlacesOn, fillMaps, friendsList, keptDaily } from './data.mjs';
+import { NO_FRIENDS, dailyHistory, fillMaps, friendsList } from './data.mjs';
 import { SEASONED, bring, button, harness, menuButton, openPane, panes, radio, section } from './setup.mjs';
 
 const PASSWORD = 'correct horse battery';
@@ -17,16 +16,16 @@ const PASTED = ['48.8566, 2.3522', '48.8606 2.3376', '48.8738, 2.2950', '48.8530
 async function visitorScenes(run) {
   await run.scene('visitor: every pane signed out', { who: 'visitor', stored: { 'plonk.intro-seen': null } }, async (s) => {
     await panes(s, [
-      ['/', 'pane-singleplayer-first-visit-signed-out'],
-      ['/#streak', 'pane-country-streak-signed-out'],
-      ['/#country', 'pane-country-guesser-signed-out'],
-      ['/#continent', 'pane-continent-guesser-signed-out'],
-      ['/#daily', 'pane-daily-signed-out-one-attempt-kept-in-this-browser'],
+      ['/', 'pane-singleplayer-signed-out-needs-account'],
+      ['/#streak', 'pane-country-streak-signed-out-needs-account'],
+      ['/#country', 'pane-country-guesser-signed-out-needs-account'],
+      ['/#continent', 'pane-continent-guesser-signed-out-needs-account'],
+      ['/#daily', 'pane-daily-signed-out-needs-account'],
       ['/#ranked', 'pane-ranked-duel-signed-out-needs-account'],
-      ['/#unranked', 'pane-unranked-signed-out-guest-offer'],
+      ['/#unranked', 'pane-unranked-signed-out-needs-account'],
       ['/#team', 'pane-2v2-signed-out-needs-account'],
       ['/#create', 'pane-create-party-signed-out-needs-account'],
-      ['/?party=ABC123', 'pane-join-party-signed-out-guest-offer'],
+      ['/?party=ABC123', 'pane-join-party-signed-out-needs-account'],
       ['/#maps', 'pane-maps-signed-out-liked-needs-account'],
       ['/#leaderboards', 'pane-leaderboards-signed-out'],
       ['/#friends', 'pane-friends-signed-out-needs-account'],
@@ -37,20 +36,14 @@ async function visitorScenes(run) {
     ]);
   });
 
-  await run.scene('visitor: a daily result kept in this browser', { who: 'visitor' }, async (s) => {
-    const kept = keptDaily(s.daily.date, [4800, 3950, 2500], s.daily.tokenFor(), dailyPlacesOn(PLACES_FIXTURE, s.daily.date));
-    await s.page.addInitScript((value) => localStorage.setItem('plonk.daily', value), kept);
-    await panes(s, [['/#daily', 'pane-daily-signed-out-result-kept-in-this-browser']]);
-  });
-
-  await run.scene('guest: the notice on panes that need an account', { who: 'guest' }, async (s) => {
+  await run.scene('guest: the notice a guest session left from before gets on every pane that plays', { who: 'guest' }, async (s) => {
     await panes(s, [
-      ['/#unranked', 'pane-unranked-as-guest-with-guest-badge'],
+      ['/#unranked', 'pane-unranked-as-guest-needs-account-notice'],
       ['/#ranked', 'pane-ranked-duel-as-guest-needs-account-notice'],
       ['/#create', 'pane-create-party-as-guest-needs-account-notice'],
       ['/#friends', 'pane-friends-as-guest-needs-account-notice'],
-      ['/?party=ABC123', 'pane-join-party-as-guest'],
-      ['/#daily', 'pane-daily-as-guest'],
+      ['/?party=ABC123', 'pane-join-party-as-guest-needs-account-notice'],
+      ['/#daily', 'pane-daily-as-guest-needs-account-notice'],
       ['/#account', 'pane-account-as-guest'],
     ]);
   });

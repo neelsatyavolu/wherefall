@@ -19,14 +19,14 @@ import { guesserPane } from './guesser-pane.ts';
 import { leaderboardsPane } from './leaderboards-pane.ts';
 import { mapEditorPane } from './map-editor-pane.ts';
 import { mapPage } from './map-page.ts';
-import { readPreset } from './map-preset.ts';
+import { readPreset, type MapPreset } from './map-preset.ts';
 import { mapsPane } from './maps-pane.ts';
 import { createPartyPane, joinPartyPane, queuePane } from './multiplayer-panes.ts';
 import { install, watchInstall } from '../pwa.ts';
 import { moderationPane } from './moderation-pane.ts';
 import { NAV_GROUPS, RESTRICTED, hrefFor, navFor, navGroupName, navName, partyCode, resetToken, sameView, type NavId, type View } from './nav.ts';
 import { onlineCount } from './online-count.ts';
-import type { Pane } from './pane.ts';
+import { playersOnly, type Pane } from './pane.ts';
 import { profilePane } from './profile-pane.ts';
 import type { Snap } from './providers.ts';
 import { onSessionEnded } from './session-ended.ts';
@@ -98,30 +98,57 @@ interface Session {
   refresh: () => void;
 }
 
-/** Builds the pane for one view. The address is read here, so a pane always matches the link that opened it. */
+/** the map chosen for a form that has not been built with it yet, by the pane the form is on */
+const chosenMaps = new Map<NavId, MapPreset>();
+
+/**
+ * The map chosen on the Maps pane or a map's page rides in the history entry that opens the form.
+ * A visitor is sent to sign in from there and comes back on another entry, so the choice is kept
+ * until the form is built: what this returns hands it over, once.
+ */
+function chosenMap(pane: NavId): () => MapPreset | null {
+  const carried = readPreset(history.state);
+  if (carried) {
+    chosenMaps.set(pane, carried);
+  }
+  return () => {
+    const preset = chosenMaps.get(pane) ?? null;
+    chosenMaps.delete(pane);
+    return preset;
+  };
+}
+
+/** A pane that starts a game alone, behind the account check: its name and its line are what a visitor is shown of it. */
+const solo = (id: NavId, lede: string, build: () => Pane): Pane => playersOnly({ title: navName(id), lede, what: t('play.what') }, build);
+
+/** Builds the pane for one view. The address is read as the pane is built, so a pane always matches the link that opened it. */
 function buildPane(view: View, handlers: HomeHandlers, session: Session): Pane {
   switch (view.pane) {
-    case 'singleplayer':
-      return singleplayerPane(parseChallenge(location.search), readPreset(history.state), handlers);
+    case 'singleplayer': {
+      const preset = chosenMap('singleplayer');
+      return solo('singleplayer', t('singleplayer.lede'), () => singleplayerPane(parseChallenge(location.search), preset(), handlers));
+    }
     case 'moderation':
       return moderationPane();
     case 'streak':
-      return streakPane(handlers.onStreak);
+      return solo('streak', t('streak.lede'), () => streakPane(handlers.onStreak));
     case 'country':
-    case 'continent':
-      return guesserPane(view.pane, handlers.onGuesser);
+    case 'continent': {
+      const kind = view.pane;
+      return solo(kind, t(`guesser.${kind}.lede`), () => guesserPane(kind, handlers.onGuesser));
+    }
     case 'about':
       return aboutPane();
     case 'ranked':
     case 'unranked':
     case 'team':
-      return queuePane(view.pane, handlers.onMatch, session.refresh);
+      return queuePane(view.pane, handlers.onMatch);
     case 'create':
-      return createPartyPane(handlers.onMatch, handlers.loadPlaces, readPreset(history.state));
+      return createPartyPane(handlers.onMatch, handlers.loadPlaces, chosenMap('create'));
     case 'join':
-      return joinPartyPane(partyCode(location.search), handlers.onMatch, session.refresh);
+      return joinPartyPane(partyCode(location.search), handlers.onMatch);
     case 'daily':
-      return dailyPane(handlers.onDaily, session.setDaily);
+      return solo('daily', t('daily.lede'), () => dailyPane(handlers.onDaily, session.setDaily));
     case 'leaderboards':
       return leaderboardsPane();
     case 'friends':
@@ -247,8 +274,8 @@ export function renderHome(initial: View, handlers: HomeHandlers, checkResume: b
     if (disposed) {
       return;
     }
-    // the Daily item is marked for whoever is looking (a new account first takes over the dailies its player kept as a visitor); the daily pane marks it itself
-    if (account.ok && current?.view.pane !== 'daily') {
+    // the Daily item is marked for whoever is looking (a new account first takes over the dailies its player kept as a visitor); the daily pane marks it itself, once a signed-in player has it
+    if (account.ok && (current?.view.pane !== 'daily' || !account.data.account)) {
       void dailyMark.refresh(account.data.account?.username ?? null);
     }
     const moderator = account.ok && Boolean(account.data.account?.moderator);
@@ -263,11 +290,6 @@ export function renderHome(initial: View, handlers: HomeHandlers, checkResume: b
     if (!account.ok || !account.data.account) {
       session.setPending(0);
       resumeHost.replaceChildren();
-      // a guest has no friends to ask about, but can be in a match that a reload should lead back to
-      const queue = guest !== null && resume ? await getQueue() : null;
-      if (!disposed && queue?.ok && !queue.data.queued && queue.data.matchId !== null) {
-        resumeHost.replaceChildren(resumeBanner(queue.data.matchId, handlers.onRejoin));
-      }
       return;
     }
     const [friends, queue] = await Promise.all([getFriends(), resume ? getQueue() : null]);

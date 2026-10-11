@@ -1,10 +1,10 @@
 // Playing other people in wave 6: a party of forty in its lobby and through a round, reactions
-// that float by the roster, a party closed to guests, the typical wait of a queue, and a report
+// that float by the roster, the typical wait of a queue, and a report
 // from the final standing that asks what it is about.
-import { matchState, outcome, player, settings, viewer } from '../../src/multiplayer/testing.ts';
+import { matchState, outcome, player } from '../../src/multiplayer/testing.ts';
 import { MEMBER, eightPlayers, fallingScores, fortyLobby, fortyParty, fortyTeamLobby, fortyTeamParty, leader, partyGame, scoresAround, spreadReveal, withTeamTotals } from './data.mjs';
 import { falling, withRoundsPlayed } from './online.mjs';
-import { GUEST_NAME, askToKick, bring, button, enterMatch, finalStanding as final, guess, leaveMap, lobbyTitle as lobby, openPane, refusal, roundReady, roundResult as result } from './setup.mjs';
+import { askToKick, bring, button, enterMatch, finalStanding as final, guess, leaveMap, lobbyTitle as lobby, openPane, refusal, roundReady, roundResult as result } from './setup.mjs';
 
 const FULL = { fullPage: true };
 /** a match of more than twenty players is asked for every four seconds: what the server changes is seen within two polls */
@@ -148,52 +148,6 @@ async function reactionScenes(run) {
   });
 }
 
-async function guestSwitchScenes(run) {
-  await run.scene('party form: Allow guests, a lobby closed to guests', {}, async (s) => {
-    const guests = () => s.page.getByRole('group', { name: s.say('party.guests') });
-    await openPane(s, '/#create');
-    await s.capture('pane-create-party-form-with-allow-guests', undefined, FULL);
-    await s.capture('pane-create-party-allow-guests-switched-off', async () => {
-      await guests().getByRole('radio', { name: s.say('account.switch.no') }).check();
-      await bring(guests());
-    });
-    await s.capture(
-      'lobby-closed-to-guests-accounts-only-a-guest-already-in-stays',
-      async () => {
-        await button(s, 'party.create.submit').click();
-        await lobby(s).waitFor();
-        s.match.addPlayer('sam', { country: 'GB' });
-        s.match.addGuest(4821);
-        await s.page.getByText(s.say('party.guests.stay')).waitFor();
-      },
-      FULL,
-    );
-    await s.capture(
-      'lobby-settings-form-with-allow-guests',
-      async () => {
-        await button(s, 'party.settings.change').click();
-        const form = s.page.getByRole('form', { name: s.say('party.settings.form') });
-        await form.getByRole('group', { name: s.say('party.guests') }).waitFor();
-      },
-      FULL,
-    );
-  });
-
-  await run.scene('a party for accounts only: a visitor who opens its link', { who: 'visitor' }, async (s) => {
-    s.match.state = matchState({ settings: settings({ guests: false }), you: viewer({ username: GUEST_NAME, guest: true }), players: [player('sam', { country: 'GB' })] });
-    await s.capture(
-      'pane-join-party-accounts-only-notice-with-the-way-to-sign-up',
-      async () => {
-        await openPane(s, '/?party=ABC123');
-        await button(s, 'guest.play').click();
-        await button(s, 'party.join.submit').click();
-        await s.page.locator('.status-box', { hasText: s.say('party.accountsOnly.label') }).waitFor();
-      },
-      FULL,
-    );
-  });
-}
-
 async function queueWaitScenes(run) {
   await run.scene('queue: the typical wait, in each wording', {}, async (s) => {
     const typical = (wait) => s.page.locator('.queue-typical', { hasText: s.say('queue.typical', { wait }) }).waitFor();
@@ -247,7 +201,6 @@ export async function onlineScenes6(run) {
   await fortyLobbyScenes(run);
   await fortyMatchScenes(run);
   await reactionScenes(run);
-  await guestSwitchScenes(run);
   await queueWaitScenes(run);
   await reportScenes(run);
 }

@@ -216,7 +216,7 @@ export type Result<T> = { ok: true; data: T } | { ok: false; error: string };
  */
 export const REFUSALS = {
   /**
-   * 401. No session, or a guest session past its 24 hours: a visitor may ask to be a guest again.
+   * 401. No session, or a guest session past its 24 hours.
    * Any call can meet it in a browser that was signed in: a session ends when the account changes
    * its password, uses a recovery code, is deleted, is banned, or signs out everywhere.
    */
@@ -227,8 +227,6 @@ export const REFUSALS = {
   deleted: 'This account was deleted. Restore it to sign in.',
   /** 403. The host put this player out of the party; every request on it is answered so, polls included */
   removed: 'You were removed from that party.',
-  /** 403. A guest opened the code of a party whose host turned "Allow guests" off */
-  accountsOnly: 'This party is for accounts only. Make an account to join.',
   /** 409. A streak or guesser run was finished less than 2 seconds a round after it was started */
   runTooSoon: 'That run finished sooner than it could have been played.',
   /** 409. The daily was saved less than 6 seconds after it was started */

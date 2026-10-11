@@ -3,13 +3,13 @@
 //   node e2e-live/two-players.mjs https://plonk.example [--headed]
 //
 // Four browser contexts sign up as throwaway users. Two of them play a 3-round party against each
-// other through the real interface on real imagery, with a visitor who has no account playing in
-// it as a guest; the host then takes the party back to its lobby and starts it again. The two then
+// other through the real interface on real imagery, after a visitor who has no account opens its
+// link and is sent to sign in; the host then takes the party back to its lobby and starts it again. The two then
 // find each other in the ranked queue and play that duel, press Play again, and meet in a new one.
 // Last, all four queue for 2v2 alone and play it to its end: teammates must see each other's pin,
 // and at every reveal the team health on screen is checked against the scores on screen.
 // It prints what each player saw at each phase, every console error and failed request, and ends
-// with THROWAWAY_USERS=a,b,c,d so the accounts can be deleted (the guest has none).
+// with THROWAWAY_USERS=a,b,c,d so the accounts can be deleted (the visitor has none).
 import { randomBytes } from 'node:crypto';
 import { chromium } from '@playwright/test';
 
@@ -245,28 +245,21 @@ async function startParty(host) {
 }
 
 /**
- * A visitor with no account joins the party by its code as a guest. Resolves to the guest's name,
- * and to whether it is a guest's name and the host's lobby shows it as one is shown.
+ * A visitor with no account opens the party's link. Playing takes an account: they are shown the
+ * way to one, and no way into the party. Resolves to whether that is what they saw.
  */
-async function joinAsGuest(visitor, host, code) {
+async function turnedAway(visitor, code) {
   await visitor.goto(`${origin}/?party=${encodeURIComponent(code)}`);
-  await visitor.getByRole('button', { name: 'Play as a guest' }).click();
-  const line = (await visitor.getByText(/Playing as Guest #\d+/).first().textContent({ timeout: STEP_MS })) ?? '';
-  const name = /Guest #\d+/.exec(line)?.[0] ?? '';
-  await visitor.getByRole('button', { name: 'Join party', exact: true }).click();
-  await visitor.getByRole('heading', { name: 'Party', exact: true }).waitFor({ timeout: STEP_MS });
-  await lobbyRow(host, name).waitFor({ timeout: STEP_MS });
-  const named = /^Guest #\d{4}$/.test(name);
-  // a guest has no profile: the name is plain text, where an account's leads to one
-  const plain = (await lobbyRow(host, name).getByRole('link').count()) === 0 && (await lobbyRow(host, users[1]).getByRole('link', { name: users[1], exact: true }).count()) === 1;
-  const lists = (await visitor.locator('main .player-list').first().locator('.player-row').allTextContents()).join(', ');
-  say(name, `joined by code as a guest; lobby lists: ${lists}${named ? '' : ' (the name is not "Guest #NNNN")'}${plain ? '' : " (the host's lobby does not show the guest in plain text beside an account's link)"}`);
-  return { name, ok: named && plain };
+  await visitor.getByRole('link', { name: 'Sign in or create an account' }).first().waitFor({ timeout: STEP_MS });
+  const ways = (await visitor.getByRole('button', { name: 'Play as a guest' }).count()) + (await visitor.getByRole('button', { name: 'Join party', exact: true }).count());
+  say('visitor', `opened the party's link and was sent to sign in${ways === 0 ? '' : ' (and was offered a way into the party all the same)'}`);
+  return ways === 0;
 }
 
 /**
- * A 3-round party of two accounts and a guest. Resolves to whether it went as it should, whether
- * everyone reached its final standing, its code, and who played it on which page.
+ * A 3-round party of two accounts, with a visitor turned away at its door. Resolves to whether it
+ * went as it should, whether everyone reached its final standing, its code, and who played it on
+ * which page.
  */
 async function party(host, member, visitor) {
   await host.goto(`${origin}/#create`);
@@ -282,39 +275,23 @@ async function party(host, member, visitor) {
   await member.getByRole('heading', { name: 'Party', exact: true }).waitFor({ timeout: STEP_MS });
   say(users[1], `joined by code; lobby lists: ${(await member.locator('main .player-list').first().locator('.player-row').allTextContents()).join(', ')}`);
 
-  const guest = await joinAsGuest(visitor, host, code);
+  const closed = await turnedAway(visitor, code);
   const players = [
     { page: host, who: users[0] },
     { page: member, who: users[1] },
-    { page: visitor, who: guest.name },
   ];
   await startParty(host);
 
-  let guestGuessed = false;
   let revealsWrong = false;
-  // every reveal lists the guest, whose name alone leads to no profile; a distance beside it is a round the guest played
-  const whatIsWrong = (seen) => {
-    const row = seen.players.find(([name]) => name?.includes(guest.name));
-    guestGuessed ||= row !== undefined && row[1] !== 'No guess';
-    if (!row) {
-      return 'the guest is not in the table';
-    }
-    if (seen.linked.some((name) => name.includes('#'))) {
-      return "the guest's name is a link";
-    }
-    return [users[0], users[1]].every((name) => seen.linked.includes(name)) ? '' : "an account's name is not a link";
-  };
+  // every reveal lists both players, each name leading to a profile
   const onReveal = (seen) => {
-    const problem = whatIsWrong(seen);
+    const problem = [users[0], users[1]].every((name) => seen.linked.includes(name)) ? '' : "an account's name is not a link";
     revealsWrong ||= problem !== '';
     return problem;
   };
   const results = await Promise.all(players.map(({ page, who }) => playMatch(page, who, PARTY_MS, onReveal)));
-  if (!guestGuessed) {
-    say(guest.name, 'no reveal showed a guess of the guest');
-  }
   const finished = results.every(Boolean);
-  return { ok: finished && guest.ok && guestGuessed && !revealsWrong, finished, code, players };
+  return { ok: finished && closed && !revealsWrong, finished, code, players };
 }
 
 /**
@@ -563,10 +540,10 @@ try {
   pages.forEach((page, index) => watch(page, users[index]));
 
   await Promise.all(pages.map((page, index) => signUp(page, users[index])));
-  // the guest: one more browser, with no account, so nothing of it is in THROWAWAY_USERS
+  // the visitor: one more browser, with no account, so nothing of it is in THROWAWAY_USERS
   const visitor = await (await newContext()).newPage();
-  watch(visitor, 'guest');
-  console.log('--- party, 3 rounds, with a guest');
+  watch(visitor, 'visitor');
+  console.log('--- party, 3 rounds, with a visitor turned away');
   const room = await party(pages[0], pages[1], visitor);
   console.log('--- the same party again, from its lobby');
   const lobbyOk = room.finished && (await partyAgain(room));

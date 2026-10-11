@@ -265,6 +265,28 @@ async function freshSeed(planned: (set: LocationSet, seed: string) => readonly L
   }
 }
 
+/**
+ * Playing takes an account, and the session can have ended since the pane that offered the game
+ * was built: signed out in another tab, or everywhere. So a game asks once more as it starts.
+ * Without an account the pane the address names is shown again, and its own check says what is
+ * needed. Resolves to whether the game is to start; it does when the server cannot be asked, since
+ * the pane asked already.
+ */
+async function mayPlay(): Promise<boolean> {
+  const address = location.href;
+  const account = await getAccount();
+  if (location.href !== address) {
+    // the player went somewhere else while the server was asked
+    return false;
+  }
+  if (account.ok && account.data.account === null) {
+    leaveScreen();
+    route();
+    return false;
+  }
+  return true;
+}
+
 /** Plays a game started from the home screen, on a seed of its own. */
 async function playFresh(options: GameOptions): Promise<void> {
   // a community map's places come from the server with the game, so its seed is taken as it comes
@@ -274,6 +296,9 @@ async function playFresh(options: GameOptions): Promise<void> {
 
 /** Plays a local game. `daily` is the day when the game is that day's daily challenge. */
 async function play(challenge: Challenge, daily: string | null = null, tutorial = false): Promise<void> {
+  if (!(await mayPlay())) {
+    return;
+  }
   leaveScreen();
   // a daily game keeps the daily's address, so a reload comes back to the leaderboard, not a plain challenge
   history.replaceState(null, '', tutorial ? location.pathname : daily === null ? toSearch(challenge) : `${location.pathname}${hrefFor('daily')}`);
@@ -318,7 +343,7 @@ function showWelcome(): void {
     prefs.markWelcomeSeen();
     then();
   };
-  app.replaceChildren(welcomeScreen({ onTutorial: answered(() => void play(TUTORIAL, null, true)), onSkip: answered(route) }));
+  app.replaceChildren(welcomeScreen({ onAccount: answered(() => goHome('account')), onLook: answered(route) }));
 }
 
 /**
@@ -348,6 +373,9 @@ async function arrive(): Promise<void> {
 
 /** Plays a country streak run on a fresh seed. */
 async function playStreak(setup: StreakSetup): Promise<void> {
+  if (!(await mayPlay())) {
+    return;
+  }
   leaveScreen();
   history.replaceState(null, '', `${location.pathname}${hrefFor('streak')}`);
   showLoading(t('load.places'));
@@ -374,6 +402,9 @@ async function playStreak(setup: StreakSetup): Promise<void> {
 
 /** Plays a Country Guesser or a Continent Guesser run on a fresh seed, steering clear of places this browser has shown. */
 async function playGuesser(kind: GuesserKind): Promise<void> {
+  if (!(await mayPlay())) {
+    return;
+  }
   leaveScreen();
   history.replaceState(null, '', `${location.pathname}${hrefFor(kind)}`);
   showLoading(t('load.places'));

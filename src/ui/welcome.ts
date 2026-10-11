@@ -3,16 +3,17 @@ import { t } from '../i18n/index.ts';
 import { el } from './dom.ts';
 
 interface WelcomeHandlers {
-  /** play the two guided rounds */
-  onTutorial: () => void;
-  /** straight to the home screen */
-  onSkip: () => void;
+  /** to the account pane, where an account is made or signed in to */
+  onAccount: () => void;
+  /** straight to the home screen, to see what is there */
+  onLook: () => void;
 }
 
 /**
- * What a new visitor sees before the home screen: what Wherefall is, and two choices. The tutorial is
- * the one accent action; skipping is beside it, as quiet as a way out is anywhere else. It stands
- * in the column the loading line before it and after it stands in, so nothing jumps.
+ * What a new visitor sees before the home screen: what Wherefall is, and two choices. Playing takes
+ * an account, so the way to one is the one accent action; looking around first is beside it, as
+ * quiet as a way out is anywhere else. It stands in the column the loading line before it and
+ * after it stands in, so nothing jumps.
  */
 export function welcomeScreen(handlers: WelcomeHandlers): HTMLElement {
   return el(
@@ -23,8 +24,8 @@ export function welcomeScreen(handlers: WelcomeHandlers): HTMLElement {
     el(
       'div',
       { class: 'actions' },
-      el('button', { class: 'button accent', text: t('welcome.tutorial'), attrs: { type: 'button' }, on: { click: handlers.onTutorial } }),
-      el('button', { class: 'button ghost', text: t('welcome.skip'), attrs: { type: 'button' }, on: { click: handlers.onSkip } }),
+      el('button', { class: 'button accent', text: t('common.signIn'), attrs: { type: 'button' }, on: { click: handlers.onAccount } }),
+      el('button', { class: 'button ghost', text: t('welcome.look'), attrs: { type: 'button' }, on: { click: handlers.onLook } }),
     ),
     el('p', { class: 'fine', text: t('welcome.note') }),
   );

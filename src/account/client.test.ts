@@ -220,7 +220,6 @@ describe('restoreAccount', () => {
       guests: 'Guests cannot do that. Make an account first.',
       deleted: 'This account was deleted. Restore it to sign in.',
       removed: 'You were removed from that party.',
-      accountsOnly: 'This party is for accounts only. Make an account to join.',
       runTooSoon: 'That run finished sooner than it could have been played.',
       dailyTooSoon: 'That daily finished sooner than it could have been played.',
       dailyUnstarted: 'Start the daily before you finish it.',

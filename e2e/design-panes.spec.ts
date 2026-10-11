@@ -175,7 +175,7 @@ for (const code of ['en', 'de', 'ru']) {
 
 test('on a first visit the how-to offers the tutorial quietly: the one filled button is Start game', async ({ page }) => {
   await page.setViewportSize(PHONE);
-  await setUp(page, { username: null, firstVisit: true });
+  await setUp(page, { firstVisit: true });
   await open(page, '/');
   const intro = page.getByRole('region', { name: 'How to play' });
   await expect(intro.getByRole('button')).toHaveText(['Play the tutorial', 'Got it']);
@@ -209,10 +209,10 @@ test('Singleplayer and Country streak put their options in the same order', asyn
 
 test('on a phone, options with long names are rows of their own and an odd one out takes the whole last row', async ({ page }) => {
   await page.setViewportSize(PHONE);
-  const { social } = await setUp(page, { username: null });
+  const { social } = await setUp(page);
   boardWithNeel(social);
   await open(page, '/');
-  const mode = page.locator('fieldset').filter({ has: page.locator('legend', { hasText: 'Mode' }) });
+  const mode =page.locator('fieldset').filter({ has: page.locator('legend', { hasText: 'Mode' }) });
   const cells = await mode.locator('.choice').evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect()).map((r) => ({ x: r.x, w: r.width, h: r.height })));
   expect(cells).toHaveLength(3);
   // one under the other, each the width of the row and one line high

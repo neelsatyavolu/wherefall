@@ -63,12 +63,4 @@ export const party: Part<typeof english> = {
   'chat.teamTag': 'команде',
 
   // Wave 6
-  'party.guests': 'Пускать гостей',
-  'party.guests.on': 'Да',
-  'party.guests.off': 'Нет',
-  'party.guests.note': 'Гость играет без аккаунта. Если выключить, войти смогут только игроки с аккаунтом.',
-  'party.guests.stay': 'Гости, которые уже здесь, остаются. Их можно выгнать в списке игроков.',
-  'party.line.accountsOnly': 'только с аккаунтом',
-  'party.accountsOnly.label': 'Только с аккаунтом',
-  'party.accountsOnly': 'В эту комнату пускают только игроков с аккаунтом. Создай аккаунт, чтобы войти: это бесплатно, нужны только имя и пароль.',
 };
