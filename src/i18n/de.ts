@@ -459,6 +459,7 @@ export const de: Translation = {
   'pane.checkingAccount': 'Konto wird geprüft',
   'pane.needsAccount':
     '{what} braucht ein Konto, damit andere Spieler sehen, gegen wen sie antreten, und deine Ergebnisse irgendwo gespeichert werden. Es ist kostenlos und braucht nur einen Benutzernamen und ein Passwort.',
+  'play.what': 'Spielen',
   'pane.banned': 'Dieses Konto ist für das Online-Spiel gesperrt: Matches, Partys, Chat, Freunde und das Erstellen von Karten. Allein spielen geht weiterhin.',
   'pane.playSingleplayer': 'Einzelspieler spielen',
 
@@ -477,7 +478,7 @@ export const de: Translation = {
   'singleplayer.start': 'Spiel starten',
   /** `{panoramax}` and `{openfreemap}` are links, each showing its own name */
   'singleplayer.credits':
-    'Kostenlos spielbar. Ein Konto ist hier freiwillig und bewahrt deine Statistik. Straßenbilder von Google Street View, wo verfügbar, sonst von {panoramax}-Mitwirkenden unter offenen Lizenzen. Karte von {openfreemap} und OpenStreetMap.',
+    'Kostenlos spielbar. Zum Spielen brauchst du ein kostenloses Konto, das deine Statistik bewahrt. Straßenbilder von Google Street View, wo verfügbar, sonst von {panoramax}-Mitwirkenden unter offenen Lizenzen. Karte von {openfreemap} und OpenStreetMap.',
 
   // Country streak
   'streak.lede': 'Ein Ort nach dem anderen, irgendwo auf der Welt. Klicke jeweils auf das Land, in dem er liegt. Das erste falsche Land beendet den Lauf.',
@@ -499,7 +500,7 @@ export const de: Translation = {
   'daily.empty': 'Heute noch keine Ergebnisse. Wer zuerst spielt, führt.',
 
   // Account: the sign-in form
-  'account.lede': 'Dein Level, deine Statistik und deine Spiele, auf jedem Gerät, auf dem du dich anmeldest. Allein spielen bleibt auch ohne Konto kostenlos.',
+  'account.lede': 'Dein Level, deine Statistik und deine Spiele, auf jedem Gerät, auf dem du dich anmeldest. Zum Spielen brauchst du eins, und es ist kostenlos.',
   'account.loading': 'Konto wird geladen',
   'account.login.name': 'Anmelden',
   'account.login.busy': 'Anmeldung läuft',

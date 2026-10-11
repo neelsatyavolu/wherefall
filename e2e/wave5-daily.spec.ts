@@ -416,48 +416,6 @@ test('a visitor is marked by what this browser kept', async ({ page }) => {
 
 // --- item 17: a visitor's results --------------------------------------------------------------------------
 
-test("a visitor's one attempt and its result are kept in this browser", async ({ page }) => {
-  const { daily, games } = await setUp(page, null);
-  await page.goto('/#daily');
-  await expect(mark(page)).toHaveAttribute('aria-label', 'Not played today');
-  await playButton(page).click();
-  await roundReady(page);
-  // a visitor's attempt begins on the server too (wave 6): it answers with a token, and the attempt is counted here with it
-  expect(daily.posted('start')).toHaveLength(1);
-  expect(await kept(page)).toMatchObject({ started: TODAY, token: expect.any(String), results: [] });
-
-  // a fresh page mid-game: the attempt is used
-  await page.reload();
-  await expect(page.getByText(BEGUN)).toBeVisible();
-  await expect(playButton(page)).toHaveCount(0);
-
-  // another day, played to the end
-  await page.evaluate((key) => localStorage.removeItem(key), STORE);
-  await page.reload();
-  await playButton(page).click();
-  await playLocalGame(page, 3);
-  await expect(summary(page)).toContainText('It is kept in this browser and moves to your account if you create one.');
-  expect(games.saved).toHaveLength(0);
-  const stored = await kept(page);
-  expect(stored.results).toHaveLength(1);
-  expect(stored.results[0].daily).toBe(TODAY);
-  expect(stored.results[0].rounds).toHaveLength(3);
-  // each round names its place (wave 6), which is what lets an account take the result over
-  expect(Object.keys(stored.results[0].rounds[0]).sort()).toEqual(['country', 'distanceKm', 'guessLat', 'guessLng', 'hinted', 'id', 'lat', 'lng', 'score']);
-  expect(stored.results[0].token).toEqual(expect.any(String));
-
-  await summary(page).getByRole('button', { name: 'Home' }).click();
-  const score = (stored.results[0].rounds as Array<{ score: number }>).reduce((total, round) => total + round.score, 0);
-  await expect(figureOf(page, 'Your result today')).toContainText(`${score.toLocaleString('en')} / 15,000`);
-  // no rank for a result that is on no leaderboard
-  await expect(figureOf(page, 'Rank')).toHaveCount(0);
-  await expect(page.getByText('This result is kept in this browser, off the leaderboard. Create an account and it moves there.')).toBeVisible();
-  await expect(playButton(page)).toHaveCount(0);
-  await expect(page.getByRole('region', { name: 'Last 14 days' }).locator('li')).toHaveCount(14);
-  await expect(page.getByRole('region', { name: 'Your daily record' })).toHaveCount(0);
-  await expect(mark(page)).toHaveAttribute('aria-label', 'Played today');
-});
-
 test("a visitor's kept results are claimed by the account they sign up for", async ({ page }) => {
   await mockServices(page);
   await mockPlaces(page);
@@ -633,16 +591,15 @@ for (const code of ['de', 'ru']) {
       await expectTranslated(page, code, [...NAMES, ...(await written(page))]);
     });
 
-    test("a visitor's pane, before and after playing, is in the language", async ({ page }) => {
+    test("a visitor's pane says that playing needs an account, in the language", async ({ page }) => {
       await setUp(page, null);
+      // a result this browser kept from before playing took an account is for the account to claim: the pane does not open on it
+      await keep(page, [keptResult(TODAY, [4800, 3950, 2500])]);
       await page.goto('/#daily');
-      await expect(page.getByRole('button', { name: say['daily.play'], exact: true })).toBeVisible();
-      await expectTranslated(page, code, [...NAMES, ...(await written(page))]);
-
-      await page.evaluate(({ key, value }) => localStorage.setItem(key, value), { key: STORE, value: JSON.stringify({ started: null, results: [keptResult(TODAY, [4800, 3950, 2500])], claim: null }) });
-      await page.reload();
-      await expect(page.getByRole('button', { name: say['summary.shareResult'], exact: true })).toBeVisible();
-      await expectTranslated(page, code, [...NAMES, ...(await written(page))]);
+      await expect(page.locator('.pane-section .notice')).toContainText(say['pane.needsAccount'].replace('{what}', say['play.what']));
+      await expect(page.getByRole('button', { name: say['daily.play'], exact: true })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: say['summary.shareResult'], exact: true })).toHaveCount(0);
+      await expectTranslated(page, code);
     });
 
     test("the daily's leave warning and its summary are in the language", async ({ page }) => {

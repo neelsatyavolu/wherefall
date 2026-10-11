@@ -49,7 +49,7 @@ export const solo: Part<typeof english> = {
 
   'about.lede': 'Un juego gratuito que consiste en averiguar en qué parte del mundo está una calle.',
   'about.what.title': 'Qué es Wherefall',
-  'about.what.1': 'Wherefall te deja en algún lugar de la Tierra, a pie de calle. Miras a tu alrededor, deduces dónde estás y pones un marcador en el mapa. Es gratis, no tiene anuncios y la cuenta es opcional.',
+  'about.what.1': 'Wherefall te deja en algún lugar de la Tierra, a pie de calle. Miras a tu alrededor, deduces dónde estás y pones un marcador en el mapa. Es gratis, no tiene anuncios y para jugar hace falta una cuenta gratuita.',
   'about.what.2': 'Juega por tu cuenta, haz el desafío diario o enfréntate a otras personas en duelos clasificatorios, partidas 2v2, partidas normales y salas privadas. Los jugadores crean sus propios mapas y los comparten.',
   'about.scoring.title': 'Cómo se puntúa',
   'about.scoring.1': 'Una ronda vale hasta 5000 puntos. Un marcador a menos de 30 m del lugar es una ronda perfecta.',
@@ -57,7 +57,7 @@ export const solo: Part<typeof english> = {
   'about.scoring.3': 'Una pista dibuja en el mapa un círculo con el lugar dentro y deja esa ronda en la mitad de puntos. En Adivina el país y Adivina el continente, cada acierto vale 1000 puntos.',
   'about.faq.title': 'Preguntas',
   'about.faq.account.q': '¿Necesito una cuenta?',
-  'about.faq.account.a': 'No. Todo lo que juegas por tu cuenta funciona sin ella, y como invitado puedes entrar en partidas normales y en salas. Una cuenta conserva tus estadísticas y tus mejores puntuaciones, te pone en los rankings y hace falta para los duelos clasificatorios, el 2v2, los amigos y la creación de mapas.',
+  'about.faq.account.a': 'Sí, para jugar. Todas las partidas requieren una cuenta gratuita: un nombre de usuario y una contraseña, sin correo. Conserva tus estadísticas y tus mejores puntuaciones y te pone en los rankings. Los rankings, los mapas de la comunidad y los perfiles de los jugadores se pueden consultar sin ella.',
   'about.faq.link.q': '¿Mi enlace le da a un amigo los mismos lugares?',
   'about.faq.link.a': 'Sí, si tu amigo ve las mismas imágenes que tú. Un enlace lleva el mapa, los ajustes y una semilla, y la semilla decide los lugares. Street View y Panoramax tienen cada uno su propia lista de lugares, así que quien juegue con la otra fuente verá otros.',
   'about.faq.imagery.q': '¿Por qué a veces salen imágenes de Panoramax?',
@@ -84,9 +84,8 @@ export const solo: Part<typeof english> = {
   // Oleada 6, la primera visita: la bienvenida y un dato con cada resultado del tutorial
   'welcome.label': 'Bienvenida',
   'welcome.lede': 'Wherefall es un juego gratuito que consiste en deducir en qué parte del mundo estás. Te deja en una calle de algún lugar de la Tierra: mira a tu alrededor y pon un marcador en el mapa.',
-  'welcome.tutorial': 'Enséñame a jugar',
-  'welcome.skip': 'Saltar',
-  'welcome.note': 'El tutorial son dos rondas cortas con consejos por el camino. No se guarda.',
+  'welcome.look': 'Echar un vistazo primero',
+  'welcome.note': 'Para jugar hace falta una cuenta gratuita: un nombre de usuario y una contraseña, sin correo. Las clasificaciones y los mapas de la comunidad están abiertos a todo el mundo.',
   'tutorial.fact.eiffel': 'La Torre Eiffel se construyó para la Exposición Universal de 1889 y fue la estructura más alta del mundo hasta 1930.',
   'tutorial.fact.colosseum': 'El Coliseo se inauguró en el año 80 y es el mayor anfiteatro que construyeron los romanos.',
 };

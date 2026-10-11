@@ -5,6 +5,7 @@ import { accountCookieName, createAccountSession, createGuestSession } from '../
 import type { Db } from '../db/client.js';
 import { insertUser } from '../db/users.js';
 import { joinParty } from '../match/parties.js';
+import { joinQueue } from '../match/queue.js';
 import { spreadPlaces } from '../places/testing.js';
 import type { Context } from '../serve.js';
 import { TEST_SECRET, apiRequest, resetDb, testDb } from '../testing.js';
@@ -101,9 +102,23 @@ describe('a guest left from before playing took an account', () => {
     const lobby = await data(post({ action: 'create', settings: SETTINGS }, neel));
     // Seated as the route once seated them.
     expect((await joinParty(db, visitor.userId, lobby.code, NOW)).ok).toBe(true);
-    expect((await data(get(`?id=${lobby.id}`, visitor.cookie, NOW + SECOND))).you).toMatchObject({ username: visitor.username, guest: true });
     expect(await data(post({ action: 'leave', matchId: lobby.id }, visitor.cookie, NOW + 2 * SECOND))).toEqual({ left: true });
     expect((await post({ action: 'leaveQueue' }, visitor.cookie, NOW + 2 * SECOND)).status).toBe(200);
+  });
+
+  it('is taken out of the match they sit in when their browser next asks for it, so no round waits on them', async () => {
+    const visitor = await guest();
+    const lobby = await data(post({ action: 'create', settings: { ...SETTINGS, timeLimit: 0 } }, neel));
+    expect((await joinParty(db, visitor.userId, lobby.code, NOW)).ok).toBe(true);
+    expect((await data(get(`?id=${lobby.id}`, neel, NOW + SECOND))).players).toHaveLength(2);
+
+    // The tab was left open: it asks, as it does every second or two.
+    expect(await refusal(get(`?id=${lobby.id}`, visitor.cookie, NOW + 2 * SECOND))).toEqual(GUESTS_CANNOT);
+    const seen = await data(get(`?id=${lobby.id}`, neel, NOW + 3 * SECOND));
+    expect(seen.players.map((player: { username: string }) => player.username)).toEqual(['neel']);
+    // Asking again, with no seat left, is answered the same.
+    expect(await refusal(get(`?id=${lobby.id}`, visitor.cookie, NOW + 4 * SECOND))).toEqual(GUESTS_CANNOT);
+    expect(await refusal(get('?id=not-a-match', visitor.cookie, NOW + 4 * SECOND))).toEqual(GUESTS_CANNOT);
   });
 
   it('is cleared away after a day without a word from them, seat and all, while one who is still there stays', async () => {
@@ -131,10 +146,19 @@ describe('a guest left from before playing took an account', () => {
     expect(await guests()).toEqual([]);
   });
 
+  it('is taken out of the queue when their browser next asks about it, so no account is matched with them', async () => {
+    const visitor = await guest();
+    // Waiting since before playing took an account, in a tab that is still open.
+    expect((await joinQueue(db, visitor.userId, 'unranked', NOW)).ok).toBe(true);
+    expect(await refusal(get('?queue=1', visitor.cookie, NOW + SECOND))).toEqual(GUESTS_CANNOT);
+    expect(await db.query('SELECT 1 FROM match_queue')).toEqual([]);
+    expect(await data(post({ action: 'queue', kind: 'unranked' }, neel, NOW + 2 * SECOND))).toMatchObject({ queued: true, waiting: 1 });
+  });
+
   it('is not let in by a forged or an expired guest session', async () => {
     const visitor = await guest();
     expect((await get('?queue=1', `${visitor.cookie}x`)).status).toBe(401);
-    expect((await get('?queue=1', visitor.cookie, NOW + 24 * HOUR - 1)).status).toBe(200);
+    expect((await get('?queue=1', visitor.cookie, NOW + 24 * HOUR - 1)).status).toBe(403);
     expect((await get('?queue=1', visitor.cookie, NOW + 24 * HOUR)).status).toBe(401);
   });
 });

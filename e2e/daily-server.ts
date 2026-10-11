@@ -50,9 +50,9 @@ export const dailyEntries = (count: number): DailyEntry[] =>
 /**
  * A stand-in for `/api/daily`, by the wave-6 contract: three rounds of sixty seconds, one attempt
  * a day, a leaderboard of the top hundred served twenty to a page, and the `start` and `claim`
- * actions. An account's start is marked here; a visitor's or a guest's is answered with a token,
- * which a claim has to carry. The page's player is "neel" unless `session` says a guest or a
- * visitor is asking.
+ * actions. Both take an account: a start is marked here, and a claim has to carry the token a
+ * visitor's start was answered with while a visitor could play. The page's player is "neel" unless
+ * `session` says a guest or a visitor is asking.
  */
 export class DailyServer {
   date = '2026-10-11';
@@ -117,7 +117,7 @@ export class DailyServer {
     this.ahead += ms;
   }
 
-  /** A token as a visitor's `start` on `day` was answered with: what a result of that day has to carry to be claimed. */
+  /** A token as a visitor's `start` on `day` was once answered with: what a result of that day has to carry to be claimed. */
   tokenFor(day: string = this.date): string {
     const token = `daily.${day}.${this.tokens.size + 1}`;
     this.tokens.set(token, day);
@@ -268,13 +268,10 @@ export class DailyServer {
     return checked !== null && isDailyDraw(lists, checked.places, checked.list, day === this.date ? this.seed : dailySeed(day));
   }
 
-  /** `start`: an account's attempt is marked here; anyone else is given a token to keep with the result. */
+  /** `start`: the account's one attempt of the day is marked as begun. */
   private start(): Answer {
     if (this.startsRefused) {
       return refusal(SAYS.tooManyStarts, 429);
-    }
-    if (!this.mine) {
-      return envelope({ state: 'started', token: this.tokenFor(this.date) });
     }
     if (this.rounds === null && !this.started) {
       this.started = true;
@@ -290,13 +287,10 @@ export class DailyServer {
     if (body.action === 'viewer') {
       return envelope(this.viewer);
     }
-    if (body.action === 'start') {
-      return this.start();
-    }
     if (!this.mine) {
       return this.session === 'guest' ? refusal(SAYS.guests, 403) : refusal(SAYS.signIn, 401);
     }
-    return this.claim(body);
+    return body.action === 'start' ? this.start() : this.claim(body);
   }
 
   private async handle(route: Route): Promise<void> {

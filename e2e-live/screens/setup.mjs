@@ -260,7 +260,6 @@ async function installServers(page, who, { account: change = SEASONED, rating = 
   if (account.state.stats) {
     account.state = { ...account.state, stats: seasonedStats(account.state.stats) };
   }
-  match.account = account;
   if (who === 'guest') {
     account.becomeGuest(GUEST_NAME);
     match.state = { ...match.state, you: { ...match.state.you, username: GUEST_NAME, guest: true, isHost: false, isResolver: false } };

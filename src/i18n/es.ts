@@ -460,6 +460,7 @@ export const es: Translation = {
   'pane.checkingAccount': 'Comprobando tu cuenta',
   'pane.needsAccount':
     '{what} requiere una cuenta, para que los demás jugadores vean contra quién juegan y tus resultados tengan dónde guardarse. Es gratis y solo pide un nombre de usuario y una contraseña.',
+  'play.what': 'Jugar',
   'pane.banned': 'Esta cuenta tiene vetado el juego en línea: partidas, salas, chat, amigos y creación de mapas. Jugar en solitario sigue funcionando.',
   'pane.playSingleplayer': 'Jugar en solitario',
 
@@ -478,7 +479,7 @@ export const es: Translation = {
   'singleplayer.start': 'Empezar partida',
   /** `{panoramax}` y `{openfreemap}` son enlaces, cada uno con su propio nombre */
   'singleplayer.credits':
-    'Jugar es gratis. Aquí la cuenta es opcional y guarda tus estadísticas. Imágenes de calle de Google Street View donde las hay; si no, de colaboradores de {panoramax} con licencias abiertas. Mapa de {openfreemap} y OpenStreetMap.',
+    'Jugar es gratis. Para jugar hace falta una cuenta gratuita, que guarda tus estadísticas. Imágenes de calle de Google Street View donde las hay; si no, de colaboradores de {panoramax} con licencias abiertas. Mapa de {openfreemap} y OpenStreetMap.',
 
   // Racha de países
   'streak.lede': 'Un lugar tras otro, en cualquier parte del mundo. Haz clic en el país donde está cada uno. El primer país equivocado termina la racha.',
@@ -500,7 +501,7 @@ export const es: Translation = {
   'daily.empty': 'Hoy aún no hay resultados. El primero que llegue se pone en cabeza.',
 
   // Cuenta: el formulario de inicio de sesión
-  'account.lede': 'Tu nivel, tus estadísticas y tus partidas, en todos los dispositivos donde inicies sesión. Jugar en solitario sin cuenta sigue siendo gratis.',
+  'account.lede': 'Tu nivel, tus estadísticas y tus partidas, en todos los dispositivos donde inicies sesión. Para jugar hace falta una, y es gratis.',
   'account.loading': 'Cargando la cuenta',
   'account.login.name': 'Iniciar sesión',
   'account.login.busy': 'Iniciando sesión',

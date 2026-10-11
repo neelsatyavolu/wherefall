@@ -20,7 +20,6 @@ export interface Refusal {
 export const SAYS = {
   signIn: 'Sign in first.',
   guests: 'Guests cannot do that. Make an account first.',
-  tooManyGuests: 'Too many guests from this network. Try again in an hour.',
   hostOnly: 'Only the host can do that.',
   badSettings: 'Choose a map, a mode, 1 to 20 rounds, and no timer or 10 to 300 seconds a round.',
   teamsNeedPlayers: 'Each team needs at least one player.',

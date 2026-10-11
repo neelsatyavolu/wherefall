@@ -1,7 +1,6 @@
 import type { Page, Route } from '@playwright/test';
 import type { ChatScope, MatchOutcome, MatchState, QueueKind, QueueState } from '../src/multiplayer/client.ts';
 import { PLACES, guest, matchState, outcome, player, queueState } from '../src/multiplayer/testing.ts';
-import type { AccountServer } from './account-server.ts';
 import * as rules from './match-rules.ts';
 import { SAYS, isRefusal, refusal, type Refusal } from './match-rules.ts';
 import { communityRows, listsFor } from './place-rules.ts';
@@ -15,8 +14,8 @@ export const FIVE_PLACES = [
   { id: 'place-five', lng: 151.2093, lat: -33.8688, country: 'AU' },
 ];
 
-/** What a guest may send; everything else that needs an account is refused them. */
-const GUEST_ACTIONS = ['guest', 'queue', 'join', 'places', 'guess', 'pin', 'team', 'emote', 'mute', 'leave', 'leaveQueue'];
+/** What a guest left from before playing took an account may send: the way out, and nothing else. */
+const GUEST_ACTIONS = ['leave', 'leaveQueue'];
 const HOST_ACTIONS = ['configure', 'start', 'shuffle', 'kick', 'host', 'lock', 'endRound', 'lobby'];
 const RANKED_WINDOW = { start: 50, perSecond: 10 };
 
@@ -52,12 +51,6 @@ export class MatchServer {
   delayMs = 0;
   /** who is asking: an account, a guest, or a visitor with no session at all */
   session: 'account' | 'guest' | 'none' = 'account';
-  /** the name the next `guest` action hands out */
-  guestName = 'Guest #4821';
-  /** true once 20 guests an hour have come from this address */
-  guestsRefused = false;
-  /** when set, a guest made here also shows on `/api/account` */
-  account: AccountServer | null = null;
   /** true once the host has removed the page's player: every request on the match is then refused */
   removed = false;
   /** how long before a round starts. Short, so tests do not wait the real five seconds; set 5000 to see them */
@@ -231,25 +224,8 @@ export class MatchServer {
 
   // --- what the page sends ---------------------------------------------------------------------
 
-  private makeGuest(): Answer {
-    if (this.session !== 'none') {
-      // a browser that already has a session is told its name; nothing is made
-      return envelope({ username: this.state.you.username });
-    }
-    if (this.guestsRefused) {
-      return refused(refusal(429, SAYS.tooManyGuests));
-    }
-    this.session = 'guest';
-    this.set({ you: { ...this.state.you, username: this.guestName, guest: true, isHost: false, isResolver: false } });
-    this.account?.becomeGuest(this.guestName);
-    return envelope({ username: this.guestName }, 201);
-  }
-
   private joinQueue(body: Body): QueueState | Refusal {
     const kind = body.kind as QueueKind;
-    if (this.session === 'guest' && kind !== 'unranked') {
-      return refusal(403, SAYS.guests);
-    }
     if (body.matchId !== undefined) {
       const { kind: matchKind, phase, players, you, id } = this.state;
       const pair = kind === 'team' && body.matchId === id && matchKind === 'party' && phase === 'lobby' && you.isHost && players.length === 2 && players.every((p) => !p.guest);
@@ -326,7 +302,7 @@ export class MatchServer {
         return body.action === 'configure' && state.phase !== 'lobby' ? this.current() : this.step(rules.withSettings(state, settings));
       }
       case 'join':
-        return this.step(rules.join(state, state.you.username, this.session === 'guest'));
+        return this.step(rules.join(state, state.you.username, false));
       case 'start':
         return this.step(rules.start(state));
       case 'team':
@@ -396,9 +372,6 @@ export class MatchServer {
   }
 
   private post(body: Body): Answer {
-    if (body.action === 'guest' && this.refuse === null) {
-      return this.makeGuest();
-    }
     const bar = this.barred(body);
     if (bar) {
       return refused(bar);
@@ -410,6 +383,9 @@ export class MatchServer {
   private get(params: URLSearchParams): Answer {
     if (this.session === 'none') {
       return refused(refusal(401, SAYS.signIn));
+    }
+    if (this.session === 'guest') {
+      return refused(refusal(403, SAYS.guests));
     }
     if (params.has('queue')) {
       return envelope(this.currentQueue());

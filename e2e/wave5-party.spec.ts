@@ -126,12 +126,10 @@ test('the host changes the settings in the lobby, and the line follows', async (
   expect(server.posted('configure')).toHaveLength(2);
 });
 
-test('a guest in the party sees the settings change, and is offered nothing that is the host\u2019s', async ({ page }) => {
+test('a player who is not the host sees the settings change, and is offered nothing that is the host\u2019s', async ({ page }) => {
   const server = await MatchServer.install(page);
-  server.session = 'guest';
-  server.state = matchState({ you: viewer({ username: 'Guest #4821', guest: true }), players: [player('sam'), player('ana'), guest(4821)] });
-  server.matchFound('m1');
-  await page.route('**/api/account', (route) => route.fulfill({ json: { success: true, data: { account: null, guest: 'Guest #4821', stats: null, recentGames: [] } } }));
+  server.state = matchState({ you: MEMBER, players: [player('sam'), player('ana')] });
+  await signIn(page, 'neel');
   await mockServices(page);
   await page.goto('/?party=ABC123');
   await page.getByRole('button', { name: 'Join party' }).click();
@@ -149,10 +147,10 @@ test('a guest in the party sees the settings change, and is offered nothing that
   await expect(settingsLine(page)).toHaveText('World · 12 rounds · No limit · no move, pan or zoom · reactions only · teams by average');
   await expect(page.getByText('This party is locked. Nobody new can join.')).toBeVisible();
   await expect(page.locator('.lobby-count .tag')).toHaveText('locked');
-  // a guest may pick a team
+  // picking a team is every player's own to do
   await team(page, 'Team 2').getByRole('button', { name: 'Join Team 2' }).click();
   expect(server.posted('team')).toEqual([{ action: 'team', matchId: 'm1', team: 1 }]);
-  await expect(team(page, 'Team 2').locator('.player-name')).toHaveText(['Guest #4821']);
+  await expect(team(page, 'Team 2').locator('.player-name')).toHaveText(['neel']);
 });
 
 // --- teams in a party -----------------------------------------------------------------------------

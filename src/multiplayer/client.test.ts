@@ -11,7 +11,6 @@ import {
   leaveQueue,
   mutePlayer,
   placesRefused,
-  playAsGuest,
   postPlaces,
   queueAsPair,
   sendChat,
@@ -103,29 +102,6 @@ describe('actions that answer with the match', () => {
       throw new TypeError('Failed to fetch');
     }) as typeof fetch;
     expect(await startMatch('m1', offline)).toEqual({ ok: false, error: UNREACHABLE });
-  });
-});
-
-describe('playAsGuest', () => {
-  it('asks for a guest session and reads the name it was given', async () => {
-    const { fetchFn, calls } = fakeFetch(success({ username: 'Guest #4821' }, 201));
-    expect(await playAsGuest(fetchFn)).toEqual({ ok: true, data: { username: 'Guest #4821' } });
-    expect(calls[0]?.url).toBe('/api/match');
-    expect(calls[0]?.init?.method).toBe('POST');
-    expect(bodyOf(calls[0])).toEqual({ action: 'guest' });
-  });
-
-  it('reads the name of the session the browser already had', async () => {
-    expect(await playAsGuest(fakeFetch(success({ username: 'neel' }, 200)).fetchFn)).toEqual({ ok: true, data: { username: 'neel' } });
-  });
-
-  it('passes on the limit on guests from one network', async () => {
-    const error = 'Too many guests from this network. Try again in an hour.';
-    expect(await playAsGuest(fakeFetch(failure(error, 429)).fetchFn)).toEqual({ ok: false, error });
-  });
-
-  it('refuses a reply without a name', async () => {
-    expect(await playAsGuest(fakeFetch(success({})).fetchFn)).toEqual({ ok: false, error: UNEXPECTED });
   });
 });
 

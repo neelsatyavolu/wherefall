@@ -4,7 +4,7 @@ import { getAccount, getGame, login, register, restoreAccount, saveGame, type Sa
 import { getGames } from '../src/account/games.ts';
 import { startRun } from '../src/account/runs.ts';
 import { claimDaily, getDaily, startDaily } from '../src/daily/client.ts';
-import { createParty, getMatch, getQueue, joinParty, joinQueue, mutePlayer, playAsGuest, queueAsPair, sendChat, sendEmote, sendGuess, sendPin, startMatch } from '../src/multiplayer/client.ts';
+import { createParty, getMatch, getQueue, joinParty, joinQueue, leaveMatch, mutePlayer, queueAsPair, sendChat, sendEmote, sendGuess, sendPin, startMatch } from '../src/multiplayer/client.ts';
 import { backToLobby, chooseTeam, configureParty, endRound, kickPlayer, lockParty, makeHost, shuffleTeams } from '../src/multiplayer/party.ts';
 import { PLACES, guest, matchState, outcome, player, rankedState, settings, teamState, viewer } from '../src/multiplayer/testing.ts';
 import { friendAction, getFriends, getLeaderboard, getOnline, getProfile } from '../src/social/client.ts';
@@ -22,39 +22,27 @@ import { SocialServer, boardEntries, friend } from './social-server.ts';
  * the account, games, daily, social and maps stand-ins are in `contract-mocks-w6.spec.ts`.
  */
 
-test('a visitor becomes a guest, who may play public games and join parties and nothing more', async ({ page }) => {
-  const account = await AccountServer.install(page, null);
+test('nobody plays without an account: a visitor is told to sign in, and a guest left from before can only leave', async ({ page }) => {
+  await AccountServer.install(page, null);
   const match = await MatchServer.install(page);
   match.session = 'none';
-  match.account = account;
   match.state = matchState({ you: viewer({ isHost: false }), players: [player('sam')] });
   const send = await open(page);
 
   expect(await getQueue(send)).toEqual(refused(SIGN_IN));
   expect(await joinQueue('unranked', send)).toEqual(refused(SIGN_IN));
+  expect(await joinParty('ABC123', send)).toEqual(refused(SIGN_IN));
   expect(data(await getAccount(send))).toMatchObject({ account: null, guest: null });
 
-  expect(await playAsGuest(send)).toEqual({ ok: true, data: { username: 'Guest #4821' } });
-  expect(data(await getAccount(send))).toMatchObject({ account: null, guest: 'Guest #4821', stats: null, recentGames: [] });
-  // a browser that already has a session is told its name, and no second guest is made
-  match.guestName = 'Guest #9999';
-  expect(await playAsGuest(send)).toEqual({ ok: true, data: { username: 'Guest #4821' } });
-
+  // a guest session made before playing took an account: nothing that plays, only the way out
+  match.session = 'guest';
+  expect(await joinQueue('unranked', send)).toEqual(refused(GUESTS));
+  expect(await joinParty('ABC123', send)).toEqual(refused(GUESTS));
   expect(await createParty({ map: 'world', mode: 'move', timeLimit: 60, rounds: 5 }, send)).toEqual(refused(GUESTS));
-  expect(await joinQueue('ranked', send)).toEqual(refused(GUESTS));
-  expect(await joinQueue('team', send)).toEqual(refused(GUESTS));
+  expect(await sendGuess('m1', 0, { lng: 0, lat: 0 }, send)).toEqual(refused(GUESTS));
+  expect(await sendEmote('m1', 'hi', send)).toEqual(refused(GUESTS));
   expect(await sendChat('m1', 'hello', 'all', send)).toEqual(refused(GUESTS));
-  expect(await changePassword('a', 'b'.repeat(8), send)).toEqual(refused(GUESTS));
-  expect(data(await joinQueue('unranked', send))).toMatchObject({ queued: true, kind: 'unranked', window: null });
-
-  const joined = data(await joinParty('ABC123', send));
-  expect(joined.you).toMatchObject({ username: 'Guest #4821', guest: true, isHost: false });
-  expect(joined.players.map((p) => [p.username, p.guest])).toEqual([['sam', false], ['Guest #4821', true]]);
-  expect(data(await sendEmote('m1', 'hi', send)).chat.at(-1)).toMatchObject({ username: 'Guest #4821', emote: 'hi', scope: 'all' });
-
-  match.guestsRefused = true;
-  match.session = 'none';
-  expect(await playAsGuest(send)).toEqual(refused('Too many guests from this network. Try again in an hour.'));
+  expect(data(await leaveMatch('m1', send))).toEqual({ left: true });
 });
 
 test('a host configures the party, seats teams, and uses the host controls; a wrong phase changes nothing', async ({ page }) => {
@@ -343,11 +331,11 @@ test('the daily: one attempt a day, a paged top hundred, and results claimed by 
   // a visitor is sent the challenge and the board, and nothing about themselves
   daily.session = 'none';
   expect(data(await getDaily(1, send))).toMatchObject({ state: 'open', yours: null, streak: { current: 0, best: 0, atRisk: false }, records: null, history: [] });
-  // a visitor's start, and a guest's, is answered with a token to keep with the result
-  expect(data(await startDaily(send))).toEqual({ state: 'started', token: expect.stringMatching(/^daily\./) });
+  // playing it takes an account: a visitor's start is refused, and a guest's
+  expect(await startDaily(send)).toEqual(refused(SIGN_IN));
   expect(await claimDaily(claim, send)).toEqual(refused(SIGN_IN));
   daily.session = 'guest';
-  expect(data(await startDaily(send)).token).not.toBeNull();
+  expect(await startDaily(send)).toEqual(refused(GUESTS));
   expect(await claimDaily(claim, send)).toEqual(refused(GUESTS));
 });
 

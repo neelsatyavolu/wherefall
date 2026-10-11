@@ -462,6 +462,7 @@ export const en = {
   'pane.checkingAccount': 'Checking your account',
   'pane.needsAccount':
     '{what} needs an account, so other players can see who they are up against and your results have somewhere to go. It is free and takes a username and a password.',
+  'play.what': 'Playing',
   'pane.banned': 'This account is banned from online play: matches, parties, chat, friends and map making. Playing alone still works.',
   'pane.playSingleplayer': 'Play singleplayer',
 
@@ -480,7 +481,7 @@ export const en = {
   'singleplayer.start': 'Start game',
   /** `{panoramax}` and `{openfreemap}` are links, each showing its own name */
   'singleplayer.credits':
-    'Free to play. An account is optional here and keeps your stats. Street imagery from Google Street View where available, otherwise from {panoramax} contributors under open licences. Map from {openfreemap} and OpenStreetMap.',
+    'Free to play. Playing takes a free account, which keeps your stats. Street imagery from Google Street View where available, otherwise from {panoramax} contributors under open licences. Map from {openfreemap} and OpenStreetMap.',
 
   // Country streak
   'streak.lede': 'One place after another, anywhere in the world. Click the country each one is in. The first wrong country ends the run.',
@@ -502,7 +503,7 @@ export const en = {
   'daily.empty': 'No results yet today. The first one in leads.',
 
   // Account: the sign-in form
-  'account.lede': 'Your level, your stats and your games, on every device you sign in on. Playing alone without one stays free.',
+  'account.lede': 'Your level, your stats and your games, on every device you sign in on. Playing takes one, and it is free.',
   'account.loading': 'Loading account',
   'account.login.name': 'Sign in',
   'account.login.busy': 'Signing in',

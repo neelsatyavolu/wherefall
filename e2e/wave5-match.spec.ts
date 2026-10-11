@@ -8,7 +8,7 @@ import { CATALOGS, expectTranslated } from './language-checks.ts';
 import { backToLobby } from './match-rules.ts';
 import { FIVE_PLACES, MatchServer, signIn } from './match-server.ts';
 
-// Wave 5, around an online game: guests, the queues, chat, the versus intro and the result screens.
+// Wave 5, around an online game: what is left of guests, the queues, chat, the versus intro and the result screens.
 
 const HOUR_MS = 3_600_000;
 const GUEST = 'Guest #4821';
@@ -54,117 +54,29 @@ async function rejoin(page: Page, server: MatchServer, change: Parameters<typeof
   await page.getByRole('button', { name: 'Rejoin match' }).click();
 }
 
-/** A browser with no session, or one that already holds a guest's, and the two servers that know it. */
-async function asVisitor(page: Page, guestAlready = false) {
+/** A browser that still holds a guest's session from before playing took an account, and the two servers that know it. */
+async function asGuest(page: Page) {
   const accounts = await AccountServer.install(page, null);
   const server = await MatchServer.install(page);
-  server.account = accounts;
-  server.session = guestAlready ? 'guest' : 'none';
-  if (guestAlready) {
-    accounts.becomeGuest(GUEST);
-    server.state = { ...server.state, you: AS_GUEST };
-  }
+  server.session = 'guest';
+  accounts.becomeGuest(GUEST);
+  server.state = { ...server.state, you: AS_GUEST };
   await mockServices(page);
   return { accounts, server };
 }
 
-// --- item 13: guests ------------------------------------------------------------------------------
+// --- item 13: guests, now that playing takes an account ---------------------------------------------
 
-test('a visitor plays a public unranked game as a guest, straight from the pane', async ({ page }) => {
-  const { server } = await asVisitor(page);
-  await page.goto('/#unranked');
-  await expect(page.getByText('No account is needed here')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Find a match' })).toHaveCount(0);
-  await expect(page.getByRole('main').getByRole('link', { name: 'Sign in or create an account' })).toHaveAttribute('href', '#account');
-
-  // one press makes the guest and joins the queue
-  await page.getByRole('button', { name: 'Play as a guest' }).click();
-  await expect(page.getByText('Looking for players')).toBeVisible();
-  expect(server.posts).toEqual([{ action: 'guest' }, { action: 'queue', kind: 'unranked' }]);
-  await expect(page.getByText(`Playing as ${GUEST}`)).toBeVisible();
-  // the guest's name stands where an account's would, with the way to sign up beside it
-  const badge = page.locator('.sidebar').getByRole('group', { name: 'Guest session' });
-  await expect(badge).toContainText(GUEST);
-  await expect(badge.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '#account');
-
-  server.state = publicGame(AS_GUEST, [player('ana', { country: 'BR' })]);
-  server.startRound(0);
-  server.matchFound('m9');
-  await roundReady(page);
-  await sendGuess(page, { x: 150, y: 150 });
-  server.opponentGuesses('ana');
-  server.reveal(4200, 3000);
-  await expect(row(result(page), GUEST).locator('td')).toHaveText([`${GUEST}you`, '321 km', '4,200', '4,200']);
-  // a guest has no profile to lead to, and earns no XP
-  await expect(result(page).getByRole('link', { name: /Guest/ })).toHaveCount(0);
-  await expect(result(page).getByRole('link', { name: 'ana' })).toHaveAttribute('href', '?user=ana');
-  await expect(result(page).locator('.round-xp')).toHaveCount(0);
-
-  server.finish(outcome([GUEST]));
-  await expect(final(page)).toContainText('You won.');
-  await expect(final(page).getByRole('link', { name: /Guest/ })).toHaveCount(0);
-  // reporting needs an account
-  await expect(final(page).getByRole('button', { name: /^Report / })).toHaveCount(0);
-  await expect(final(page).locator('.match-xp')).toHaveCount(0);
-
-  // and a guest can go again
-  await final(page).getByRole('button', { name: 'Play again' }).click();
-  await expect(page.getByText('Looking for players')).toBeVisible();
-  expect(server.posted('queue')).toEqual([
-    { action: 'queue', kind: 'unranked' },
-    { action: 'queue', kind: 'unranked' },
-  ]);
-});
-
-test('a visitor joins a party by its code as a guest, and is offered nothing a guest is refused', async ({ page }) => {
-  const { server } = await asVisitor(page);
-  server.state = matchState({ you: MEMBER, players: [player('sam', { country: 'FR' })] });
-  await page.goto('/?party=ABC123');
-  await expect(title(page)).toHaveText('Join party');
-  await expect(page.getByRole('button', { name: 'Join party' })).toHaveCount(0);
-
-  await page.getByRole('button', { name: 'Play as a guest' }).click();
-  await expect(page.getByText(`Playing as ${GUEST}`)).toBeVisible();
-  await expect(page.getByLabel('Party code')).toHaveValue('ABC123');
-  await page.getByRole('button', { name: 'Join party' }).click();
-  expect(server.posts).toEqual([{ action: 'guest' }, { action: 'join', code: 'ABC123' }]);
-
-  await expect(page.getByRole('heading', { name: 'Party', exact: true })).toBeVisible();
-  await expect(page.locator('.player-row')).toHaveText([/sam$/, `${GUEST}you`]);
-  // the host's name leads to a profile and carries a flag; the guest's is plain text
-  await expect(page.locator('.player-row').getByRole('link')).toHaveText(['sam']);
-  await expect(page.locator('.player-row').first().getByRole('img', { name: 'France' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Start match' })).toBeHidden();
-  // friends are an account's
-  await expect(page.getByRole('heading', { name: 'Invite friends' })).toHaveCount(0);
-
-  // the host allows chat, which a guest cannot write: the reactions, and what signing up adds
-  const chat = page.getByRole('region', { name: 'Chat' });
-  await expect(chat.getByRole('group', { name: 'Reactions' }).getByRole('button')).toHaveCount(20);
-  await expect(chat.getByRole('textbox', { name: 'Message' })).toBeHidden();
-  await expect(chat).toContainText('Guests can send reactions. Writing messages needs an account.');
-  await expect(chat.getByRole('link', { name: 'Sign up' })).toHaveAttribute('target', '_blank');
-  await chat.getByRole('button', { name: 'gl', exact: true }).click();
-  await expect(chat.locator('.chat-line')).toHaveText(['yougl']);
-});
-
-test('a guest is shown what signing up adds on every pane that needs an account, and no control the server would refuse', async ({ page }) => {
-  const { server } = await asVisitor(page, true);
-  for (const address of ['/#ranked', '/#team', '/#create', '/#friends', '/?edit=new']) {
+test('a guest left from before is shown what signing up adds on every pane that plays, and no control the server would refuse', async ({ page }) => {
+  const { server } = await asGuest(page);
+  for (const address of ['/#unranked', '/#join', '/#ranked', '/#team', '/#create', '/#friends', '/?edit=new']) {
     await page.goto(address);
     const notice = page.locator('.notice');
-    await expect(notice, address).toContainText(`This needs an account. You are playing as ${GUEST}`);
+    await expect(notice, address).toContainText(`This needs an account. You are here as ${GUEST}, a guest, and a guest can no longer play.`);
     await expect(notice.getByRole('link', { name: 'Sign up' }), address).toHaveAttribute('href', '#account');
     await expect(page.getByRole('button', { name: /Find a match|Create party|Join party|Send request|Publish map|Play as a guest/ }), address).toHaveCount(0);
     await expect(page.locator('.sidebar').getByRole('group', { name: 'Guest session' }), address).toContainText(GUEST);
   }
-  // the two a guest can use are simply there
-  await page.goto('/#unranked');
-  await expect(page.getByRole('button', { name: 'Find a match' })).toBeVisible();
-  await expect(page.getByText(`Playing as ${GUEST}`)).toBeVisible();
-  await page.goto('/#join');
-  await expect(page.getByRole('button', { name: 'Join party' })).toBeVisible();
-  await expect(page.locator('.notice')).toHaveCount(0);
   // nothing was asked of the server that it would have refused
   expect(server.posts).toEqual([]);
 
@@ -172,28 +84,8 @@ test('a guest is shown what signing up adds on every pane that needs an account,
   await expect(page).toHaveURL(/#account$/);
 });
 
-test('a guest session that has run out is said so on the pane, with a new one a press away', async ({ page }) => {
-  const { accounts, server } = await asVisitor(page, true);
-  await page.goto('/#unranked');
-  await expect(page.getByRole('button', { name: 'Find a match' })).toBeVisible();
-
-  // a day has passed: the server no longer knows this guest
-  server.session = 'none';
-  server.guestName = 'Guest #7302';
-  accounts.signOut();
-  await page.getByRole('button', { name: 'Find a match' }).click();
-  await expect(page.getByRole('status').filter({ hasText: 'Your guest session has ended. A guest session lasts 24 hours.' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Find a match' })).toHaveCount(0);
-  await expect(page.locator('.sidebar').getByRole('group', { name: 'Guest session' })).toHaveCount(0);
-
-  await page.getByRole('button', { name: 'Play as a guest' }).click();
-  await expect(page.getByText('Playing as Guest #7302')).toBeVisible();
-  await expect(page.getByText('Looking for players')).toBeVisible();
-  expect(server.posts.map((body) => body.action)).toEqual(['queue', 'guest', 'queue']);
-});
-
 test('a session that runs out during a match ends it with a plain notice and two ways on', async ({ page }) => {
-  const { accounts, server } = await asVisitor(page, true);
+  const { accounts, server } = await asGuest(page);
   server.state = publicGame(AS_GUEST, [player('ana')]);
   server.startRound(0);
   server.matchFound('m9');
@@ -629,15 +521,8 @@ for (const code of ['es', 'fr', 'de', 'ru']) {
     });
 
     test('the guest notices are in the language and fit', async ({ page }) => {
-      const { accounts, server } = await asVisitor(page);
-      await page.goto('/#unranked');
-      await expect(page.getByRole('button', { name: say['guest.play'] })).toBeVisible();
-      await page.waitForLoadState('networkidle');
-      await expectTranslated(page, code);
-
-      accounts.becomeGuest(GUEST);
-      server.session = 'guest';
-      for (const address of ['/#unranked', '/#ranked', '/#join']) {
+      await asGuest(page);
+      for (const address of ['/', '/#unranked', '/#ranked', '/#join']) {
         await page.goto('about:blank');
         await page.goto(address);
         await expect(page.locator('.sidebar .guest-badge')).toBeVisible();

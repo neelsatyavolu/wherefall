@@ -105,7 +105,7 @@ test('a profile link opens directly, and a name nobody has says so', async ({ pa
   await page.goto('/?user=nobody_here');
   await expect(page.getByRole('alert')).toContainText('No player has that name.');
   await page.getByRole('link', { name: 'Singleplayer' }).click();
-  await expect(page.getByRole('button', { name: 'Start game' })).toBeVisible();
+  await expect(title(page)).toHaveText('Singleplayer');
 });
 
 test('friends: a request is sent, one is accepted, one declined, one removed', async ({ page }) => {

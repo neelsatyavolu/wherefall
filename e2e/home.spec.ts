@@ -94,6 +94,8 @@ test('every pane opens the same way: a title, then a line on what it is', async 
     await nav(page, name).click();
     await expect(title(page)).toHaveText(name);
     await expect(page.locator('.pane-head .lede')).toBeVisible();
+    // a pane that plays is drawn again once the server has said who is looking
+    await expect(page.getByText('Checking your account')).toHaveCount(0);
     const box = (await title(page).boundingBox())!;
     lefts.add(Math.round(box.x));
     tops.add(Math.round(box.y));
@@ -126,7 +128,7 @@ test('reload, back and forward keep to the address', async ({ page }) => {
 });
 
 test('a challenge link keeps its card on singleplayer while the player looks around', async ({ page }) => {
-  await mockApis(page, null);
+  await mockApis(page, 'neel');
   await page.goto(CHALLENGE);
   await expect(nav(page, 'Singleplayer')).toHaveAttribute('aria-current', 'page');
   await expect(page.getByText('You were sent a challenge')).toBeVisible();
@@ -190,26 +192,25 @@ test('on a wide screen the sidebar is a comfortable column to the left of the pa
   expect((await page.locator('.setup').boundingBox())!.width).toBeLessThanOrEqual(640);
 });
 
-// a guest can play public unranked games and join parties, so a visitor is offered that there; the rest need an account
-for (const [name, hash, fact, guests] of [
-  ['Ranked duel', 'ranked', '1 v 1 · World · moving · up to 5 rounds · 1 min a round · rated', false],
-  ['Unranked match', 'unranked', '2 to 10 players · World · moving · 5 rounds · 45 sec a round · not rated', true],
-  ['2v2 match', 'team', '2 v 2 · World · moving · up to 5 rounds · 1 min a round · not rated', false],
-  ['Create party', 'create', '2 to 40 players · any map · your rules · not rated', false],
-  ['Join party', 'join', "A friend's private match · their rules · not rated", true],
+// every way to play online needs an account
+for (const [name, hash, fact] of [
+  ['Ranked duel', 'ranked', '1 v 1 · World · moving · up to 5 rounds · 1 min a round · rated'],
+  ['Unranked match', 'unranked', '2 to 10 players · World · moving · 5 rounds · 45 sec a round · not rated'],
+  ['2v2 match', 'team', '2 v 2 · World · moving · up to 5 rounds · 1 min a round · not rated'],
+  ['Create party', 'create', '2 to 40 players · any map · your rules · not rated'],
+  ['Join party', 'join', "A friend's private match · their rules · not rated"],
 ] as const) {
-  test(`a visitor who picks ${name} is told what it is, then ${guests ? 'offered a game as a guest or an account' : 'that an account is needed'}`, async ({ page }) => {
+  test(`a visitor who picks ${name} is told what it is, then that an account is needed`, async ({ page }) => {
     await mockApis(page, null);
     await page.goto(`/#${hash}`);
 
     await expect(title(page)).toHaveText(name);
     const facts = page.getByText(fact);
-    const notice = page.getByText(guests ? 'No account is needed here: play as a guest' : 'Multiplayer needs an account');
+    const notice = page.getByText('Multiplayer needs an account');
     await expect(facts).toBeVisible();
     await expect(notice).toBeVisible();
     expect((await facts.boundingBox())!.y).toBeLessThan((await notice.boundingBox())!.y);
-    await expect(page.getByRole('button', { name: /Find a match|Create party|Join party/ })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Play as a guest' })).toHaveCount(guests ? 1 : 0);
+    await expect(page.getByRole('button', { name: /Find a match|Create party|Join party|Play as a guest/ })).toHaveCount(0);
 
     await page.getByRole('link', { name: 'Sign in or create an account' }).click();
     await expect(page).toHaveURL(/#account$/);
@@ -220,7 +221,7 @@ for (const [name, hash, fact, guests] of [
 }
 
 test('a first visit gets a short introduction that stays dismissed', async ({ page }) => {
-  await mockApis(page, null);
+  await mockApis(page, 'neel');
   await page.goto('/');
   const intro = page.getByRole('region', { name: 'How to play' });
   await expect(intro.locator('li')).toHaveCount(3);

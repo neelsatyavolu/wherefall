@@ -128,8 +128,7 @@ for (const [name, width, height] of [
 
 test('every phase of a game has a way out', async ({ page }) => {
   await mockServices(page);
-  await signIn(page, null);
-  await DailyServer.install(page, 'none');
+  await DailyServer.install(page);
   // the daily: guessing, then the result
   await page.goto('/#daily');
   await page.getByRole('button', { name: "Play today's challenge" }).click();
@@ -344,7 +343,6 @@ test('ending a streak run by Exit keeps the streak', async ({ page }) => {
 test('a US browser starts in miles, and distances follow the units chosen on the account pane', async ({ page }) => {
   // nothing stored: the page starts as a new browser does
   await mockServices(page, { units: 'browser' });
-  await signIn(page, null);
   await page.goto('/#account');
   // the test browser is set to US English, and a US or UK browser starts in miles
   await expect(page.getByRole('radio', { name: 'Miles' })).toBeChecked();

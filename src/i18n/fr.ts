@@ -459,6 +459,7 @@ export const fr: Translation = {
   'pane.checkingAccount': 'Vérification de votre compte',
   'pane.needsAccount':
     '{what} : il faut un compte, pour que les autres joueurs voient contre qui ils jouent et que vos résultats soient conservés quelque part. C’est gratuit et il suffit d’un nom d’utilisateur et d’un mot de passe.',
+  'play.what': 'Jouer',
   'pane.banned': 'Ce compte est banni du jeu en ligne : matchs, salons, chat, amis et création de cartes. Le jeu en solo reste possible.',
   'pane.playSingleplayer': 'Jouer en solo',
 
@@ -477,7 +478,7 @@ export const fr: Translation = {
   'singleplayer.start': 'Lancer la partie',
   /** `{panoramax}` et `{openfreemap}` sont des liens, chacun affichant son propre nom */
   'singleplayer.credits':
-    'Jeu gratuit. Le compte est facultatif ici et conserve vos statistiques. Images de rue fournies par Google Street View quand elles existent, sinon par les contributeurs de {panoramax}, sous licences ouvertes. Carte fournie par {openfreemap} et OpenStreetMap.',
+    'Jeu gratuit. Il faut un compte gratuit pour jouer ; il conserve vos statistiques. Images de rue fournies par Google Street View quand elles existent, sinon par les contributeurs de {panoramax}, sous licences ouvertes. Carte fournie par {openfreemap} et OpenStreetMap.',
 
   // Série de pays
   'streak.lede': 'Un lieu après l’autre, partout dans le monde. Cliquez sur le pays où se trouve chacun. Le premier pays faux met fin à la partie.',
@@ -499,7 +500,7 @@ export const fr: Translation = {
   'daily.empty': 'Aucun résultat aujourd’hui pour l’instant. Le premier arrivé prend la tête.',
 
   // Compte : le formulaire de connexion
-  'account.lede': 'Votre niveau, vos statistiques et vos parties, sur chaque appareil où vous vous connectez. Jouer en solo sans compte reste gratuit.',
+  'account.lede': 'Votre niveau, vos statistiques et vos parties, sur chaque appareil où vous vous connectez. Il en faut un pour jouer, et il est gratuit.',
   'account.loading': 'Chargement du compte',
   'account.login.name': 'Se connecter',
   'account.login.busy': 'Connexion en cours',

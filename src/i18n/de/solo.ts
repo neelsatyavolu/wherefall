@@ -49,7 +49,7 @@ export const solo: Part<typeof english> = {
 
   'about.lede': 'Ein kostenloses Spiel, bei dem du herausfindest, wo auf der Welt eine Straße liegt.',
   'about.what.title': 'Was Wherefall ist',
-  'about.what.1': 'Wherefall setzt dich irgendwo auf der Erde auf einer Straße ab. Du siehst dich um, findest heraus, wo du bist, und setzt einen Pin auf die Karte. Es ist kostenlos und ohne Werbung, und ein Konto ist freiwillig.',
+  'about.what.1': 'Wherefall setzt dich irgendwo auf der Erde auf einer Straße ab. Du siehst dich um, findest heraus, wo du bist, und setzt einen Pin auf die Karte. Es ist kostenlos und ohne Werbung, und zum Spielen brauchst du ein kostenloses Konto.',
   'about.what.2': 'Spiele allein, nimm dir die Tages-Challenge vor oder tritt gegen andere an: im Wertungsduell, im 2v2, im Match ohne Wertung oder in einer privaten Party. Spieler bauen eigene Karten und teilen sie.',
   'about.scoring.title': 'So wird gewertet',
   'about.scoring.1': 'Eine Runde bringt bis zu 5.000 Punkte. Ein Pin, der höchstens 30 m neben dem Ort liegt, ist eine perfekte Runde.',
@@ -57,7 +57,7 @@ export const solo: Part<typeof english> = {
   'about.scoring.3': 'Ein Hinweis zeichnet einen Kreis auf die Karte, in dem der Ort liegt, und halbiert die Punkte dieser Runde. Beim Länderraten und beim Kontinentraten bringt jede richtige Antwort 1.000 Punkte.',
   'about.faq.title': 'Fragen',
   'about.faq.account.q': 'Brauche ich ein Konto?',
-  'about.faq.account.a': 'Nein. Alles, was du allein spielst, geht ohne Konto, und als Gast kannst du Matches ohne Wertung und Partys beitreten. Ein Konto bewahrt deine Statistik und deine besten Punktzahlen, bringt dich in die Ranglisten und ist nötig für Wertungsduelle, 2v2, Freunde und eigene Karten.',
+  'about.faq.account.a': 'Ja, zum Spielen. Jedes Spiel braucht ein kostenloses Konto: einen Benutzernamen und ein Passwort, keine E-Mail. Es bewahrt deine Statistik und deine besten Punktzahlen und bringt dich in die Ranglisten. Die Ranglisten, die Community-Karten und die Profile der Spieler kannst du auch ohne Konto ansehen.',
   'about.faq.link.q': 'Bekommt ein Freund über meinen Link dieselben Orte?',
   'about.faq.link.a': 'Ja, wenn ihr beide dieselben Bilder seht. Ein Link enthält die Karte, die Einstellungen und einen Startwert, und der Startwert bestimmt die Orte. Street View und Panoramax haben je eine eigene Liste von Orten, wer also mit der anderen Quelle spielt, bekommt andere.',
   'about.faq.imagery.q': 'Warum sehe ich manchmal Bilder von Panoramax?',
@@ -84,9 +84,8 @@ export const solo: Part<typeof english> = {
   // Welle 6, der erste Besuch: die Begrüßung und eine Tatsache zu jedem Ergebnis im Tutorial
   'welcome.label': 'Willkommen',
   'welcome.lede': 'Wherefall ist ein kostenloses Spiel, bei dem du herausfindest, wo auf der Welt du bist. Es setzt dich irgendwo auf der Erde auf einer Straße ab: Sieh dich um und setz dann einen Pin auf die Karte.',
-  'welcome.tutorial': 'Zeig mir, wie es geht',
-  'welcome.skip': 'Überspringen',
-  'welcome.note': 'Das Tutorial sind zwei kurze Runden mit Hilfe bei jedem Schritt. Es wird nicht gespeichert.',
+  'welcome.look': 'Erst umsehen',
+  'welcome.note': 'Zum Spielen brauchst du ein kostenloses Konto: einen Benutzernamen und ein Passwort, keine E-Mail. Die Bestenlisten und die Community-Karten stehen allen offen.',
   'tutorial.fact.eiffel': 'Der Eiffelturm wurde für die Weltausstellung 1889 gebaut und war bis 1930 das höchste Bauwerk der Welt.',
   'tutorial.fact.colosseum': 'Das Kolosseum wurde im Jahr 80 eröffnet und ist das größte Amphitheater, das die Römer je gebaut haben.',
 };

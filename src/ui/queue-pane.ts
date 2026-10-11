@@ -8,7 +8,7 @@ import { msUntil, secondsLeft } from '../multiplayer/state.ts';
 import { el, formatScore } from './dom.ts';
 import { leagueName } from './league.ts';
 import { navName } from './nav.ts';
-import { accountOnly, errorLine, factLine, guestsWelcome, statusLine, type GateTools, type Pane, type Who } from './pane.ts';
+import { accountOnly, errorLine, factLine, statusLine, type Pane, type GateTools } from './pane.ts';
 import { clock } from './round-timer.ts';
 import { sounds } from './sound.ts';
 
@@ -169,7 +169,7 @@ function queueBody({ kind, onMatch, entry, tools }: QueueOptions): Pane {
     ticker = window.setInterval(() => lines.draw(current, now()), TICK_MS);
   }
 
-  /** The session ran out (a guest's lasts a day): the pane closes and says how to go on. */
+  /** The session ran out: the pane closes and says how to go on. */
   function over(): void {
     stopPolling();
     queued = false;
@@ -244,7 +244,7 @@ function queueBody({ kind, onMatch, entry, tools }: QueueOptions): Pane {
         return;
       }
     }
-    if (entry === 'again' || tools.fresh) {
+    if (entry === 'again') {
       await find();
     } else {
       showIdle();
@@ -274,20 +274,14 @@ function takeEntry(kind: QueueKind): QueueReason | null {
   return entry;
 }
 
-/**
- * Matchmaking for one kind: what it is, a button to start looking, and the wait until matched. A
- * guest can play public unranked games; the other kinds need an account. `onSession` is called
- * when a visitor becomes a guest here.
- */
-export function queuePane(kind: QueueKind, onMatch: EnterMatch, onSession?: () => void): Pane {
+/** Matchmaking for one kind: what it is, a button to start looking, and the wait until matched. */
+export function queuePane(kind: QueueKind, onMatch: EnterMatch): Pane {
   const entry = takeEntry(kind);
   // the settings in the facts line are fixed by the server and repeated here to show them
   const facts = kind === 'ranked' ? [t('queue.ranked.facts'), t('queue.ranked.xp')] : [t(`queue.${kind}.facts`)];
-  const gate = { title: navName(kind), lede: t(`queue.${kind}.lede`), facts, what: t('match.multiplayer') };
-  const build = (who: Who, tools: GateTools): Pane => {
+  return accountOnly({ title: navName(kind), lede: t(`queue.${kind}.lede`), facts, what: t('match.multiplayer') }, (account, tools) => {
     const queue = queueBody({ kind, onMatch, entry, tools });
-    const rating = kind === 'ranked' && who.account ? factLine([t('queue.yourRating', { rating: formatScore(who.account.rating) }), leagueName(who.account.league)].join(' · ')) : null;
+    const rating = kind === 'ranked' ? factLine([t('queue.yourRating', { rating: formatScore(account.rating) }), leagueName(account.league)].join(' · ')) : null;
     return { node: el('div', { class: 'pane-stack' }, rating, queue.node), dispose: queue.dispose };
-  };
-  return kind === 'unranked' ? guestsWelcome(gate, build, onSession) : accountOnly(gate, (account, tools) => build({ account, guest: null }, tools));
+  });
 }

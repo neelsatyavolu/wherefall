@@ -4,8 +4,8 @@
 import { dailyEntries } from '../../e2e/daily-server.ts';
 import { PLACES_FIXTURE, RUSSIA_ONLY, mockPlaces } from '../../e2e/fixtures.ts';
 import { servePlaces } from '../../e2e/place-rules.ts';
-import { dailyHistoryUnder, keptDaily, recordsOf } from './data.mjs';
-import { bring, button, openMap, openPane, panes, playRound, roundReady, section, startChallenge, visit } from './setup.mjs';
+import { dailyHistoryUnder, recordsOf } from './data.mjs';
+import { bring, button, openMap, openPane, playRound, roundReady, section, startChallenge, visit } from './setup.mjs';
 
 const FULL = { fullPage: true };
 /** a streak of four that earlier world games left in this browser */
@@ -102,13 +102,25 @@ async function expectSoon(happened, page, withinMs = 10_000) {
 }
 
 async function welcomeScenes(run) {
-  await run.scene('welcome: a new visitor, the tutorial with its facts, the tutorial\'s end', { who: 'visitor', welcome: true, stored: { 'plonk.intro-seen': null } }, async (s) => {
-    await s.capture('welcome-screen-show-me-how-or-skip', async () => {
+  await run.scene('welcome: a new visitor, and the home screen after looking around', { who: 'visitor', welcome: true, stored: { 'plonk.intro-seen': null } }, async (s) => {
+    await s.capture('welcome-screen-sign-in-or-look-around', async () => {
       await visit(s, '/');
-      await welcome(s).getByRole('button', { name: s.say('welcome.tutorial') }).waitFor();
+      await welcome(s).getByRole('button', { name: s.say('welcome.look') }).waitFor();
     });
+    await s.capture(
+      'pane-singleplayer-after-looking-around-needs-account',
+      async () => {
+        await welcome(s).getByRole('button', { name: s.say('welcome.look') }).click();
+        await s.page.locator('.pane-title').waitFor();
+      },
+      FULL,
+    );
+  });
+
+  await run.scene('tutorial: a signed-in player, with its facts', { stored: { 'plonk.intro-seen': null } }, async (s) => {
     await s.capture('tutorial-first-round-with-its-tip', async () => {
-      await welcome(s).getByRole('button', { name: s.say('welcome.tutorial') }).click();
+      await openPane(s, '/#account');
+      await button(s, 'common.playTutorial').click();
       await roundReady(s.page);
     });
     await s.capture('tutorial-result-with-its-fact-line-eiffel-tower', async () => {
@@ -120,22 +132,6 @@ async function welcomeScenes(run) {
       await playRound(s, 0.5, 0.33);
       await result(s).locator('.place-fact').waitFor();
     });
-    await s.capture('tutorial-end-singleplayer-daily-challenge-sign-up', async () => {
-      await button(s, 'result.seeSummary').click();
-      await summary(s).getByRole('button', { name: s.say('nav.item.daily') }).waitFor();
-    });
-  });
-
-  await run.scene('welcome: skipped, the home screen with its how-to box', { who: 'visitor', welcome: true, stored: { 'plonk.intro-seen': null } }, async (s) => {
-    await s.capture(
-      'pane-singleplayer-after-skip-how-to-box-still-there',
-      async () => {
-        await visit(s, '/');
-        await welcome(s).getByRole('button', { name: s.say('welcome.skip') }).click();
-        await s.page.locator('.pane-title').waitFor();
-      },
-      FULL,
-    );
   });
 
   await run.scene('tutorial replayed by a signed-in player: its end', {}, async (s) => {
@@ -260,10 +256,6 @@ async function dailyResultScenes(run) {
     );
   });
 
-  await run.scene('visitor: a daily result kept before results could move to an account', { who: 'visitor' }, async (s) => {
-    await s.page.addInitScript((value) => localStorage.setItem('plonk.daily', value), keptDaily(s.daily.date, [4800, 3950, 2500]));
-    await panes(s, [['/#daily', 'pane-daily-signed-out-kept-result-that-cannot-be-claimed']]);
-  });
 }
 
 async function saveNoteScenes(run) {

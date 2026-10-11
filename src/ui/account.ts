@@ -217,7 +217,7 @@ export function accountPane(onChange: () => void, onTutorial: () => void): Pane 
       return;
     }
     signedIn = false;
-    body.replaceChildren(...(ended ? [endedNote()] : []), signInForm({ onSignedIn: reload, onCode: showCode }), ...settingsRows(onTutorial));
+    body.replaceChildren(...(ended ? [endedNote()] : []), signInForm({ onSignedIn: reload, onCode: showCode }), ...settingsRows(null));
   }
 
   // The session can end from another browser while this pane is open. Whichever part of the pane

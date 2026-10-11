@@ -181,7 +181,6 @@ const queueStateSchema = z.object({
   typicalWaitSeconds: z.number().nullable(),
 });
 
-const guestSchema = z.object({ username: z.string() });
 const leftSchema = z.object({ left: z.literal(true) });
 const notQueuedSchema = z.object({ queued: z.literal(false) });
 
@@ -216,15 +215,6 @@ export const matchAction = (fetchFn: typeof fetch, body: { action: string } & Re
 
 const queueAction = (fetchFn: typeof fetch, body: { action: 'queue' } & Record<string, unknown>): Reply<QueueState> =>
   call(fetchFn, MATCH, queueStateSchema, post(body));
-
-/**
- * Makes this browser a guest ("Guest #4821") so it can play public unranked games and join parties
- * without an account. A browser that already has a session, of either kind, is told its name and
- * nothing is made. A guest session ends 24 hours after it was made.
- */
-export function playAsGuest(fetchFn: typeof fetch = fetch): Reply<{ username: string }> {
-  return call(fetchFn, MATCH, guestSchema, post({ action: 'guest' }));
-}
 
 /** Opens a party. The caller becomes its host and is in its lobby. Accounts only. */
 export function createParty(settings: PartySettings, fetchFn: typeof fetch = fetch): Reply<MatchState> {
@@ -282,7 +272,7 @@ export function leaveMatch(matchId: string, fetchFn: typeof fetch = fetch): Repl
   return call(fetchFn, MATCH, leftSchema, post({ action: 'leave', matchId }));
 }
 
-/** Joins a queue alone. A guest may join `unranked` only. A player locked out of ranked is told for how long. */
+/** Joins a queue alone. A player locked out of ranked is told for how long. */
 export function joinQueue(kind: QueueKind, fetchFn: typeof fetch = fetch): Reply<QueueState> {
   return queueAction(fetchFn, { action: 'queue', kind });
 }

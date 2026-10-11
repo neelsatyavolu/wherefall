@@ -27,13 +27,11 @@ function settingsLine(settings: MatchSettings): Array<HTMLElement | string> {
 export function lobbySettings(handlers: SettingsHandlers, report: Report, onForm: (open: boolean) => void = () => {}) {
   const line = el('p', { class: 'settings-line' });
   const lockedNote = el('p', { class: 'fine lobby-locked', text: t('party.locked.note'), attrs: { role: 'status' } });
-  /** for the host of a party that has stopped taking guests: the ones already in are not put out by that */
-  const guestsNote = el('p', { class: 'fine lobby-guests', text: t('party.guests.stay'), attrs: { role: 'status' } });
   const change = el('button', { class: 'button ghost', text: t('party.settings.change'), attrs: { type: 'button', 'aria-expanded': 'false' } });
   const lock = lockButton(handlers.onLock, report);
   const controls = el('div', { class: 'actions' }, change, lock.node);
   const formHost = el('div', { class: 'lobby-form' });
-  const node = el('section', { class: 'account-section lobby-settings' }, el('h2', { class: 'label', text: t('lobby.settings') }), line, lockedNote, guestsNote, controls, formHost);
+  const node = el('section', { class: 'account-section lobby-settings' }, el('h2', { class: 'label', text: t('lobby.settings') }), line, lockedNote, controls, formHost);
   let latest: MatchState | null = null;
   let drawn = '';
 
@@ -81,7 +79,6 @@ export function lobbySettings(handlers: SettingsHandlers, report: Report, onForm
       // the server's clock does not matter here: nothing in a lobby waits on it
       const offers = partyOffers(state, 0);
       lock.node.hidden = !offers.lock;
-      guestsNote.hidden = !(offers.configure && !state.settings.guests && state.players.some((player) => player.guest));
       controls.hidden = !offers.configure && !offers.lock;
       if (!offers.configure) {
         // the party changed hands, or left its lobby: the form goes with the right to send it

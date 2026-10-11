@@ -277,21 +277,6 @@ test('a signed-in player has the finished game saved to their stats', async ({ p
   expect(rounds[0]!.score).toBeGreaterThanOrEqual(0);
 });
 
-test('a visitor is told how to keep stats and nothing is saved', async ({ page }) => {
-  await mockServices(page);
-  await page.route('**/api/account', (route) => route.fulfill({ json: accountReply(null) }));
-  let saves = 0;
-  await page.route('**/api/games', (route) => {
-    saves++;
-    return route.fulfill({ status: 401, json: { success: false, error: 'Sign in first.' } });
-  });
-
-  await finishThreeRounds(page);
-
-  await expect(page.getByRole('region', { name: 'Game summary' })).toContainText('Sign in from the home screen to keep your stats.');
-  expect(saves).toBe(0);
-});
-
 test('the account screen opens from home and goes back', async ({ page }) => {
   await mockServices(page);
   await page.route('**/api/account', (route) => route.fulfill({ json: accountReply(null) }));
@@ -301,6 +286,6 @@ test('the account screen opens from home and goes back', async ({ page }) => {
   await expect(page.getByLabel('Password')).toBeVisible();
   // the account is a pane of the home screen now: the browser's own Back leaves it
   await page.goBack();
-  await expect(page.getByRole('button', { name: 'Start game' })).toBeVisible();
+  await expect(page.locator('.pane-title')).toHaveText('Singleplayer');
   await expect(page.getByLabel('Username')).toBeHidden();
 });

@@ -60,7 +60,7 @@ export const solo = {
   // About
   'about.lede': 'A free game of working out where in the world a street is.',
   'about.what.title': 'What Wherefall is',
-  'about.what.1': 'Wherefall drops you somewhere on Earth at street level. You look around, work out where you are, and put a pin on the map. It is free, there are no adverts, and an account is optional.',
+  'about.what.1': 'Wherefall drops you somewhere on Earth at street level. You look around, work out where you are, and put a pin on the map. It is free, there are no adverts, and playing takes a free account.',
   'about.what.2': 'Play alone, take the daily challenge, or play other people in ranked duels, 2v2, unranked matches and private parties. Players make maps of their own and share them.',
   'about.scoring.title': 'How scoring works',
   'about.scoring.1': 'A round is worth up to 5,000 points. A pin within 30 m of the place is a perfect round.',
@@ -68,7 +68,7 @@ export const solo = {
   'about.scoring.3': 'A hint draws a circle on the map with the place inside it, and halves that round. In Country Guesser and Continent Guesser each right answer is 1,000 points.',
   'about.faq.title': 'Questions',
   'about.faq.account.q': 'Do I need an account?',
-  'about.faq.account.a': 'No. Everything you play alone works without one, and a guest can join unranked matches and parties. An account keeps your stats and best scores, puts you on the leaderboards, and is needed for ranked duels, 2v2, friends and making maps.',
+  'about.faq.account.a': "Yes, to play. Every game takes a free account: a username and a password, no email. It keeps your stats and best scores and puts you on the leaderboards. The leaderboards, the community maps and players' profiles can be read without one.",
   'about.faq.link.q': 'Does a friend get the same places from my link?',
   'about.faq.link.a': 'Yes, when you both see the same imagery. A link carries the map, the settings and a seed, and the seed decides the places. Street View and Panoramax each have their own list of places, so a player on the other one gets other places.',
   'about.faq.imagery.q': 'Why do I sometimes get Panoramax pictures?',
@@ -97,9 +97,8 @@ export const solo = {
   // Wave 6, a first visit: the welcome before the home screen, and a fact with each of the tutorial's results
   'welcome.label': 'Welcome',
   'welcome.lede': 'Wherefall is a free game of working out where in the world you are. It drops you on a street somewhere on Earth: look around, then put a pin on the map.',
-  'welcome.tutorial': 'Show me how',
-  'welcome.skip': 'Skip',
-  'welcome.note': 'The tutorial is two short rounds with tips along the way. It is not saved.',
+  'welcome.look': 'Look around first',
+  'welcome.note': 'Playing takes a free account: a username and a password, no email. The leaderboards and the community maps are open to everyone.',
   /** one true sentence about each of the tutorial's places, shown with its round's result */
   'tutorial.fact.eiffel': "The Eiffel Tower was built for the 1889 World's Fair and was the tallest structure in the world until 1930.",
   'tutorial.fact.colosseum': 'The Colosseum opened in the year 80 and is the largest amphitheatre the Romans ever built.',

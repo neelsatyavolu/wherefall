@@ -1,7 +1,6 @@
-/* A guest: the name in the sidebar and over a pane, with the way to sign up beside it. */
+/* A guest: the name in the sidebar, with the way to sign up beside it. */
 
-.guest-badge,
-.guest-line {
+.guest-badge {
   margin: 0;
   display: flex;
   flex-wrap: wrap;

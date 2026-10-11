@@ -265,7 +265,6 @@ async function countAudio(page: Page): Promise<() => Promise<number>> {
 
 test('no sound is made before the player touches the page, and none at all when Sound is off', async ({ page }) => {
   await mockServices(page);
-  await signIn(page, null);
   const audioMade = await countAudio(page);
   await page.goto(CHALLENGE);
   await expect(page.getByRole('button', { name: 'Play challenge' })).toBeVisible();

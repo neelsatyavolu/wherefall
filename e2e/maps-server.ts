@@ -71,7 +71,7 @@ const byAge = (a: MapDetail, b: MapDetail) => b.createdAt.localeCompare(a.create
  */
 export class MapsServer {
   maps: MapDetail[] = [PARIS, MINE];
-  /** who is asking: `mine` and `liked` need an account, and a guest may only read and count a play */
+  /** who is asking: `mine`, `liked` and every action need an account; a guest and a visitor may only read */
   session: 'account' | 'guest' | 'none' = 'account';
   readonly posts: Body[] = [];
   /** every list that was asked for, as its query string */
@@ -185,7 +185,7 @@ export class MapsServer {
     if (request.method() === 'POST') {
       const body = request.postDataJSON() as Body;
       this.posts.push(body);
-      await route.fulfill(this.refuse === null ? (this.barred(body.action !== 'play') ?? this.act(body)) : refusal(this.refuse, this.refuseStatus));
+      await route.fulfill(this.refuse === null ? (this.barred(true) ?? this.act(body)) : refusal(this.refuse, this.refuseStatus));
       return;
     }
     const params = new URL(request.url()).searchParams;
