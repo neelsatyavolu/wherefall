@@ -2,6 +2,7 @@
   "name": "plonk",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "Free street-view guessing game on open imagery",
   "type": "module",
   "scripts": {
