@@ -141,7 +141,7 @@ test('the daily is saved only when begun today, long enough ago, on the places o
   await GamesServer.install(page, daily);
   const send = await open(page);
   const todays = dailyPlaces(daily.date);
-  const played = (places = todays, scores = [4000, 3000, 2000]): SavedGame => game(places.map((place, index) => roundOn(place, scores[index])), { timeLimit: 60, seed: daily.seed, daily: daily.date });
+  const played = (places = todays, scores = [4000, 3000, 2000]): SavedGame => game(places.map((place, index) => roundOn(place, scores[index])), { timeLimit: 180, seed: daily.seed, daily: daily.date });
 
   expect(await saveGame(played(), send)).toEqual(refused(REFUSALS.dailyUnstarted));
   daily.minMs = 6000;

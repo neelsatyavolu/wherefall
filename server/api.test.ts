@@ -277,7 +277,7 @@ describe('the API routes', () => {
     expect([before, utcDay()]).toContain(date);
     expect(rest).toMatchObject({
       seed: `daily${date.replaceAll('-', '')}`,
-      settings: { map: 'world', mode: 'move', timeLimit: 60, rounds: 3 },
+      settings: { map: 'world', mode: 'move', timeLimit: 180, rounds: 3 },
       state: 'open',
       yours: null,
       streak: { current: 0, best: 0, atRisk: false },

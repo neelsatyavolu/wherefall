@@ -60,7 +60,7 @@ const farOff = (place: KnownPlace, claims: Record<string, unknown> = {}) => ({
 const dailyGame = (scores: number | number[], change: Record<string, unknown> = {}) => ({
   map: 'world',
   mode: 'move',
-  timeLimit: 60,
+  timeLimit: 180,
   seed: SEED,
   rounds: rounds(scores),
   daily: TODAY,
@@ -152,8 +152,8 @@ describe('POST /api/daily { action: "claim" }', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ success: true, data: { claimed: [day(2), day(1)] } });
     expect(await db.query('SELECT daily, seed, map, mode, time_limit, rounds, score, max_score, xp_earned FROM games ORDER BY daily')).toEqual([
-      { daily: day(2), seed: seedOf(day(2)), map: 'world', mode: 'move', time_limit: 60, rounds: 3, score: 6000, max_score: 15_000, xp_earned: 120 },
-      { daily: day(1), seed: seedOf(day(1)), map: 'world', mode: 'move', time_limit: 60, rounds: 3, score: 2500, max_score: 15_000, xp_earned: 50 },
+      { daily: day(2), seed: seedOf(day(2)), map: 'world', mode: 'move', time_limit: 180, rounds: 3, score: 6000, max_score: 15_000, xp_earned: 120 },
+      { daily: day(1), seed: seedOf(day(1)), map: 'world', mode: 'move', time_limit: 180, rounds: 3, score: 2500, max_score: 15_000, xp_earned: 50 },
     ]);
     expect(await xpOf()).toBe(170);
     const seen = await today(neel, NOW + HOUR);

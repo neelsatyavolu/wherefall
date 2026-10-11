@@ -3,7 +3,7 @@ import { MAX_ROUND_SCORE, type SavedGame } from '../account/input.js';
 const DAY_MS = 86_400_000;
 
 /** Every daily challenge is played the same way, so every score on a day's leaderboard is comparable. */
-export const DAILY_SETTINGS = { map: 'world', mode: 'move', timeLimit: 60, rounds: 3 } as const;
+export const DAILY_SETTINGS = { map: 'world', mode: 'move', timeLimit: 180, rounds: 3 } as const;
 
 /** The most a daily challenge can score. */
 export const DAILY_MAX_SCORE = DAILY_SETTINGS.rounds * MAX_ROUND_SCORE;

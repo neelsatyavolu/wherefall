@@ -267,7 +267,7 @@ export class GamesServer {
 
   /** Why a game claiming to be the daily cannot be saved as it, or null when it can. */
   private dailyProblem(body: Body, rounds: readonly SavedRound[], daily: DailyServer): Answer | null {
-    const settings = body.map === 'world' && body.mode === 'move' && body.timeLimit === 60 && rounds.length === 3;
+    const settings = body.map === 'world' && body.mode === 'move' && body.timeLimit === 180 && rounds.length === 3;
     if (body.daily !== daily.date || body.seed !== daily.seed || !settings) {
       return refusal(SAYS.notTodays, 400);
     }

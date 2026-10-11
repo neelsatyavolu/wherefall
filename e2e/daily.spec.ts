@@ -25,8 +25,8 @@ test('the daily pane shows the day, the fixed settings and the leaderboard', asy
   await expect(page.locator('.pane-title')).toHaveText('Daily challenge');
   await expect(page.getByText('Three places, the same for everyone, new every day at midnight UTC.')).toBeVisible();
   await expect(page.getByText('October 11, 2026')).toBeVisible();
-  // three rounds of sixty seconds, moving, on the world
-  await expect(page.getByText('World · 3 rounds · 1 min · move')).toBeVisible();
+  // three rounds of three minutes, moving, on the world
+  await expect(page.getByText('World · 3 rounds · 3 min · move')).toBeVisible();
   // sam has a country, so a flag comes before the name
   await expect(leaderboard(page).locator('tbody tr').nth(0).locator('td')).toHaveText(['1', /sam$/, '13,000']);
   await expect(leaderboard(page).locator('tbody tr').nth(0).getByRole('img', { name: 'United Kingdom' })).toBeVisible();
@@ -82,7 +82,7 @@ test("a signed-in player's daily game is three rounds of a minute, saved with th
   await roundReady(page);
   await expect(page.locator('.hud')).toContainText('1 / 3');
   await expect(page.locator('.hud')).toContainText('World');
-  await expect(page.locator('.hud')).toContainText(/1:00|0:5\d/);
+  await expect(page.locator('.hud')).toContainText(/3:00|2:5\d/);
   // moving is allowed
   await expect(page.getByRole('button', { name: 'Return to start' })).toBeVisible();
   await playLocalGame(page, 3);
@@ -90,7 +90,7 @@ test("a signed-in player's daily game is three rounds of a minute, saved with th
   const summary = page.getByRole('region', { name: 'Game summary' });
   await expect(summary).toContainText("On today's leaderboard as neel.");
   expect(games.saved).toHaveLength(1);
-  expect(games.saved[0]).toMatchObject({ daily: '2026-10-11', seed: 'daily20261011', map: 'world', mode: 'move', timeLimit: 60 });
+  expect(games.saved[0]).toMatchObject({ daily: '2026-10-11', seed: 'daily20261011', map: 'world', mode: 'move', timeLimit: 180 });
   expect(games.saved[0]!.rounds).toHaveLength(3);
   expect(daily.rounds).toHaveLength(3);
 

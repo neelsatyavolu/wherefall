@@ -5,7 +5,7 @@ import { DAILY_MIN_MS, finishDaily } from './finish.ts';
 const GAME: SavedGame = {
   map: 'world',
   mode: 'move',
-  timeLimit: 60,
+  timeLimit: 180,
   seed: 'daily20261011',
   daily: '2026-10-11',
   rounds: [{ id: 'a', lng: 2, lat: 48, guessLng: 2.1, guessLat: 48.1, hinted: false, country: 'FR', distanceKm: 10, score: 4800 }],

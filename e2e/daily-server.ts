@@ -48,7 +48,7 @@ export const dailyEntries = (count: number): DailyEntry[] =>
   Array.from({ length: count }, (_, i) => ({ username: `player${String(i + 1).padStart(3, '0')}`, country: i % 3 === 0 ? 'FR' : null, score: 14_000 - i * 100 }));
 
 /**
- * A stand-in for `/api/daily`, by the wave-6 contract: three rounds of sixty seconds, one attempt
+ * A stand-in for `/api/daily`, by the wave-6 contract: three rounds of three minutes, one attempt
  * a day, a leaderboard of the top hundred served twenty to a page, and the `start` and `claim`
  * actions. Both take an account: a start is marked here, and a claim has to carry the token a
  * visitor's start was answered with while a visitor could play. The page's player is "neel" unless
@@ -213,7 +213,7 @@ export class DailyServer {
     return {
       date: this.date,
       seed: this.seed,
-      settings: { map: 'world', mode: 'move', timeLimit: 60, rounds: ROUNDS },
+      settings: { map: 'world', mode: 'move', timeLimit: 180, rounds: ROUNDS },
       serverNow: new Date().toISOString(),
       nextAt: new Date(Date.now() + this.nextInMs).toISOString(),
       state: this.score !== null ? 'done' : this.mine && this.started ? 'started' : 'open',

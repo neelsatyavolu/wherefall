@@ -8,7 +8,7 @@ import { askViewer, claimDaily, dailyChallenge, getDaily, startDaily, type Daily
 const daily: DailyState = {
   date: '2026-10-11',
   seed: 'daily20261011',
-  settings: { map: 'world', mode: 'move', timeLimit: 60, rounds: 3 },
+  settings: { map: 'world', mode: 'move', timeLimit: 180, rounds: 3 },
   serverNow: '2026-10-11T12:00:00.000Z',
   nextAt: '2026-10-12T00:00:00.000Z',
   state: 'done',
@@ -71,7 +71,7 @@ describe('getDaily', () => {
     ['the seed is missing', { ...daily, seed: undefined }],
     ['the settings are the five rounds of two minutes the daily used to be', { ...daily, settings: { ...daily.settings, timeLimit: 120, rounds: 5 } }],
     ['the daily is not three rounds', { ...daily, settings: { ...daily.settings, rounds: 5 } }],
-    ['the daily is not sixty seconds a round', { ...daily, settings: { ...daily.settings, timeLimit: 120 } }],
+    ['the daily is not three minutes a round', { ...daily, settings: { ...daily.settings, timeLimit: 120 } }],
     ['the daily is not one where the player may move', { ...daily, settings: { ...daily.settings, mode: 'nmpz' } }],
     ['the state is not one', { ...daily, state: 'played' }],
     ['the state is missing', { ...daily, state: undefined }],
@@ -101,8 +101,8 @@ describe('getDaily', () => {
 });
 
 describe('dailyChallenge', () => {
-  it("is the day's settings with the day's seed: three rounds of sixty seconds, moving, on the world", () => {
-    expect(dailyChallenge(daily)).toEqual({ map: 'world', mode: 'move', timeLimit: 60, rounds: 3, seed: 'daily20261011' });
+  it("is the day's settings with the day's seed: three rounds of three minutes, moving, on the world", () => {
+    expect(dailyChallenge(daily)).toEqual({ map: 'world', mode: 'move', timeLimit: 180, rounds: 3, seed: 'daily20261011' });
   });
 });
 

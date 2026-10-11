@@ -22,7 +22,7 @@ const SEED = 'daily20270115';
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
-const SETTINGS = { map: 'world', mode: 'move', timeLimit: 60, rounds: 3 };
+const SETTINGS = { map: 'world', mode: 'move', timeLimit: 180, rounds: 3 };
 const NO_STREAK = { current: 0, best: 0, atRisk: false };
 const GUESTS_CANNOT = 'Guests cannot do that. Make an account first.';
 const NOT_TODAYS = "That game could not be saved as a daily challenge: it is not today's.";
@@ -66,7 +66,7 @@ const farOff = (place: KnownPlace, claims: Record<string, unknown> = {}) => ({
 const dailyGame = (scores: number | number[], change: Record<string, unknown> = {}) => ({
   map: 'world',
   mode: 'move',
-  timeLimit: 60,
+  timeLimit: 180,
   seed: SEED,
   rounds: rounds(scores),
   daily: TODAY,

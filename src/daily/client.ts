@@ -16,7 +16,7 @@ const dailySchema = z.object({
   date: z.string(),
   /** derived from the date, so everyone gets the same places */
   seed: z.string(),
-  settings: z.object({ map: z.literal('world'), mode: z.literal('move'), timeLimit: z.literal(60), rounds: z.literal(3) }),
+  settings: z.object({ map: z.literal('world'), mode: z.literal('move'), timeLimit: z.literal(180), rounds: z.literal(3) }),
   /** ISO 8601; what `nextAt` is counted down against */
   serverNow: z.string(),
   /** the next UTC midnight, when the next daily opens */

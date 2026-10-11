@@ -287,7 +287,7 @@ test('the daily: one attempt a day, a paged top hundred, and results claimed by 
   const send = await open(page);
 
   const open1 = data(await getDaily(1, send));
-  expect(open1).toMatchObject({ state: 'open', yours: null, settings: { map: 'world', mode: 'move', timeLimit: 60, rounds: 3 } });
+  expect(open1).toMatchObject({ state: 'open', yours: null, settings: { map: 'world', mode: 'move', timeLimit: 180, rounds: 3 } });
   expect(open1.leaderboard).toMatchObject({ page: 1, more: true });
   expect(open1.leaderboard.entries).toHaveLength(20);
   expect(open1.leaderboard.entries[0]).toEqual({ rank: 1, username: 'player001', country: 'FR', score: 14_000 });
@@ -306,7 +306,7 @@ test('the daily: one attempt a day, a paged top hundred, and results claimed by 
 
   // each day's daily is on that day's three places
   const rounds = (day: string, scores: number[]) => scores.map((score, index) => roundOn(dailyPlaces(day)[index]!, score));
-  const game: SavedGame = { map: 'world', mode: 'move', timeLimit: 60, seed: daily.seed, daily: daily.date, rounds: rounds(daily.date, [4000, 3000, 2001]) };
+  const game: SavedGame = { map: 'world', mode: 'move', timeLimit: 180, seed: daily.seed, daily: daily.date, rounds: rounds(daily.date, [4000, 3000, 2001]) };
   expect(data(await saveGame(game, send))).toMatchObject({ score: 9001, maxScore: 15_000, rounds: 3 });
   const done = data(await getDaily(1, send));
   expect(done.state).toBe('done');

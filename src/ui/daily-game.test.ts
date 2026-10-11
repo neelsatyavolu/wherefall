@@ -18,7 +18,7 @@ const standing = (score: number, beat: number, date = '2026-10-11'): Result<Dail
   data: {
     date,
     seed: 'daily20261011',
-    settings: { map: 'world', mode: 'move', timeLimit: 60, rounds: 3 },
+    settings: { map: 'world', mode: 'move', timeLimit: 180, rounds: 3 },
     serverNow: '2026-10-11T18:00:00.000Z',
     nextAt: '2026-10-12T00:00:00.000Z',
     state: 'done',

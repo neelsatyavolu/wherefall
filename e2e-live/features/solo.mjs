@@ -218,7 +218,7 @@ export async function daily(page, context, who) {
 
   const [opened] = await Promise.all([page.waitForResponse(isDailyRead, { timeout: STEP_MS }), page.goto(`${origin}/#daily`)]);
   const before = await dataOf(opened);
-  check('the daily is three rounds of 60 seconds, and not played yet', before?.state === 'open' && before.settings?.rounds === DAILY_ROUNDS && before.settings?.timeLimit === 60, `state ${before?.state}, ${JSON.stringify(before?.settings)}`);
+  check('the daily is three rounds of 180 seconds, and not played yet', before?.state === 'open' && before.settings?.rounds === DAILY_ROUNDS && before.settings?.timeLimit === 180, `state ${before?.state}, ${JSON.stringify(before?.settings)}`);
   await playButton(page).click({ timeout: STEP_MS });
   for (let round = 1; round <= DAILY_ROUNDS; round += 1) {
     await roundReady(page);

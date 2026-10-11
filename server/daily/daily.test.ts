@@ -9,7 +9,7 @@ const ROUND = { id: 'a-place', lng: 2.35, lat: 48.85, guessLng: 2.4, guessLat: 4
 const game = (change: Partial<SavedGame> = {}): SavedGame => ({
   map: 'world',
   mode: 'move',
-  timeLimit: 60,
+  timeLimit: 180,
   seed: 'daily20261011',
   rounds: [ROUND, ROUND, ROUND],
   daily: '2026-10-11',
@@ -33,8 +33,8 @@ describe('dailySeed', () => {
 });
 
 describe('DAILY_SETTINGS', () => {
-  it('is the whole world, moving, a minute a round, three rounds, 15,000 at most', () => {
-    expect(DAILY_SETTINGS).toEqual({ map: 'world', mode: 'move', timeLimit: 60, rounds: 3 });
+  it('is the whole world, moving, three minutes a round, three rounds, 15,000 at most', () => {
+    expect(DAILY_SETTINGS).toEqual({ map: 'world', mode: 'move', timeLimit: 180, rounds: 3 });
     expect(DAILY_MAX_SCORE).toBe(15_000);
   });
 });

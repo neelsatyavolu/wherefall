@@ -40,7 +40,7 @@ const NOT_VALID = 'That game could not be saved: its details are not valid.';
 
 const round = scoredRound;
 const game = (rounds: unknown[], change: Record<string, unknown> = {}) => ({ map: 'world', mode: 'move', timeLimit: 0, seed: 'seed1', rounds, ...change });
-const dailyGame = (scores: number[]) => game(dailyRounds(TODAY, scores), { timeLimit: 60, seed: 'daily20270115', daily: TODAY });
+const dailyGame = (scores: number[]) => game(dailyRounds(TODAY, scores), { timeLimit: 180, seed: 'daily20270115', daily: TODAY });
 
 /** The first place of the first list that is on a map. */
 function firstOn(map: string): KnownPlace {
@@ -314,7 +314,7 @@ describe('GET /api/games?id=', () => {
 
   it('says which day a daily challenge was', async () => {
     const saved = await data(playDaily([1000, 1000, 1000]));
-    expect(await data(fetchGame(saved.id))).toMatchObject({ daily: TODAY, timeLimit: 60, kind: 'daily', result: null, ratingChange: null, players: 1 });
+    expect(await data(fetchGame(saved.id))).toMatchObject({ daily: TODAY, timeLimit: 180, kind: 'daily', result: null, ratingChange: null, players: 1 });
   });
 
   it('gives a match by its id too, with the player’s own guess in each round and how it ended', async () => {

@@ -147,7 +147,7 @@ describe('viewed', () => {
   const daily = (change: Partial<DailyState> = {}): DailyState => ({
     date: '2026-10-11',
     seed: 'daily20261011',
-    settings: { map: 'world', mode: 'move', timeLimit: 60, rounds: 3 },
+    settings: { map: 'world', mode: 'move', timeLimit: 180, rounds: 3 },
     serverNow: '2026-10-11T18:00:00.000Z',
     nextAt: '2026-10-12T00:00:00.000Z',
     state: 'open',
