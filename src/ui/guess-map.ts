@@ -5,6 +5,7 @@ import type { LngLat } from '../game/geo.ts';
 import { hintRing, type HintCircle } from '../game/hint.ts';
 import type { RoundResult } from '../game/session.ts';
 import { t } from '../i18n/index.ts';
+import { withCityNames } from './basemap-cities.ts';
 import { GROUND_TOKENS, overPictures, repaint, themeStyle, withoutRelief, type Ground } from './basemap-theme.ts';
 import { el } from './dom.ts';
 import { mustSee, near, onMap, pointsToFit, roomIn, viewOf } from './map-fit.ts';
@@ -19,6 +20,8 @@ import { boxAround, namesThatFit } from './pin-labels.ts';
  * (`basemap-theme.ts`): an ink-dark map in the dark scheme, a paper one in the light.
  */
 const STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+/** the cities named while the map is zoomed out: see `basemap-cities.ts` */
+const CITIES = '/cities.json';
 const LINES = 'guess-lines';
 const HINT = 'hint-circle';
 const PLACES = 'map-places';
@@ -156,10 +159,10 @@ export class GuessMap {
       dragRotate: false,
       pitchWithRotate: false,
     });
-    // the style is recoloured on its way in: its relief picture left out, every other layer kept, only its colours changed
+    // the style is recoloured on its way in: its relief picture left out, cities named from further out, every other layer kept, only its colours changed
     this.map.setStyle(STYLE, {
       transformStyle: (_previous, served) => {
-        const lighter = withoutRelief(served);
+        const lighter = withCityNames(withoutRelief(served), CITIES);
         this.served = lighter;
         return themeStyle(lighter, pageScheme());
       },

@@ -36,6 +36,7 @@ Two location sets, one per source:
 
 - `public/locations.google.json`: about 24,000 places with official Google coverage in 127 countries and territories. Built by `scripts/build-google-locations.ts`, which drops random points in every country and asks Google's free coverage lookup for the nearest outdoor panorama of its own.
 - `public/locations.json`: about 4,300 places in 47 countries and territories, sampled from Panoramax and used when the game falls back to it.
+- `public/cities.json`: about 7,300 cities from [Natural Earth](https://www.naturalearthdata.com) (public domain). The guess map names them while it is zoomed out further than zoom 7, where its tiles carry only a handful of cities to a screen.
 
 ## Multiplayer and daily challenge
 
@@ -85,6 +86,8 @@ ONLY=LU,JP pnpm locations   # a few countries, written to locations.sample.json
 
 GOOGLE_MAPS_KEY=... pnpm locations:google   # the Google set; about 25 minutes of free lookups
 LOCATIONS_OUT=/tmp/new.json GOOGLE_MAPS_KEY=... pnpm locations:google   # written elsewhere, to check before it replaces the live set
+
+pnpm cities                 # the city names of the zoomed-out guess map; one download
 ```
 
 The builder reads Panoramax's coverage grid, gives each country a quota (square root of its covered area, between 40 and 600), and picks spread-out 360° photos with usable resolution and GPS accuracy. Challenge links depend on the dataset, so rebuilding it changes which places an old link leads to. The functions read the same files to check saved games, so a rebuilt set has to be deployed with them.

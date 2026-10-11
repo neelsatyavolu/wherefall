@@ -13,7 +13,8 @@
     "coverage": "vitest run --coverage",
     "e2e": "playwright test",
     "locations": "node scripts/build-locations.ts",
-    "locations:google": "node scripts/build-google-locations.ts"
+    "locations:google": "node scripts/build-google-locations.ts",
+    "cities": "node scripts/build-cities.ts"
   },
   "dependencies": {
     "@photo-sphere-viewer/core": "^5.15.1",
