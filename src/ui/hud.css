@@ -1,0 +1,107 @@
+/* The round screen's HUD: map, round, score, the clock and the way out. */
+
+.play {
+  /* the clock's two warnings: the one place the game uses yellow and red as signals */
+  --timer-warn: #f0c33c;
+  --timer-urgent: var(--danger);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .play {
+    --timer-warn: #8a6100;
+  }
+}
+
+.hud {
+  position: absolute;
+  top: var(--edge);
+  left: var(--edge);
+  max-width: calc(100% - 2 * var(--edge));
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+}
+
+.hud-cell {
+  display: grid;
+  gap: 2px;
+  padding: 8px 14px;
+}
+
+.hud-cell + .hud-cell {
+  border-left: 1px solid var(--border);
+}
+
+.hud-cell .value {
+  font: 500 17px/1.2 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* under ten seconds the clock is yellow, under five red and pulsing; the number is there throughout */
+.hud-cell.warn .value {
+  color: var(--timer-warn);
+}
+
+.hud-cell.urgent .value {
+  color: var(--timer-urgent);
+  animation: timer-pulse 1s var(--ease) infinite;
+}
+
+@keyframes timer-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* stood still for a player who asked for less motion: the colour and the number still say it */
+@media (prefers-reduced-motion: reduce) {
+  .hud-cell.urgent .value {
+    animation: none;
+  }
+}
+
+/* the way out of a game, at the end of the HUD */
+.hud-exit {
+  appearance: none;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0 16px;
+  background: var(--bg);
+  color: var(--fg-2);
+  font: 500 14px/1.4 var(--font-sans);
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease),
+    color 150ms var(--ease);
+}
+
+.hud-exit:hover {
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+
+@media (max-width: 720px) {
+  .hud {
+    right: 16px;
+  }
+
+  /* the player chose the map; on a narrow screen its name gives way to the numbers */
+  .hud-map {
+    display: none;
+  }
+
+  .hud-cell {
+    flex: 1;
+    padding: 6px 10px;
+  }
+
+  .hud-cell .value {
+    font-size: 14px;
+  }
+
+  .hud-exit {
+    min-width: 56px;
+    padding: 0 12px;
+  }
+}

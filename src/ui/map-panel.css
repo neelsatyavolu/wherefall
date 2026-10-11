@@ -1,0 +1,228 @@
+/* The guess map on the round screen: small in the corner, grows when the pointer is over it. */
+
+.map-panel {
+  /*
+   * How far the map may grow, at any size: across to the rail (the left column, where the compass
+   * and its buttons are, and a match's roster), and up to the line under the HUD. So no size of
+   * map covers a control, on any screen.
+   */
+  --map-room: calc(100% - var(--rail) - 3 * var(--edge));
+  --map-rise: calc(100% - var(--hud-foot) - var(--edge));
+  position: absolute;
+  right: var(--edge);
+  bottom: var(--edge);
+  width: 320px;
+  height: 260px;
+  max-width: var(--map-room);
+  max-height: var(--map-rise);
+  display: grid;
+  /* the map, the credit for satellite or terrain pictures when they are on, the bar with the Guess button */
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  transition:
+    width 150ms var(--ease),
+    height 150ms var(--ease);
+}
+
+/* three sizes to open to; the choice is remembered. Kept open, it stays at that size with the pointer away */
+.map-panel:hover,
+.map-panel:focus-within,
+.map-panel.keep,
+.map-panel.open {
+  width: min(58vw, 780px);
+  height: min(64vh, 580px);
+}
+
+.map-panel[data-size='small']:hover,
+.map-panel[data-size='small']:focus-within,
+.map-panel[data-size='small'].keep {
+  width: 440px;
+  height: 340px;
+}
+
+.map-panel[data-size='large']:hover,
+.map-panel[data-size='large']:focus-within,
+.map-panel[data-size='large'].keep {
+  width: min(86vw, 1320px);
+  height: min(84vh, 900px);
+}
+
+/* full screen: the map takes the whole round screen, under the HUD, until the button or Escape */
+.play[data-phase='guessing'] .map-panel.full {
+  inset: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  transition: none;
+}
+
+.play[data-phase='guessing'] .map-panel.full .map-tools {
+  top: var(--hud-foot);
+}
+
+.map {
+  min-height: 0;
+}
+
+/*
+ * The bar under the map. Guess is a button in it, not the bar itself: there is a strip of the
+ * panel's own ground between the map and the button, so a drag that ends at the map's edge does
+ * not land on Guess, and the accent stays a small mark even when the map is large.
+ */
+.guess-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--bg);
+  border-top: 1px solid var(--border-strong);
+}
+
+.guess-bar .guess {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 420px;
+}
+
+/* closing the map is a phone's business: on a wide screen it closes when the pointer leaves */
+.map-close {
+  display: none;
+}
+
+.map-toggle {
+  display: none;
+  position: absolute;
+  right: var(--edge);
+  bottom: var(--edge);
+}
+
+.play[data-phase='loading'] .map-panel,
+.play[data-phase='loading'] .map-toggle {
+  visibility: hidden;
+}
+
+.play[data-phase='result'] .map-panel,
+.play[data-phase='summary'] .map-panel {
+  inset: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  transition: none;
+}
+
+.play[data-phase='result'] .guess-bar,
+.play[data-phase='summary'] .guess-bar,
+.play[data-phase='result'] .map-toggle,
+.play[data-phase='summary'] .map-toggle {
+  display: none;
+}
+
+/* the sizes, keep-open, full screen and map type only mean something while a pin is being placed */
+.play[data-phase='result'] .map-side,
+.play[data-phase='summary'] .map-side {
+  visibility: hidden;
+}
+
+/* over a result the map fills the screen: the credit moves clear of the panel, under the zoom buttons */
+.play[data-phase='result'] .map-credit,
+.play[data-phase='summary'] .map-credit {
+  position: absolute;
+  top: 84px;
+  right: 8px;
+  max-width: min(280px, calc(100% - 16px));
+  border: 1px solid var(--border-strong);
+}
+
+@media (max-width: 720px) {
+  /* no hover on touch: the map opens from a button instead */
+  .map-toggle {
+    display: block;
+    z-index: 2;
+    min-height: 44px;
+  }
+
+  .map-panel,
+  .map-panel:hover,
+  .map-panel:focus-within {
+    display: none;
+    max-width: none;
+    max-height: none;
+  }
+
+  /* open, it is a sheet from the foot of the screen: the map, and under it a bar with Close map and Guess */
+  .play[data-phase='guessing'] .map-panel.open {
+    display: grid;
+    inset: auto 0 0;
+    width: auto;
+    height: 72vh;
+    border-width: 1px 0 0;
+  }
+
+  .play[data-phase='guessing']:has(.map-panel.open) .map-toggle {
+    display: none;
+  }
+
+  .guess-bar {
+    align-items: center;
+    min-height: 56px;
+    padding: 6px var(--edge);
+  }
+
+  .map-close {
+    display: block;
+    flex: none;
+  }
+
+  /*
+   * Guess at the right, as wide as its words and no wider: a mark of the accent, not a band of it.
+   * The country a streak's pin is in can make it a long line: it then takes what the bar has left
+   * and goes onto two lines inside the button, which stays 44px or more.
+   */
+  .guess-bar .guess {
+    flex: 0 1 auto;
+    min-width: 132px;
+    max-width: none;
+    margin-left: auto;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    line-height: 1.25;
+  }
+
+  /*
+   * What a match stands at the screen's bottom left (its chat button) would lie on the bar while
+   * the sheet is open: it stands on top of the bar until the sheet is closed again. --sheet-bar is
+   * the height to clear; the match's own styles (chat.css) use it.
+   */
+  .play[data-phase='guessing']:has(.map-panel.open) {
+    --sheet-bar: 56px;
+  }
+
+  .play[data-phase='result'] .map-panel,
+  .play[data-phase='summary'] .map-panel {
+    display: grid;
+  }
+
+  /* the HUD runs the width of a phone: over a result the zoom buttons sit under it, not behind it */
+  .play[data-phase='result'] .map-tools,
+  .play[data-phase='summary'] .map-tools {
+    top: var(--hud-foot);
+  }
+
+  .play[data-phase='result'] .map-credit,
+  .play[data-phase='summary'] .map-credit {
+    top: 172px;
+  }
+
+  /* a panel has the foot of the screen then: the map's own credit moves up under the HUD, across from the zoom buttons */
+  .play[data-phase='result'] .map .maplibregl-ctrl-bottom-right,
+  .play[data-phase='summary'] .map .maplibregl-ctrl-bottom-right {
+    top: var(--hud-foot);
+    right: auto;
+    bottom: auto;
+    left: 8px;
+  }
+}

@@ -1,0 +1,92 @@
+import type { solo as english } from '../en/solo.ts';
+import type { Part } from '../index.ts';
+
+/** Wave 5: singleplayer options, the two guessers, settings and the About pane. Every key of `../en/solo.ts`, or the type check fails. */
+export const solo: Part<typeof english> = {
+  'nav.item.country': 'Länderraten',
+  'nav.item.continent': 'Kontinentraten',
+  'nav.item.about': 'Über Wherefall',
+
+  'time.seconds': '{seconds} Sek.',
+  'time.minutes': '{minutes} Min.',
+  'time.minutesSeconds': '{minutes} Min. {seconds} Sek.',
+  'time.less': 'Weniger Zeit',
+  'time.more': 'Mehr Zeit',
+
+  'singleplayer.roadNames': 'Straßennamen auf der Karte',
+  'singleplayer.roadNames.off': 'Aus',
+  'singleplayer.roadNames.on': 'An',
+
+  'prefs.volume': 'Lautstärke',
+
+  'continent.africa': 'Afrika',
+  'continent.asia': 'Asien',
+  'continent.europe': 'Europa',
+  'continent.north-america': 'Nordamerika',
+  'continent.oceania': 'Ozeanien',
+  'continent.south-america': 'Südamerika',
+
+  'guesser.country.lede': 'Zehn Orte, irgendwo auf der Welt. Zu jedem gibt es sechs Länder: Wähle das, in dem er liegt. Jede richtige Antwort bringt 1.000 Punkte.',
+  'guesser.continent.lede': 'Zehn Orte, irgendwo auf der Welt. Wähle zu jedem den Kontinent, auf dem er liegt. Jede richtige Antwort bringt 1.000 Punkte.',
+  'guesser.best': 'Deine beste Punktzahl: {score} von {max}',
+  'guesser.fine': 'Wenn du angemeldet bist, bleibt deine beste Punktzahl erhalten und jede richtige Antwort bringt 20 XP.',
+  'guesser.continent.note': 'Mittelamerika und die Karibik zählen zu Nordamerika, die Türkei und der Kaukasus zu Asien. Russland gehört westlich des Urals zu Europa und östlich davon zu Asien.',
+
+  'guesser.country.ask': 'Welches Land ist das?',
+  'guesser.continent.ask': 'Welcher Kontinent ist das?',
+  'guesser.wrong': 'Falsch',
+  'guesser.itWas': 'Falsch. Es war {answer}.',
+  'guesser.answer': 'Antwort',
+  'guesser.yours': 'Dein Tipp',
+  'guesser.outOfPlaces': 'Es gibt keine weiteren Orte mehr, deshalb lässt sich dieses Spiel nicht beenden.',
+  'guesser.save.signedOut': 'Du bist nicht angemeldet, deshalb wird diese Punktzahl nicht gespeichert.',
+  'guesser.save.failed': 'Diese Punktzahl konnte nicht gespeichert werden.',
+  'guesser.save.best': 'Deine beste Punktzahl liegt bei {score}.',
+
+  'save.xpCapped': 'Das heutige XP-Limit für Solospiele ist erreicht, deshalb wurden keine XP gutgeschrieben.',
+  'save.xpCut': 'Damit ist das heutige XP-Limit für Solospiele erreicht, deshalb wurde nur ein Teil der XP gutgeschrieben.',
+  'save.placesChanged': 'Wherefall wurde aktualisiert, während diese Seite offen war, und die Orte haben sich geändert. Dein nächstes Spiel läuft mit den aktuellen.',
+
+  'about.lede': 'Ein kostenloses Spiel, bei dem du herausfindest, wo auf der Welt eine Straße liegt.',
+  'about.what.title': 'Was Wherefall ist',
+  'about.what.1': 'Wherefall setzt dich irgendwo auf der Erde auf einer Straße ab. Du siehst dich um, findest heraus, wo du bist, und setzt einen Pin auf die Karte. Es ist kostenlos und ohne Werbung, und ein Konto ist freiwillig.',
+  'about.what.2': 'Spiele allein, nimm dir die Tages-Challenge vor oder tritt gegen andere an: im Wertungsduell, im 2v2, im Match ohne Wertung oder in einer privaten Party. Spieler bauen eigene Karten und teilen sie.',
+  'about.scoring.title': 'So wird gewertet',
+  'about.scoring.1': 'Eine Runde bringt bis zu 5.000 Punkte. Ein Pin, der höchstens 30 m neben dem Ort liegt, ist eine perfekte Runde.',
+  'about.scoring.2': 'Darüber hinaus sinkt die Punktzahl mit der Entfernung. Auf der Weltkarte gilt ein Maßstab von 20.000 km: etwa 3.000 Punkte, wenn der Pin 1.000 km daneben liegt, etwa 400 bei 5.000 km. Eine Region, ein Land oder eine Community-Karte wird nach der eigenen Größe gewertet, derselbe Fehler kostet auf einer kleinen Karte also mehr.',
+  'about.scoring.3': 'Ein Hinweis zeichnet einen Kreis auf die Karte, in dem der Ort liegt, und halbiert die Punkte dieser Runde. Beim Länderraten und beim Kontinentraten bringt jede richtige Antwort 1.000 Punkte.',
+  'about.faq.title': 'Fragen',
+  'about.faq.account.q': 'Brauche ich ein Konto?',
+  'about.faq.account.a': 'Nein. Alles, was du allein spielst, geht ohne Konto, und als Gast kannst du Matches ohne Wertung und Partys beitreten. Ein Konto bewahrt deine Statistik und deine besten Punktzahlen, bringt dich in die Ranglisten und ist nötig für Wertungsduelle, 2v2, Freunde und eigene Karten.',
+  'about.faq.link.q': 'Bekommt ein Freund über meinen Link dieselben Orte?',
+  'about.faq.link.a': 'Ja, wenn ihr beide dieselben Bilder seht. Ein Link enthält die Karte, die Einstellungen und einen Startwert, und der Startwert bestimmt die Orte. Street View und Panoramax haben je eine eigene Liste von Orten, wer also mit der anderen Quelle spielt, bekommt andere.',
+  'about.faq.imagery.q': 'Warum sehe ich manchmal Bilder von Panoramax?',
+  'about.faq.imagery.a': 'Street View hat auf dieser Seite ein Tageskontingent. Ist es aufgebraucht oder Google nicht erreichbar, geht das Spiel mit den offenen Bildern von Panoramax weiter.',
+  'about.faq.repeats.q': 'Sehe ich denselben Ort zweimal?',
+  'about.faq.repeats.a': 'Selten. Dieser Browser merkt sich die letzten 5.000 Orte, die er dir gezeigt hat, und hält neue Spiele von ihnen fern. Challenge-Links, die Tages-Challenge und Matches bleiben davon unberührt, damit dort alle dieselben Orte bekommen.',
+  'about.faq.phone.q': 'Kann ich auf dem Handy spielen?',
+  'about.faq.phone.a': 'Ja. Wherefall läuft im Browser deines Handys, und wo der Browser es erlaubt, kannst du es über das Menü als App installieren.',
+  'about.credits.title': 'Quellen',
+  'about.credits.google': 'Straßenbilder von Google Street View, © Google.',
+  'about.credits.panoramax': 'Offene Straßenbilder von {panoramax}-Mitwirkenden, unter offenen Lizenzen.',
+  'about.credits.maps': 'Die Karte zeichnet {openfreemap} aus Daten © OpenStreetMap-Mitwirkende.',
+  'about.credits.tiles': 'Satellitenkarte: EOxCloudless von EOX IT Services GmbH (enthält modifizierte Copernicus-Sentinel-Daten 2024), CC BY-NC-SA 4.0. Geländekarte: OpenTopoMap (CC-BY-SA), aus Daten von OpenStreetMap und SRTM.',
+  'about.changes.title': 'Was neu ist',
+  'about.changes.version': 'Update {number}',
+  'about.changes.5': 'Wertung mit einem Weltmaßstab von 20.000 km, eine Tages-Challenge mit drei Runden und Serien, Gäste in Online-Spielen, Länderraten und Kontinentraten, Teams und mehr Optionen für Partys, Rundenzeiten von 10 Sekunden bis 5 Minuten, eine Lautstärke-Einstellung und diese Seite.',
+  'about.changes.4': 'Fünf Sprachen, Töne, eine App zum Installieren, das Überspringen eines Ortes, der nicht lädt, der Einstieg in ein laufendes öffentliches Spiel und Moderation.',
+  'about.changes.3': 'Community-Karten zum Spielen und zum Selbstbauen, Verlaufsdiagramme in den Profilen und öffentliche Matches für mehr als zwei Spieler.',
+  'about.changes.2': 'Eine detaillierte Karte für den Pin, die Länderserie, Hinweise, Länderkarten, Meilen oder Kilometer, Ligen, XP und Level, Ranglisten, Profile, Spielverlauf, Freunde und Chat.',
+  'about.changes.1': 'Die Seitenleiste, Konten, Wertungsduelle, Matches ohne Wertung und 2v2-Matches, Partys und die Tages-Challenge.',
+
+  'home.menuClose': 'Schließen',
+
+  // Welle 6, der erste Besuch: die Begrüßung und eine Tatsache zu jedem Ergebnis im Tutorial
+  'welcome.label': 'Willkommen',
+  'welcome.lede': 'Wherefall ist ein kostenloses Spiel, bei dem du herausfindest, wo auf der Welt du bist. Es setzt dich irgendwo auf der Erde auf einer Straße ab: Sieh dich um und setz dann einen Pin auf die Karte.',
+  'welcome.tutorial': 'Zeig mir, wie es geht',
+  'welcome.skip': 'Überspringen',
+  'welcome.note': 'Das Tutorial sind zwei kurze Runden mit Hilfe bei jedem Schritt. Es wird nicht gespeichert.',
+  'tutorial.fact.eiffel': 'Der Eiffelturm wurde für die Weltausstellung 1889 gebaut und war bis 1930 das höchste Bauwerk der Welt.',
+  'tutorial.fact.colosseum': 'Das Kolosseum wurde im Jahr 80 eröffnet und ist das größte Amphitheater, das die Römer je gebaut haben.',
+};

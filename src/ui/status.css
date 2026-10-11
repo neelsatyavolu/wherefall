@@ -1,0 +1,41 @@
+/* A line of status: a dot, a word in mono, a sentence. Never label grey: it says what became of something the player did. */
+
+.status-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 8px;
+  margin: 0;
+  max-width: 65ch;
+  font: 14px/1.5 var(--font-sans);
+  color: var(--fg-2);
+}
+
+/* level with the middle of the first line, however far the sentence runs on */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  margin-top: calc((1.5em - 6px) / 2);
+  border-radius: 50%;
+  background: var(--fg-3);
+}
+
+.status-note[data-state='live'] .status-dot {
+  background: var(--accent);
+}
+
+.status-note[data-state='ok'] .status-dot {
+  background: var(--ok);
+}
+
+.status-note[data-state='error'] .status-dot {
+  background: var(--danger);
+}
+
+.status-word {
+  margin-right: 8px;
+  font: 12px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg);
+  white-space: nowrap;
+}

@@ -1,0 +1,92 @@
+import type { solo as english } from '../en/solo.ts';
+import type { Part } from '../index.ts';
+
+/** Wave 5: singleplayer options, the two guessers, settings and the About pane. Every key of `../en/solo.ts`, or the type check fails. */
+export const solo: Part<typeof english> = {
+  'nav.item.country': 'Devinez le pays',
+  'nav.item.continent': 'Devinez le continent',
+  'nav.item.about': 'À propos',
+
+  'time.seconds': '{seconds} s',
+  'time.minutes': '{minutes} min',
+  'time.minutesSeconds': '{minutes} min {seconds} s',
+  'time.less': 'Moins de temps',
+  'time.more': 'Plus de temps',
+
+  'singleplayer.roadNames': 'Noms des rues sur la carte',
+  'singleplayer.roadNames.off': 'Masqués',
+  'singleplayer.roadNames.on': 'Affichés',
+
+  'prefs.volume': 'Volume',
+
+  'continent.africa': 'Afrique',
+  'continent.asia': 'Asie',
+  'continent.europe': 'Europe',
+  'continent.north-america': 'Amérique du Nord',
+  'continent.oceania': 'Océanie',
+  'continent.south-america': 'Amérique du Sud',
+
+  'guesser.country.lede': 'Dix lieux, partout dans le monde. Pour chacun, six pays sont proposés : choisissez celui où il se trouve. Une bonne réponse vaut 1 000 points.',
+  'guesser.continent.lede': 'Dix lieux, partout dans le monde. Pour chacun, choisissez le continent où il se trouve. Une bonne réponse vaut 1 000 points.',
+  'guesser.best': 'Votre meilleur score : {score} sur {max}',
+  'guesser.fine': 'Avec un compte, votre meilleur score est conservé et chaque bonne réponse rapporte 20 XP.',
+  'guesser.continent.note': 'L’Amérique centrale et les Caraïbes comptent pour l’Amérique du Nord, la Turquie et le Caucase pour l’Asie. La Russie est en Europe à l’ouest de l’Oural et en Asie à l’est.',
+
+  'guesser.country.ask': 'Quel est ce pays ?',
+  'guesser.continent.ask': 'Quel est ce continent ?',
+  'guesser.wrong': 'Faux',
+  'guesser.itWas': 'Faux. C’était : {answer}.',
+  'guesser.answer': 'Réponse',
+  'guesser.yours': 'Votre réponse',
+  'guesser.outOfPlaces': 'Il ne reste plus de lieu à montrer : cette partie ne peut pas être terminée.',
+  'guesser.save.signedOut': 'Vous n’êtes pas connecté : ce score n’est pas conservé.',
+  'guesser.save.failed': 'Ce score n’a pas pu être enregistré.',
+  'guesser.save.best': 'Votre meilleur score est de {score}.',
+
+  'save.xpCapped': 'La limite d’XP du jour pour les parties en solo est atteinte : aucun XP n’a été ajouté.',
+  'save.xpCut': 'La limite d’XP du jour pour les parties en solo est atteinte : seule une partie des XP a été ajoutée.',
+  'save.placesChanged': 'Wherefall a été mis à jour pendant que cette page était ouverte, et ses lieux ont changé. Votre prochaine partie se jouera sur les lieux actuels.',
+
+  'about.lede': 'Un jeu gratuit où il faut trouver dans quel coin du monde se trouve une rue.',
+  'about.what.title': 'Wherefall, c’est quoi',
+  'about.what.1': 'Wherefall vous dépose quelque part sur Terre, au niveau de la rue. Vous regardez autour de vous, vous déduisez où vous êtes et vous placez un repère sur la carte. C’est gratuit, sans publicité, et le compte est facultatif.',
+  'about.what.2': 'Jouez seul, relevez le défi du jour ou affrontez d’autres joueurs en duel classé, en 2v2, en match non classé ou dans un salon privé. Les joueurs créent leurs propres cartes et les partagent.',
+  'about.scoring.title': 'Le calcul des points',
+  'about.scoring.1': 'Une manche vaut jusqu’à 5 000 points. Un repère à moins de 30 m du lieu donne une manche parfaite.',
+  'about.scoring.2': 'Au-delà, le score baisse avec la distance. Sur la carte du monde, l’échelle est de 20 000 km : environ 3 000 points pour un repère à 1 000 km, environ 400 à 5 000 km. Une région, un pays ou une carte communautaire sont notés à leur propre échelle : la même erreur coûte donc plus cher sur une petite carte.',
+  'about.scoring.3': 'Un indice trace sur la carte un cercle qui contient le lieu, et divise par deux les points de la manche. Dans Devinez le pays et Devinez le continent, chaque bonne réponse vaut 1 000 points.',
+  'about.faq.title': 'Questions',
+  'about.faq.account.q': 'Faut-il un compte ?',
+  'about.faq.account.a': 'Non. Tout ce qui se joue seul fonctionne sans compte, et un invité peut rejoindre les matchs non classés et les salons. Un compte conserve vos statistiques et vos meilleurs scores, vous fait figurer dans les classements, et il est nécessaire pour les duels classés, le 2v2, les amis et la création de cartes.',
+  'about.faq.link.q': 'Mon lien donne-t-il les mêmes lieux à un ami ?',
+  'about.faq.link.a': 'Oui, si vous voyez tous les deux les mêmes images. Un lien contient la carte, les réglages et une graine, et c’est la graine qui décide des lieux. Street View et Panoramax ont chacun leur liste de lieux : un joueur qui passe par l’autre source en verra donc d’autres.',
+  'about.faq.imagery.q': 'Pourquoi des images Panoramax, parfois ?',
+  'about.faq.imagery.a': 'Street View dispose ici d’un quota quotidien. Quand il est épuisé, ou quand Google est injoignable, le jeu continue avec les images libres de Panoramax.',
+  'about.faq.repeats.q': 'Vais-je revoir deux fois le même lieu ?',
+  'about.faq.repeats.a': 'Rarement. Ce navigateur retient les 5 000 derniers lieux qu’il vous a montrés et les évite dans les nouvelles parties. Les liens de défi, le défi du jour et les matchs ne sont pas concernés : tout le monde y voit les mêmes lieux.',
+  'about.faq.phone.q': 'Peut-on jouer sur un téléphone ?',
+  'about.faq.phone.a': 'Oui. Wherefall fonctionne dans le navigateur d’un téléphone et, quand le navigateur le permet, s’installe comme une application depuis le menu.',
+  'about.credits.title': 'Crédits',
+  'about.credits.google': 'Images de rue : Google Street View, © Google.',
+  'about.credits.panoramax': 'Images de rue libres : contributeurs de {panoramax}, sous licences ouvertes.',
+  'about.credits.maps': 'La carte est dessinée par {openfreemap} à partir de données © les contributeurs d’OpenStreetMap.',
+  'about.credits.tiles': 'Carte satellite : EOxCloudless par EOX IT Services GmbH (contient des données Copernicus Sentinel 2024 modifiées), CC BY-NC-SA 4.0. Carte du relief : OpenTopoMap (CC-BY-SA), à partir des données OpenStreetMap et SRTM.',
+  'about.changes.title': 'Nouveautés',
+  'about.changes.version': 'Mise à jour {number}',
+  'about.changes.5': 'Un score calculé sur une échelle mondiale de 20 000 km, un défi du jour en trois manches avec des séries, des invités dans les parties en ligne, Devinez le pays et Devinez le continent, des équipes et davantage d’options pour les salons, des manches de 10 secondes à 5 minutes, un réglage du volume et cette page.',
+  'about.changes.4': 'Cinq langues, des sons, une application à installer, la possibilité de passer un lieu qui ne charge pas ou de rejoindre une partie publique en cours, et la modération.',
+  'about.changes.3': 'Des cartes communautaires à jouer et à créer, des courbes de progression sur les profils et des matchs publics à plus de deux joueurs.',
+  'about.changes.2': 'Une carte détaillée pour placer le repère, la série de pays, les indices, les cartes par pays, les miles ou les kilomètres, les ligues, l’XP et les niveaux, les classements, les profils, l’historique des parties, les amis et le chat.',
+  'about.changes.1': 'Le menu latéral, les comptes, les duels classés, les matchs non classés et 2v2, les salons et le défi du jour.',
+
+  'home.menuClose': 'Fermer',
+
+  // Vague 6, la première visite : l’accueil et une information avec chaque résultat du tutoriel
+  'welcome.label': 'Bienvenue',
+  'welcome.lede': 'Wherefall est un jeu gratuit où l’on cherche à deviner où l’on se trouve dans le monde. Il vous dépose dans une rue, quelque part sur Terre : regardez autour de vous, puis placez un repère sur la carte.',
+  'welcome.tutorial': 'Montrez-moi comment jouer',
+  'welcome.skip': 'Passer',
+  'welcome.note': 'Le tutoriel, ce sont deux courtes manches avec des conseils en chemin. Il n’est pas enregistré.',
+  'tutorial.fact.eiffel': 'La tour Eiffel a été construite pour l’Exposition universelle de 1889 et est restée la plus haute construction du monde jusqu’en 1930.',
+  'tutorial.fact.colosseum': 'Le Colisée a été inauguré en l’an 80 et c’est le plus grand amphithéâtre que les Romains aient construit.',
+};

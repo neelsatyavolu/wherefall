@@ -1,0 +1,628 @@
+import type { Translation } from './index.ts';
+import { round } from './fr/round.ts';
+import { solo } from './fr/solo.ts';
+import { match } from './fr/match.ts';
+import { daily } from './fr/daily.ts';
+import { account } from './fr/account.ts';
+import { maps } from './fr/maps.ts';
+import { social } from './fr/social.ts';
+import { party } from './fr/party.ts';
+
+/** French. Machine-written and not checked by a native speaker. */
+export const fr: Translation = {
+  // the strings added in wave 5 live in a file per area, beside this one
+  ...round,
+  ...solo,
+  ...match,
+  ...daily,
+  ...account,
+  ...maps,
+  ...social,
+  ...party,
+
+  'language.name': 'Langue',
+
+  // Boutons et lignes courtes partagés
+  'common.tryAgain': 'Réessayer',
+  'common.home': 'Accueil',
+  'common.cancel': 'Annuler',
+  'common.remove': 'Retirer',
+  'common.report': 'Signaler',
+  'common.sendReport': 'Envoyer le signalement',
+  'common.reportPlayer': 'Signaler {name}',
+  'common.linkCopied': 'Lien copié',
+  'common.signIn': 'Se connecter ou créer un compte',
+  'common.playTutorial': 'Jouer le tutoriel',
+  'common.typeToSearch': 'Tapez pour chercher',
+  'common.connectionLost': 'Connexion perdue. {error}',
+  'common.matchOver': 'Le match est terminé.',
+  'common.joiningMatch': 'Entrée dans le match',
+  'common.loadingFriends': 'Chargement de vos amis',
+  'common.makeMap': 'Créer une carte',
+  'common.editMap': 'Modifier la carte',
+  'common.leaveMatch': 'Quitter le match',
+  'common.partyCode': 'Code du salon',
+  'common.findingPlaces': 'Recherche de lieux',
+  'common.loadingView': 'Chargement de la vue',
+  /** deux noms dans une liste ; trois sont joints en « a et b et c » */
+  'common.pair': '{first} et {second}',
+
+  // Libellés partagés : en-têtes de tableau, libellés de chiffres, légendes de formulaire
+  'label.rating': 'Cote',
+  'label.points': 'Points',
+  'label.rounds': 'Manches',
+  'label.round': 'Manche',
+  'label.map': 'Carte',
+  'label.mode': 'Mode',
+  'label.league': 'Ligue',
+  'label.bestStreak': 'Meilleure série',
+  'label.noGuess': 'Sans réponse',
+  'label.distance': 'Distance',
+  'label.country': 'Pays',
+  'label.player': 'Joueur',
+  'label.timePerRound': 'Temps par manche',
+  'label.xp': 'XP',
+  'label.rankedDuels': 'Duels classés',
+  'label.games': 'Parties',
+  'label.recentGames': 'Parties récentes',
+  'label.score': 'Score',
+  'label.places': 'Lieux',
+  'label.level': 'Niveau',
+  'label.streak': 'Série',
+  'label.chat': 'Chat',
+
+  // Étiquettes à côté d'un nom ou d'un score
+  'tag.you': 'vous',
+  'tag.host': 'hôte',
+  'tag.won': 'gagné',
+  'tag.away': 'absent',
+  'tag.hint': 'indice',
+
+  // Leagues, lowest first. The server sends the English name; `league.<name>` is how it is shown
+  'league.Trekker': 'Randonneur',
+  'league.Explorer': 'Explorateur',
+  'league.Voyager': 'Voyageur',
+  'league.Nomad': 'Nomade',
+  'league.Legend': 'Légende',
+
+  // La barre latérale
+  'nav.group.solo': 'Solo',
+  'nav.group.online': 'En ligne',
+  'nav.group.party': 'Salon',
+  'nav.group.community': 'Communauté',
+  'nav.item.singleplayer': 'Partie solo',
+  'nav.item.streak': 'Série de pays',
+  'nav.item.daily': 'Défi du jour',
+  'nav.item.ranked': 'Duel classé',
+  'nav.item.unranked': 'Match non classé',
+  'nav.item.team': 'Match 2v2',
+  'nav.item.create': 'Créer un salon',
+  'nav.item.join': 'Rejoindre un salon',
+  'nav.item.maps': 'Cartes',
+  'nav.item.leaderboards': 'Classements',
+  'nav.item.friends': 'Amis',
+  'nav.item.account': 'Compte',
+  'nav.item.moderation': 'Modération',
+
+  // Cartes officielles
+  'map.world': 'Monde',
+  'map.europe': 'Europe',
+  'map.americas': 'Amériques',
+  'map.asia-oceania': 'Asie et Océanie',
+  'map.africa': 'Afrique',
+  'map.community': 'Carte communautaire',
+  'map.tooFewPlaces.one': '{name} compte {count} lieu. Choisissez moins de manches.',
+  'map.tooFewPlaces.other': '{name} compte {count} lieux. Choisissez moins de manches.',
+
+  // Réglages d'une partie : un mode comme choix, et dans une ligne de réglages comme « Monde · 5 manches · 1 min · déplacement »
+  'mode.move': 'Déplacement',
+  'mode.no-move': 'Sans déplacement',
+  'mode.nmpz': 'Sans déplacement, rotation ni zoom',
+  'settings.mode.move': 'déplacement',
+  'settings.mode.no-move': 'sans déplacement',
+  'settings.mode.nmpz': 'sans déplacement, rotation ni zoom',
+  'settings.rounds.one': '{count} manche',
+  'settings.rounds.other': '{count} manches',
+  'time.0': 'Sans limite',
+
+  // Chargement d'une partie, et son échec
+  'load.places': 'Chargement des lieux',
+  'load.failed': 'La partie n’a pas pu être chargée. Vérifiez votre connexion et réessayez.',
+  'error.unreachable': 'Le serveur est injoignable. Vérifiez votre connexion et réessayez.',
+  'error.unexpected': 'Le serveur a envoyé une réponse que cette page n’a pas pu lire. Réessayez dans un instant.',
+
+  // Ce que le bilan dit de l'enregistrement d'une partie terminée
+  'save.xp': '+{xp} XP.',
+  'save.tutorial': 'C’était le tutoriel. Il n’est pas enregistré et ne compte pas dans les statistiques.',
+  'save.game.signedOut': 'Connectez-vous depuis l’accueil pour conserver vos statistiques.',
+  'save.game.failed': 'Cette partie n’a pas pu être enregistrée dans vos statistiques.',
+  'save.game.saved': 'Enregistrée dans les statistiques de {name}.',
+  'save.game.recount.one': 'Le serveur l’a comptée pour {count} point.',
+  'save.game.recount.other': 'Le serveur l’a comptée pour {count} points.',
+  'save.daily.signedOut': 'Vous n’êtes pas connecté, ce résultat ne figure donc pas au classement.',
+  'save.daily.failed': 'Ce résultat n’a pas pu être inscrit au classement.',
+  'save.daily.saved': 'Au classement du jour sous le nom {name}.',
+  'save.daily.firstStays': 'Votre premier résultat du jour reste au classement sous le nom {name}.',
+  'save.streak.signedOut': 'Connectez-vous depuis l’accueil pour conserver votre meilleure série.',
+  'save.streak.failed': 'Cette partie n’a pas pu être enregistrée.',
+  'save.streak.best': 'Votre meilleure série est de {streak}.',
+
+  // Le guide du tutoriel
+  'tutorial.label': 'Tutoriel',
+  'tutorial.hide': 'Masquer les conseils',
+  'tutorial.tip.look': 'Regardez autour de vous : faites glisser l’image avec la souris ou le doigt.',
+  'tutorial.tip.move': 'Avancez dans la rue : cliquez sur une flèche de la chaussée ou appuyez sur la touche Flèche haut.',
+  'tutorial.tip.map': 'Passons à la carte. Survolez-la dans le coin de l’écran ou, sur téléphone, appuyez sur Ouvrir la carte.',
+  'tutorial.tip.pin': 'Cliquez sur la carte à l’endroit où vous pensez être. Zoomez avec + pour plus de précision.',
+  'tutorial.tip.guess': 'Le repère vous convient ? Appuyez sur Valider. Vous pouvez encore le déplacer avant.',
+  'tutorial.tip.result': 'La ligne pointillée montre votre écart : plus elle est courte, plus vous marquez de points. Appuyez sur Manche suivante.',
+  'tutorial.tip.solo': 'Celui-ci, c’est à vous de le trouver. Plus de conseils.',
+
+  // Comment un match s'est terminé
+  'outcome.cancelled': 'Le match a été annulé avant de commencer.',
+  'outcome.draw': 'Match nul.',
+  'outcome.yourTeam': 'Votre équipe a gagné.',
+  'outcome.otherTeam': 'L’autre équipe a gagné.',
+  'outcome.you': 'Vous avez gagné.',
+  'outcome.won.one': '{names} a gagné.',
+  'outcome.won.other': '{names} ont gagné.',
+
+  // Ce qui empêche d'enregistrer un brouillon de carte
+  'draft.name': 'Donnez à la carte un nom de {min} à {max} caractères.',
+  'draft.description': 'Donnez à la carte une description courte de {min} à {max} caractères.',
+  'draft.places': 'Une carte doit compter au moins {min} lieux. Ajoutez-en encore {missing}.',
+
+  // L'auteur d'une image, sous le résultat d'une manche
+  'credit.google': 'Images {copyright}',
+  'credit.panoramax': 'Photo : {name}, {licence}, via Panoramax',
+  'credit.contributor': 'un contributeur Panoramax',
+  'credit.openLicence': 'licence ouverte',
+
+  // L'écran de manche : affichage, outils de la vue de rue, bouton Valider
+  'round.time': 'Temps',
+  'round.exit': 'Quitter',
+  /** la lettre sur l'aiguille de la boussole */
+  'round.north': 'N',
+  'round.placePin': 'Placez votre repère',
+  'round.guess': 'Valider',
+  'round.openMap': 'Ouvrir la carte',
+  'round.closeMap': 'Fermer la carte',
+  'round.returnToStart': 'Revenir au départ',
+  'round.hint': 'Indice (moitié des points)',
+  'round.hintShown': 'Indice affiché',
+  'round.hintTitle': 'Trace sur la carte un cercle qui contient le lieu. Divise par deux les points de cette manche.',
+  /** le crédit des images quand le premier choix d'images n'a pas pu servir */
+  'round.creditStandIn': '{credit} (en remplacement aujourd’hui)',
+
+  // Les outils de la carte de réponse
+  'guessMap.zoom': 'Zoom',
+  'guessMap.zoomIn': 'Zoom avant',
+  'guessMap.zoomOut': 'Zoom arrière',
+  'guessMap.size': 'Taille de la carte',
+  'guessMap.size.small': 'Petite carte',
+  'guessMap.size.medium': 'Carte moyenne',
+  'guessMap.size.large': 'Grande carte',
+  'guessMap.marker': 'Repère sur la carte',
+
+  // La vue de rue
+  'pano.blocked': 'Ce passage est bloqué',
+  'pano.loading': 'Chargement...',
+  'provider.panoramaxCredit': 'Images : contributeurs Panoramax',
+
+  // Une partie locale
+  'play.again': 'Rejouer',
+  'play.keepPlaying': 'Continuer',
+  'play.skipPlace': 'Passer ce lieu',
+  'play.viewFailed': 'Cette vue n’a pas pu être chargée. Vérifiez votre connexion et réessayez.',
+  'play.findingAnother': 'Recherche d’un autre lieu',
+  'play.noSpare': 'Il n’y a pas d’autre lieu de rechange dans cette partie.',
+  'play.leaveConfirm': 'Quitter cette partie ? Les manches jouées ne seront pas enregistrées.',
+  'play.leave': 'Quitter la partie',
+  'play.tooFewPlaces.one': '{name} compte {count} lieu, trop peu pour {rounds} manches. Relancez la partie avec moins de manches.',
+  'play.tooFewPlaces.other': '{name} compte {count} lieux, trop peu pour {rounds} manches. Relancez la partie avec moins de manches.',
+  'play.communityUnavailable': 'Cette carte est faite de lieux Google Street View, qui ne peuvent pas être affichés pour le moment : elle n’est donc pas jouable. Réessayez plus tard.',
+
+  // Le panneau après une manche
+  'result.label': 'Résultat de la manche',
+  'result.openInMaps': 'Ouvrir dans Google Maps',
+  'result.timedOut': 'Le temps s’est écoulé avant que vous ayez placé un repère.',
+  'result.hinted': 'Vous avez utilisé l’indice : cette manche rapporte la moitié des points.',
+  'result.next': 'Manche suivante',
+  'result.seeSummary': 'Voir le bilan',
+
+  // Le panneau après une partie
+  'summary.label': 'Bilan de la partie',
+  'summary.finalScore': 'Score final',
+  'summary.share': 'Envoyez le lien à un ami : il aura les mêmes lieux.',
+  'summary.copyLink': 'Copier le lien du défi',
+  'summary.linkLabel': 'Lien du défi',
+
+  // Une partie de série de pays
+  'streakPlay.notInCountry': 'Ce point n’est dans aucun pays',
+  'streakPlay.guessCountry': 'Valider : {country}',
+  'streakPlay.correct': 'Correct',
+  'streakPlay.correctCountry': 'Correct : {country}',
+  'streakPlay.nextFailed': 'Le lieu suivant n’a pas pu être chargé. Vérifiez votre connexion et réessayez.',
+  'streakPlay.endConfirm': 'Terminer cette partie ? Votre série de {streak} est conservée.',
+  'streakPlay.end': 'Terminer la partie',
+  'streakPlay.overLabel': 'Série terminée',
+  /** après le nombre de la série, écrit en grand à côté */
+  'streakPlay.countries.one': 'pays',
+  'streakPlay.countries.other': 'pays',
+  'streakPlay.unbeaten': '{streak} d’affilée : vous avez trouvé tous les lieux de cette partie.',
+  'streakPlay.wrong': 'C’était : {answer}. Votre réponse : {guess}.',
+  'streakPlay.noPick': 'C’était : {answer}. Vous n’avez choisi aucun pays.',
+
+  // Une partie enregistrée, manche par manche
+  'history.title': 'Partie',
+  'history.back': 'Retour au compte',
+  'history.loading': 'Chargement de la partie',
+  'history.daily': 'défi du jour',
+  'history.mapLabel': 'Carte des lieux et de vos réponses',
+  'history.noMap': 'Cette partie a été enregistrée avant que les lieux soient conservés : il n’en existe pas de carte.',
+
+  // Les courbes de progression
+  'chart.label': 'Progression',
+  'chart.title': 'Progression',
+  'chart.empty': 'Pas encore assez d’historique pour tracer une courbe. Un point est ajouté chaque jour où l’XP ou la cote change.',
+  'chart.summary': '{name} du {first} au {last} : {min} au plus bas, {max} au plus haut, {now} actuellement',
+
+  // Chiffres, barre de niveau et tableau des parties d'un compte ou d'un profil
+  'stats.xp': '{xp} XP',
+  'stats.toLevel': '{xp} avant le niveau {level}',
+  'stats.levelProgress': 'Progression vers le niveau suivant',
+  'stats.date': 'Date',
+  'stats.mode.move': 'Déplacement',
+  'stats.mode.no-move': 'Sans dépl.',
+  'stats.mode.nmpz': 'NMPZ',
+  'stats.openRounds.one': 'Manches de la partie du {day}, {count} point',
+  'stats.openRounds.other': 'Manches de la partie du {day}, {count} points',
+
+  // Un match : son chargement, la manche, le départ
+  'match.multiplayer': 'Multijoueur',
+  'match.loading': 'Chargement du match',
+  'match.loadFailed': 'Le match n’a pas pu être chargé. Vérifiez votre connexion et réessayez.',
+  'match.placesFailed': 'Les lieux n’ont pas pu être chargés. Vérifiez votre connexion et réessayez.',
+  'match.loadingPlaces': 'Chargement des lieux',
+  'match.waitingForPlaces': 'En attente des lieux',
+  'match.roundStartsIn': 'La manche commence dans {seconds} s',
+  'match.viewMissing': 'Ce lieu ne peut pas être affiché sur cet appareil. Vous pouvez quand même répondre.',
+  'match.waitForStart': 'Attendez le départ',
+  'match.guessSent': 'Réponse envoyée',
+  'match.timeUp': 'Temps écoulé',
+  'match.leaveConfirm': 'Quitter ce match ? Vous ne pourrez pas y revenir.',
+  'match.stay': 'Rester',
+  'match.reportConfirm': 'Signaler {name} aux modérateurs ?',
+
+  // Un match : la vie, qui a répondu, le tableau de la manche, le résultat
+  'match.health': 'Vie',
+  'match.healthOf': 'Vie de {name}',
+  'match.nameYou': '{name} (vous)',
+  'match.roster.label': 'Réponses de cette manche',
+  'match.status.guessed': 'a répondu',
+  'match.status.guessing': 'cherche',
+  'match.status.away': 'absent',
+  'match.players': 'Joueurs',
+  'match.total': 'Total',
+  'match.roundResult': 'Résultat de la manche',
+  'match.roundOf': 'Manche {round} sur {rounds}',
+  'match.nextRoundIn': 'Manche suivante dans {seconds} s',
+  'match.finalIn': 'Résultat final dans {seconds} s',
+  'match.finalStanding': 'Résultat final',
+  'match.tag.left': 'parti',
+  'match.join.label': 'Arrivée dans une partie en cours',
+  'match.join.title': 'Une partie en cours',
+  'match.join.round': 'Vous entrez à la manche {round}',
+  'match.join.story': 'Les manches précédentes ne vous rapportent rien. Voici où en sont les autres.',
+
+  // Les équipes d'un match 2v2
+  'team.heading': 'Équipe',
+  'team.tableLabel': 'Équipes',
+  'team.name': 'Équipe {number}',
+  'team.nameYours': 'Équipe {number} (la vôtre)',
+  'team.yours': 'la vôtre',
+
+  // La salle d'attente d'un salon
+  'lobby.title': 'Salon',
+  'lobby.copyLink': 'Copier le lien d’invitation',
+  'lobby.joinLink': 'Lien d’invitation',
+  'lobby.playerCount': '{count} sur {max}',
+  'lobby.settings': 'Réglages',
+  'lobby.start': 'Lancer le match',
+  'lobby.leave': 'Quitter le salon',
+  'lobby.hint.ready': 'Toutes les personnes présentes jouent. Lancez le match quand vous voulez.',
+  'lobby.hint.needPlayers': 'Un match demande au moins deux joueurs. Partagez le code ou le lien.',
+  'lobby.hint.waiting': 'En attente du lancement du match par l’hôte.',
+  'lobby.invite.title': 'Inviter des amis',
+  'lobby.invite.none': 'Les amis ajoutés depuis le volet Amis peuvent être invités ici.',
+  'lobby.invite.allHere': 'Tous vos amis sont ici.',
+  'lobby.invite.failed': 'Vos amis n’ont pas pu être chargés.',
+  'lobby.invite.button': 'Inviter',
+  'lobby.invite.label': 'Inviter {name}',
+  'lobby.invite.sent': 'Invité',
+
+  // Le chat d'un salon et d'un match
+  'chat.messages': 'Messages',
+  'chat.empty': 'Aucun message pour l’instant.',
+  'chat.message': 'Message',
+  'chat.placeholder': 'Écrire un message',
+  'chat.send': 'Envoyer',
+  'chat.reactions': 'Réactions',
+  'chat.close': 'Fermer le chat',
+  'chat.unread.one': '{count} nouveau',
+  'chat.unread.other': '{count} nouveaux',
+
+  // Les volets de recherche de match : ce qu'est chaque type, et l'attente
+  'queue.ranked.lede':
+    'Un seul adversaire, et des points de vie à la place d’un total. Vous commencez tous les deux avec 5 000 ; à chaque manche, celui qui marque le moins perd la différence. Le duel s’arrête quand l’un de vous n’en a plus, ou après cinq manches.',
+  'queue.ranked.facts': '1 v 1 · Monde · déplacement · 5 manches max. · 1 min par manche · coté',
+  'queue.unranked.lede':
+    'Une partie publique, ouverte à qui en cherche une. Dès qu’un deuxième joueur arrive, un compte à rebours de dix secondes démarre ; quiconque rejoint avant la fin participe, jusqu’à dix joueurs. Si une partie est déjà en cours et qu’il y reste de la place et des manches, vous y entrez et jouez à partir de sa manche suivante. Le total le plus élevé après cinq manches l’emporte.',
+  'queue.unranked.facts': '2 à 10 joueurs · Monde · déplacement · 5 manches · 45 s par manche · non coté',
+  'queue.team.lede': 
+    'Quatre joueurs en deux équipes, chacune avec 5 000 points de vie en commun. À chaque manche, une équipe marque le score de son meilleur membre, et celle qui marque le moins perd la différence, plus trois dixièmes. Le match s’arrête quand une équipe n’en a plus, ou après cinq manches.',
+  'queue.team.facts': '2 v 2 · Monde · déplacement · 5 manches max. · 1 min par manche · non coté',
+  'queue.yourRating': 'Votre cote : {rating}',
+  'queue.find': 'Chercher un match',
+  'queue.joining': 'Entrée dans la file d’attente',
+  'queue.looking': 'Recherche de joueurs',
+  'queue.startingIn': 'Début dans {seconds} s',
+  'queue.waiting.one': '{count} joueur en attente',
+  'queue.waiting.other': '{count} joueurs en attente',
+  'queue.ranOut': 'La recherche a pris fin sans trouver de match. Relancez-la.',
+
+  // Créer et rejoindre un salon
+  'party.create.lede': 'Un match privé pour deux à quarante joueurs. Vous choisissez les réglages, partagez le code et lancez le match quand tout le monde est là.',
+  'party.create.facts': '2 à 40 joueurs · carte au choix · vos règles · non coté',
+  'party.create.submit': 'Créer un salon',
+  'party.join.lede': 'Saisissez le code à six caractères donné par l’hôte. Un lien d’invitation le remplit pour vous.',
+  'party.join.facts': 'Le match privé d’un ami · ses règles · non coté',
+  'party.join.submit': 'Rejoindre un salon',
+  'party.join.empty': 'Saisissez le code que l’hôte vous a donné.',
+
+  // Le volet Amis
+  'friends.lede': 'Ajoutez des joueurs par leur nom d’utilisateur, voyez qui est en ligne ou dans un salon et répondez aux invitations.',
+  'friends.what': 'Liste d’amis',
+  'friends.add.label': 'Ajouter un ami par nom d’utilisateur',
+  'friends.add.submit': 'Envoyer la demande',
+  'friends.empty': 'Pas encore d’amis. Envoyez une demande par nom d’utilisateur ; l’autre joueur la voit ici et peut l’accepter.',
+  'friends.invites': 'Invitations à un salon',
+  'friends.invitedYou': 'vous invite',
+  'friends.joinPartyOf': 'Rejoindre le salon de {name}',
+  'friends.requests': 'Demandes',
+  'friends.accept': 'Accepter',
+  'friends.acceptName': 'Accepter {name}',
+  'friends.decline': 'Refuser',
+  'friends.declineName': 'Refuser {name}',
+  'friends.list': 'Amis',
+  'friends.level': 'niveau {level}',
+  'friends.removeName': 'Retirer {name}',
+  'friends.sent': 'Envoyée, en attente de réponse',
+  'friends.cancelRequest': 'Annuler la demande envoyée à {name}',
+
+  // Le volet Classements
+  'leaderboards.lede': 'Les cent meilleurs joueurs par cote, par XP et par plus longue série de pays : depuis toujours, ou selon leurs gains du jour.',
+  'leaderboards.board': 'Classement',
+  'leaderboards.tab.rating': 'Cote',
+  'leaderboards.tab.xp': 'XP',
+  'leaderboards.tab.streak': 'Meilleure série',
+  'leaderboards.column.rating': 'Cote',
+  'leaderboards.column.xp': 'XP',
+  'leaderboards.column.streak': 'Série',
+  'leaderboards.loading': 'Chargement du classement',
+  'leaderboards.empty': 'Personne ne figure encore dans ce classement.',
+  'leaderboards.yourPlace': 'Vous êtes numéro {rank} avec {value}.',
+
+  // Le profil d'un joueur
+  'profile.loading': 'Chargement du profil',
+  'profile.since': 'Joue depuis {date}',
+  'profile.stats': 'Statistiques de {name}',
+  'profile.noGames': 'Aucune partie pour l’instant.',
+  'profile.report.open': 'Signaler le joueur',
+  'profile.report.placeholder': 'Ce qui s’est passé (facultatif)',
+  'profile.report.sent': 'Signalement envoyé. Un modérateur va l’examiner.',
+
+  // Le volet Modération
+  'moderation.lede': 'Les cartes et les joueurs signalés par d’autres. Retirer une carte la supprime ; un bannissement empêche le jeu en ligne, pas le jeu en solo.',
+  'moderation.loading': 'Chargement des signalements',
+  'moderation.maps.title': 'Cartes signalées',
+  'moderation.maps.empty': 'Aucune carte n’attend de décision.',
+  'moderation.players.title': 'Joueurs signalés',
+  'moderation.players.empty': 'Aucun joueur n’attend de décision.',
+  'moderation.by': 'par {maker}',
+  'moderation.reports.one': '{count} signalement',
+  'moderation.reports.other': '{count} signalements',
+  'moderation.banned': 'banni',
+  'moderation.removeMap': 'Retirer la carte',
+  'moderation.removeMapLabel': 'Retirer la carte {name}',
+  'moderation.dismiss': 'Rejeter',
+  'moderation.dismissLabel': 'Rejeter les signalements visant {name}',
+  'moderation.ban': 'Bannir',
+  'moderation.banLabel': 'Bannir {name} du jeu en ligne',
+  'moderation.unban': 'Débannir',
+  'moderation.unbanLabel': 'Lever le bannissement de {name}',
+
+  // Le cadre de l'accueil : la barre latérale et le bandeau du match inachevé
+  'home.nav': 'Principale',
+  'home.menu': 'Menu',
+  'home.install': 'Installer Wherefall',
+  'home.profile': 'Profil',
+  'home.waiting.one': '{count} en attente',
+  'home.waiting.other': '{count} en attente',
+  'home.resume.label': 'Match inachevé',
+  'home.resume.text': 'Vous êtes dans un match qui n’est pas terminé.',
+  'home.resume.rejoin': 'Rejoindre le match',
+  'home.resume.leave': 'Le quitter',
+
+  // Ce que tous les volets partagent : le retour, la vérification du compte et ses messages
+  'pane.back': 'Retour',
+  'pane.checkingAccount': 'Vérification de votre compte',
+  'pane.needsAccount':
+    '{what} : il faut un compte, pour que les autres joueurs voient contre qui ils jouent et que vos résultats soient conservés quelque part. C’est gratuit et il suffit d’un nom d’utilisateur et d’un mot de passe.',
+  'pane.banned': 'Ce compte est banni du jeu en ligne : matchs, salons, chat, amis et création de cartes. Le jeu en solo reste possible.',
+  'pane.playSingleplayer': 'Jouer en solo',
+
+  // La présentation de la première visite
+  'intro.title': 'Comment jouer',
+  'intro.step.1': 'On vous dépose quelque part sur Terre, au niveau de la rue.',
+  'intro.step.2': 'Regardez autour de vous, avancez dans la rue si le mode le permet, puis placez un repère sur la carte là où vous pensez être.',
+  'intro.step.3': 'Plus le repère est proche, plus vous marquez de points, sur 5 000 par manche.',
+  'intro.dismiss': 'Compris',
+
+  // Partie solo
+  'singleplayer.lede': 'Cinq lieux, un repère pour chacun, jusqu’à 5 000 points par manche. Choisissez une carte et le niveau de difficulté.',
+  'singleplayer.challenge': 'Défi',
+  'singleplayer.challengeSent': 'On vous a envoyé un défi',
+  'singleplayer.playChallenge': 'Jouer le défi',
+  'singleplayer.start': 'Lancer la partie',
+  /** `{panoramax}` et `{openfreemap}` sont des liens, chacun affichant son propre nom */
+  'singleplayer.credits':
+    'Jeu gratuit. Le compte est facultatif ici et conserve vos statistiques. Images de rue fournies par Google Street View quand elles existent, sinon par les contributeurs de {panoramax}, sous licences ouvertes. Carte fournie par {openfreemap} et OpenStreetMap.',
+
+  // Série de pays
+  'streak.lede': 'Un lieu après l’autre, partout dans le monde. Cliquez sur le pays où se trouve chacun. Le premier pays faux met fin à la partie.',
+  'streak.best': 'Votre meilleure série : {streak}',
+  'streak.start': 'Lancer une série',
+  'streak.fine': 'Avec un compte, votre meilleure série est conservée et chaque pays trouvé rapporte 20 XP.',
+
+  // Défi du jour
+  'daily.lede': 'Trois lieux, les mêmes pour tout le monde, renouvelés chaque jour à minuit UTC.',
+  'daily.loading': 'Chargement du défi du jour',
+  'daily.today': 'Aujourd’hui',
+  'daily.yourResult': 'Votre résultat du jour',
+  'daily.notPlayed': 'Vous n’avez pas encore joué aujourd’hui. Vous avez un seul essai.',
+  'daily.firstCounts': 'Vous avez un seul essai par jour.',
+  'daily.play': 'Jouer le défi du jour',
+  'daily.againNote': 'Un seul essai par jour. Le prochain défi ouvre à minuit UTC.',
+  'daily.leaderboard': 'Classement',
+  'daily.todaysLeaderboard': 'Classement du jour',
+  'daily.empty': 'Aucun résultat aujourd’hui pour l’instant. Le premier arrivé prend la tête.',
+
+  // Compte : le formulaire de connexion
+  'account.lede': 'Votre niveau, vos statistiques et vos parties, sur chaque appareil où vous vous connectez. Jouer en solo sans compte reste gratuit.',
+  'account.loading': 'Chargement du compte',
+  'account.login.name': 'Se connecter',
+  'account.login.busy': 'Connexion en cours',
+  'account.register.name': 'Créer un compte',
+  'account.register.busy': 'Création du compte',
+  'account.username': 'Nom d’utilisateur',
+  'account.password': 'Mot de passe',
+  'account.usernameHint': '3 à 20 lettres, chiffres ou tirets bas isolés, jamais au début ni à la fin.',
+  'account.passwordHint': 'Au moins 8 caractères. À la création du compte, vous recevez un code de récupération : le seul moyen de revenir si vous oubliez le mot de passe.',
+  'account.missing': 'Saisissez un nom d’utilisateur et un mot de passe.',
+
+  // Compte : un joueur connecté
+  'account.signedInAs': 'Connecté en tant que',
+  'account.signOut': 'Se déconnecter',
+  'account.stats': 'Vos statistiques',
+  'account.averageRound': 'Manche moyenne',
+  'account.bestRound': 'Meilleure manche',
+  'account.perfectRounds': 'Manches parfaites',
+  'account.bestGame': 'Meilleure partie',
+  'account.ofMax': 'sur {max}',
+  'account.noGames': 'Aucune partie pour l’instant. Terminez une partie avec votre compte et elle sera enregistrée ici.',
+  'account.tutorialNote': 'Deux manches guidées dans des lieux célèbres. Il ne compte jamais dans vos statistiques.',
+  'account.newUsername': 'Nouveau nom d’utilisateur',
+  'account.rename': 'Changer de nom d’utilisateur',
+  'account.renameHint': '3 à 20 lettres, chiffres ou tirets bas isolés, jamais au début ni à la fin. Il peut être changé une fois tous les 30 jours.',
+  'account.renameEmpty': 'Saisissez le nom d’utilisateur souhaité.',
+
+  // Réglages conservés dans ce navigateur
+  'prefs.units': 'Distances en',
+  'prefs.units.km': 'Kilomètres',
+  'prefs.units.mi': 'Miles',
+  'prefs.sound': 'Son',
+  'prefs.sound.on': 'Activé',
+  'prefs.sound.off': 'Désactivé',
+
+  // Cartes
+  'maps.lede': 'Jouez sur une carte officielle, ou sur celle qu’un autre joueur a composée avec les lieux de son choix. Créez la vôtre à partir de n’importe quel endroit couvert par Street View.',
+  'maps.search': 'Chercher une carte',
+  'maps.places.one': '{count} lieu',
+  'maps.places.other': '{count} lieux',
+  'maps.plays.one': '{count} partie',
+  'maps.plays.other': '{count} parties',
+  'maps.likes.one': '{count} j’aime',
+  'maps.likes.other': '{count} j’aime',
+  'maps.official': 'Cartes officielles',
+  'maps.loadingOfficial': 'Chargement des cartes officielles',
+  'maps.officialFailed': 'Les cartes officielles n’ont pas pu être chargées.',
+  'maps.noOfficial': 'Aucune carte officielle de ce nom.',
+  'maps.allCountries.one': 'Tous les pays ({count})',
+  'maps.allCountries.other': 'Les {count} pays',
+  'maps.choose': 'Choisir',
+  'maps.chooseMap': 'Choisir {name}',
+  /** `{maker}` est un lien vers le profil de l'auteur */
+  'maps.by': 'par {maker}',
+  'maps.edit': 'Modifier',
+  'maps.loading': 'Chargement des cartes',
+  'maps.showMore': 'Afficher plus',
+  'maps.showMoreOf': 'Afficher plus : {list}',
+  'maps.popular': 'Cartes communautaires populaires',
+  'maps.popularEmpty': 'Personne n’a encore créé de carte. La vôtre pourrait être la première.',
+  'maps.newest': 'Cartes communautaires récentes',
+  'maps.newestEmpty': 'Rien de nouveau pour l’instant.',
+  'maps.mine': 'Mes cartes',
+  'maps.mineEmpty': 'Vous n’avez pas encore créé de carte.',
+  'maps.matching': 'Cartes communautaires correspondant à « {query} »',
+  'maps.noCommunity': 'Aucune carte communautaire ne correspond.',
+
+  // La page d'une carte communautaire
+  'mapPage.loading': 'Chargement de la carte',
+  /** `{maker}` est un lien vers le profil de l'auteur */
+  'mapPage.byline': 'Carte communautaire de {maker} · créée le {date}',
+  'mapPage.inNumbers': '{name} en chiffres',
+  'mapPage.plays': 'Parties',
+  'mapPage.likes': 'J’aime',
+  'mapPage.noGoogle': 'Une carte communautaire est faite de lieux Google Street View. Ce site n’a pas d’images Google configurées pour le moment : la carte ne peut donc être ni jouée ni prévisualisée ici.',
+  'mapPage.play': 'Jouer sur cette carte',
+  'mapPage.party': 'Créer un salon avec cette carte',
+  'mapPage.like': 'J’aime',
+  'mapPage.unlike': 'Je n’aime plus',
+  'mapPage.preview': 'Emplacement des lieux de {name}',
+  'mapPage.reportThis': 'Signaler cette carte',
+  'mapPage.reportReason': 'Ce qui ne va pas (facultatif)',
+  'mapPage.reported': 'Signalement envoyé. Quelqu’un va l’examiner.',
+  'mapPage.yours': 'Votre carte',
+  'mapPage.delete': 'Supprimer la carte',
+  'mapPage.deleteConfirm': 'La supprimer définitivement ?',
+  'mapPage.deleteYes': 'Oui, la supprimer',
+  'mapPage.deleteNo': 'La garder',
+
+  // L'éditeur de cartes
+  'editor.lede': 'Cliquez n’importe où sur la carte du monde pour ajouter le lieu le plus proche couvert par Street View, ou collez une liste de lieux. Il faut cinq lieux pour faire une carte ; cinq mille est le maximum.',
+  /** ce pour quoi le message de connexion dit qu'il faut un compte : « {what} : il faut un compte, … » */
+  'editor.what': 'Créer une carte',
+  'editor.loading': 'Chargement de l’éditeur',
+  'editor.loadFailed': 'L’éditeur n’a pas pu être chargé. Vérifiez votre connexion et réessayez.',
+  'editor.needsGoogle':
+    'La création de cartes a besoin des images Google Street View : chaque lieu sur lequel vous cliquez est associé au panorama Street View le plus proche, et c’est celui-ci qui est joué. Ce site n’a pas d’images Google configurées pour le moment : les cartes ne peuvent donc être ni créées ni modifiées ici.',
+  'editor.backToMaps': 'Retour aux cartes',
+  'editor.loadingMap': 'Chargement de votre carte',
+  'editor.notYours': 'Cette carte a été créée par quelqu’un d’autre : elle ne peut pas être modifiée depuis votre compte.',
+  'editor.name': 'Nom',
+  'editor.description': 'Description courte',
+  'editor.mapLabel': 'Carte du monde : cliquez pour ajouter un lieu',
+  'editor.clickToAdd': 'Cliquez sur la carte pour ajouter un lieu.',
+  /** combien de lieux compte la carte, après le mot « Lieux » : « Lieux · 12 sur 500 » */
+  'editor.placesOf': '{placed} sur {max}',
+  'editor.removePlace': 'Retirer le lieu {number}, {country}',
+  'editor.looking': 'Recherche de Street View à cet endroit',
+  'editor.none': 'Pas de Street View à moins de 500 m de ce point.',
+  'editor.noCountry': 'Ce Street View n’est dans aucun pays : il ne peut pas être ajouté.',
+  'editor.full': 'La carte est pleine.',
+  'editor.duplicate': 'Ce lieu est déjà dans la carte.',
+  'editor.added': 'Lieu ajouté : {country}.',
+  'editor.unreachable': 'Street View est injoignable. Réessayez ce point dans un instant.',
+  'editor.publish': 'Publier la carte',
+  'editor.save': 'Enregistrer les modifications',
+
+  // Le choix de la carte dans les réglages d'une partie
+  'picker.loading': 'Chargement des autres cartes',
+  'picker.failed': 'Les autres cartes n’ont pas pu être chargées. La carte du monde reste disponible.',
+  'picker.aCountry': 'Un pays',
+  'picker.countries': 'Pays',
+  'picker.noCountry': 'Aucun pays de ce nom n’a encore assez de lieux.',
+  'picker.places.one': '{count} lieu',
+  'picker.places.other': '{count} lieux',
+};

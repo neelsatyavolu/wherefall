@@ -1,0 +1,16 @@
+/* The wait in a queue: how long it has been, how wide the search is, and the lock on ranked. */
+
+.queue-notice,
+.queue-lock {
+  margin: 0;
+}
+
+.queue-notice:empty,
+.queue-waiting:empty {
+  display: none;
+}
+
+/* a time that ticks keeps its width */
+.queue-lock {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,12 @@
+/* The party form: a control with one line under it that says what it does. */
+
+.party-field {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.party-form .fine {
+  margin: 0;
+}

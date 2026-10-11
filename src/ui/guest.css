@@ -1,0 +1,46 @@
+/* A guest: the name in the sidebar and over a pane, with the way to sign up beside it. */
+
+.guest-badge,
+.guest-line {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font: 14px/1.5 var(--font-mono);
+  color: var(--fg-2);
+}
+
+.guest-badge {
+  padding: 0 var(--gutter) 20px;
+}
+
+.guest-host:empty {
+  display: none;
+}
+
+.guest-link {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+/* why a visitor is back at the start: a session that ran out */
+.session-note {
+  color: var(--fg);
+}
+
+/* in a match's chat: what signing up adds, where a guest has the reactions alone */
+.chat-guest {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .guest-badge {
+    padding: 0;
+  }
+
+  /* big enough to touch */
+  .guest-link {
+    padding: 8px 0;
+  }
+}

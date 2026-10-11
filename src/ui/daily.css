@@ -1,0 +1,335 @@
+/* The daily pane, and the mark on its item in the sidebar. Tokens only: ink, hairlines and the one accent. */
+
+/* said by a screen reader, drawn nowhere */
+.daily-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* the day and the wait for the next one, side by side where there is room */
+.daily-head {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 16px 32px;
+  align-items: start;
+  justify-self: stretch;
+}
+
+.daily-clock {
+  font-variant-numeric: tabular-nums;
+}
+
+/* the player's standing: what they are told, then what they can do */
+.daily-you {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  justify-self: stretch;
+  min-width: 0;
+}
+
+.daily-you .figures {
+  grid-template-columns: repeat(auto-fit, minmax(120px, max-content));
+  gap: 16px 48px;
+  justify-self: stretch;
+}
+
+.daily-you .prose {
+  max-width: 640px;
+}
+
+/* --- streak and records: figures sharing hairlines, as on the account pane --------------- */
+
+.daily-record {
+  display: grid;
+  gap: 12px;
+  justify-self: stretch;
+  min-width: 0;
+}
+
+/*
+ * Four cells across 640 leave each about 128px. The streak cell holds "4 days" and under it
+ * "Best: 9 days", each on a line of its own in every language: the days never part from their
+ * number, and the cells are padded a little less at the sides so the longest "best" still fits
+ * its one line (German and Russian with a streak of a hundred days and more).
+ */
+.daily-record .account-stats .figure {
+  padding-inline: 12px;
+}
+
+.daily-streak-count {
+  white-space: nowrap;
+}
+
+/* where the streak stands, said under the figures: a status while today can still break it */
+.daily-streak-note {
+  margin: 0;
+}
+
+.daily-record .label,
+.daily-days-section .label,
+.daily-chart .label {
+  margin: 0;
+}
+
+/* --- the last 14 days: a cell a day, two weeks one under the other ----------------------- */
+
+.daily-days-section {
+  display: grid;
+  gap: 12px;
+  justify-self: stretch;
+  min-width: 0;
+}
+
+.daily-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+
+.daily-day {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 8px 2px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font: 12px/1.3 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.daily-day-date {
+  color: var(--fg-3);
+}
+
+.daily-day.missed .daily-day-score,
+.daily-day.open .daily-day-score {
+  color: var(--fg-3);
+}
+
+/*
+ * On a phone a cell is about 50px, and a score with its thousands separator all but fills it, so
+ * the numbers of neighbouring days run together. There the digits are written without the
+ * separator (`data-short`), which leaves air on both sides of the hairline between two days.
+ */
+@media (max-width: 480px) {
+  .daily-day-score[data-short] {
+    font-size: 0;
+  }
+
+  .daily-day-score[data-short]::after {
+    content: attr(data-short);
+    font-size: 12px;
+  }
+}
+
+/* today is underlined in the accent, and says so to a screen reader */
+.daily-day.today {
+  border-bottom: 2px solid var(--accent);
+  background: var(--surface);
+}
+
+.daily-day.today .daily-day-date {
+  color: var(--fg);
+}
+
+/* --- today's scores: ten thin bars from one baseline, the player's own in the accent ------ */
+
+.daily-chart {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.daily-plot {
+  display: grid;
+  gap: 6px;
+}
+
+.daily-bars {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  align-items: end;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.daily-bar {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.daily-bar-fill {
+  width: 100%;
+  max-width: 24px;
+  background: var(--fg-4);
+}
+
+.daily-bar:hover .daily-bar-fill {
+  background: var(--fg-2);
+}
+
+.daily-bar.own .daily-bar-fill,
+.daily-bar.own:hover .daily-bar-fill {
+  background: var(--accent);
+}
+
+/* the word over the player's own bar: ink, not the bar's colour */
+.daily-bar-you {
+  margin: 0;
+  color: var(--fg);
+}
+
+.daily-axis {
+  display: flex;
+  justify-content: space-between;
+  font: 12px/1.3 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-3);
+}
+
+/* --- the leaderboard --------------------------------------------------------------------- */
+
+.daily-board {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* a place of two or three digits keeps clear of the name beside it */
+.daily-board .rounds .num:first-child {
+  padding-right: 12px;
+}
+
+/* the player's own row, under a page they are not on */
+.daily-own-row td {
+  border-top: 1px solid var(--border-strong);
+}
+
+/* --- the mark on the Daily item in the sidebar: a square, an exclamation mark or a tick ---- */
+
+li:has(> .daily-mark) {
+  position: relative;
+}
+
+/* the item's name stops short of its mark */
+li:has(> .daily-mark:not([hidden])) > .nav-item {
+  padding-right: calc(var(--gutter) + 28px);
+}
+
+.daily-mark {
+  position: absolute;
+  top: 50%;
+  right: var(--gutter);
+  transform: translateY(-50%);
+  font: 500 12px/1 var(--font-mono);
+  color: var(--fg-3);
+  /* a click on it is a click on the item under it */
+  pointer-events: none;
+}
+
+.daily-mark[data-state='open'] {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+}
+
+.daily-mark[data-state='atRisk'] {
+  padding: 2px 5px;
+  border: 1px solid var(--border-strong);
+  color: var(--fg);
+}
+
+/* --- a result against the day's average: a row a round, sharing hairlines ------------------ */
+
+.daily-averages {
+  display: grid;
+  gap: 12px;
+  justify-self: stretch;
+  min-width: 0;
+}
+
+.daily-averages .label {
+  margin: 0;
+}
+
+.daily-average-rounds {
+  display: grid;
+  /* the round and its score as wide as they are, and what is left for the words */
+  grid-template-columns: max-content max-content minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+  font: 14px/1.4 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-average-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  column-gap: 16px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.daily-average-round {
+  color: var(--fg-3);
+  white-space: nowrap;
+}
+
+.daily-average-score {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* which side of the average is said in words; below it the line is only quieter, never another colour */
+.daily-average-diff {
+  min-width: 0;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.daily-average-row[data-side='below'] .daily-average-diff,
+.daily-average-row[data-side='level'] .daily-average-diff {
+  color: var(--fg-2);
+}
+
+/* --- the daily's own part of a game's summary: a personal best, the averages, or a game lost to an update --- */
+
+.daily-extras {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.daily-extras[hidden] {
+  display: none;
+}
+
+.daily-best-line {
+  margin: 0;
+}
+
+/* on a line of its own the mark starts at the edge, as the lines around it do */
+.daily-best-line .tag {
+  margin-left: 0;
+}

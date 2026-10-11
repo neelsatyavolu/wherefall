@@ -1,0 +1,60 @@
+/* Status, as DESIGN.md section 5 has it: a small dot and a mono label, then a sentence that can be read, and the way on. */
+
+.status-box {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-width: 0;
+  max-width: 640px;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+}
+
+.status-box-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: 12px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+/* the dot: the tone's colour, and hollow where there is no news in it, so it is not colour alone */
+.status-box-label::before {
+  content: '';
+  flex: none;
+  box-sizing: border-box;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--fg-3);
+  border-radius: 50%;
+}
+
+[data-tone='error'] > .status-box-label::before {
+  border-color: var(--danger);
+  background: var(--danger);
+}
+
+[data-tone='ok'] > .status-box-label::before {
+  border-color: var(--ok);
+  background: var(--ok);
+}
+
+[data-tone='live'] > .status-box-label::before {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.status-box-text {
+  margin: 0;
+  font: 14px/1.5 var(--font-sans);
+  color: var(--fg-2);
+  max-width: 65ch;
+  overflow-wrap: anywhere;
+}
+
+.status-box > .actions {
+  margin-top: 4px;
+}

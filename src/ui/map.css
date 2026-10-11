@@ -1,0 +1,282 @@
+/* What is drawn on a map, in a game or in the history view: pins, lines' ends, and the map's own chrome. */
+
+/* a pin is edged in the colour of its ground, so it stands clear of any map under it; its number or name is at the type scale's floor */
+.pin {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--bg);
+  font: 500 12px/1 var(--font-mono);
+  cursor: inherit;
+}
+
+/* a pin that carries a number or a name is as tall as its text needs */
+.pin:not(:empty) {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+}
+
+.pin-guess {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.pin-actual {
+  background: var(--fg);
+  color: var(--bg);
+  border-radius: 50%;
+}
+
+/*
+ * A reveal with many players: a name that would lie on another pin is left off its own
+ * (`guess-map.ts` decides which), and that pin is a bare mark, the size of one with no name, until
+ * the pointer is on it or it is tapped. Then it has its name again, over its neighbours.
+ */
+.pin.bare {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  cursor: pointer;
+}
+
+.pin.bare .pin-name {
+  display: none;
+}
+
+/* a pin with its name on stands over the bare marks around it, the viewer's own over them all, and a name that was asked for over that */
+.pin:has(> .pin-name):not(.bare) {
+  z-index: 1;
+}
+
+.pin-guess:has(> .pin-name) {
+  z-index: 2;
+}
+
+.pin.bare:hover,
+.pin.bare.named {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  z-index: 3;
+}
+
+.pin.bare:hover .pin-name,
+.pin.bare.named .pin-name {
+  display: inline;
+}
+
+.maplibregl-map.maplibregl-map {
+  font: 12px/1.4 var(--font-sans);
+}
+
+.maplibregl-map .maplibregl-ctrl-attrib,
+.maplibregl-map .maplibregl-ctrl-attrib.maplibregl-compact {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg-3);
+  border-radius: 0;
+}
+
+.maplibregl-map .maplibregl-ctrl-attrib a {
+  color: var(--fg-2);
+}
+
+/* the "i" that unfolds the credit: the library draws it in black on white, so on a dark ground it is turned over */
+.maplibregl-map .maplibregl-ctrl-attrib-button {
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.maplibregl-map[data-ground='dark'] .maplibregl-ctrl-attrib-button {
+  filter: invert(1);
+}
+
+
+/*
+ * What sits on a map is drawn in the colours of the ground under it, which is not always the
+ * page's: the street map follows the page's scheme, satellite pictures are dark and the terrain
+ * map is pale in both. `guess-map.ts` says which on the map's element.
+ */
+.maplibregl-map[data-ground='dark'] {
+  --bg: #0e0e0d;
+  --fg: #f2f0ea;
+  --fg-2: rgba(242, 240, 234, 0.68);
+  --fg-3: rgba(242, 240, 234, 0.45);
+  --border: rgba(242, 240, 234, 0.1);
+  --border-strong: rgba(242, 240, 234, 0.22);
+  --accent: #4c8dff;
+}
+
+.maplibregl-map[data-ground='light'] {
+  --bg: #f7f5ef;
+  --fg: #16161a;
+  --fg-2: rgba(22, 22, 26, 0.66);
+  --fg-3: rgba(22, 22, 26, 0.45);
+  --border: rgba(22, 22, 26, 0.12);
+  --border-strong: rgba(22, 22, 26, 0.24);
+  --accent: #2f6fe0;
+}
+
+.maplibregl-map {
+  background: var(--bg);
+}
+
+/*
+ * The pin being placed: a crosshair, open in the middle, so the exact spot stays in view. Each arm
+ * is a 2px line of ink inside a 1px edge of the ground's own colour, so it shows on water, on
+ * streets, on a satellite picture and on the terrain map alike.
+ */
+.aim {
+  --arm: 14px;
+  --gap: 12px;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+}
+
+.aim::before,
+.aim::after {
+  content: '';
+  position: absolute;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* hard stops, not a fade: the edge first, then the ink a pixel inside it, each with a gap where the arms would cross */
+.aim::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  background-image:
+    linear-gradient(to right, transparent 1px, var(--fg) 1px calc(var(--arm) - 1px), transparent calc(var(--arm) - 1px) calc(var(--arm) + var(--gap) + 1px), var(--fg) calc(var(--arm) + var(--gap) + 1px) calc(100% - 1px), transparent calc(100% - 1px)),
+    linear-gradient(to right, var(--bg) var(--arm), transparent var(--arm) calc(var(--arm) + var(--gap)), var(--bg) calc(var(--arm) + var(--gap)));
+  background-size:
+    100% 2px,
+    100% 4px;
+}
+
+.aim::after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  margin-left: -2px;
+  background-image:
+    linear-gradient(to bottom, transparent 1px, var(--fg) 1px calc(var(--arm) - 1px), transparent calc(var(--arm) - 1px) calc(var(--arm) + var(--gap) + 1px), var(--fg) calc(var(--arm) + var(--gap) + 1px) calc(100% - 1px), transparent calc(100% - 1px)),
+    linear-gradient(to bottom, var(--bg) var(--arm), transparent var(--arm) calc(var(--arm) + var(--gap)), var(--bg) calc(var(--arm) + var(--gap)));
+  background-size:
+    2px 100%,
+    4px 100%;
+}
+
+/* a map on a page: a game's history, a community map, the editor */
+.history-map {
+  height: min(60vh, 480px);
+  border: 1px solid var(--border-strong);
+}
+
+/* a map on a page lets the page scroll past it, and says so in the page's own type when a bare wheel or one finger is tried on it */
+.maplibregl-map .maplibregl-cooperative-gesture-screen {
+  padding: 16px;
+  background: rgba(14, 14, 13, 0.62);
+  color: #f2f0ea;
+  font: 14px/1.4 var(--font-sans);
+}
+
+/* zoom at the top right of the map, sizes at the top left */
+.map-tools {
+  position: absolute;
+  inset: 8px 8px auto 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.map-sizes,
+.map-zoom {
+  display: flex;
+  border: 1px solid var(--border-strong);
+  pointer-events: auto;
+}
+
+.map-zoom {
+  flex-direction: column;
+}
+
+.map-tool {
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--fg-2);
+  font: 500 14px/1 var(--font-mono);
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease),
+    color 150ms var(--ease);
+}
+
+.map-zoom .map-tool {
+  font-size: 17px;
+}
+
+.map-sizes .map-tool + .map-tool {
+  border-left: 1px solid var(--border);
+}
+
+.map-zoom .map-tool + .map-tool {
+  border-top: 1px solid var(--border);
+}
+
+.map-tool:hover {
+  color: var(--fg);
+}
+
+.map-tool[aria-pressed='true'] {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* a map on a page (a game's history, a community map, the editor): the map and its zoom buttons */
+.map-frame {
+  position: relative;
+}
+
+@media (max-width: 720px) {
+  .map-tool {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* a map to look at is a strip of the page on a phone, not a screen of its own; the editor's, which is worked in, keeps its height */
+  .history-map:not(.editor-map) {
+    height: 240px;
+  }
+
+  /* the map library's "i" for its credit, big enough for a finger */
+  .maplibregl-map .maplibregl-ctrl-attrib.maplibregl-compact {
+    min-height: 44px;
+    padding: 12px 44px 12px 8px;
+  }
+
+  .maplibregl-map .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) {
+    padding: 0;
+    min-width: 44px;
+  }
+
+  .maplibregl-map .maplibregl-ctrl-attrib-button {
+    width: 44px;
+    height: 44px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}

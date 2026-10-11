@@ -1,0 +1,45 @@
+/* A pane's one forward action. An ordinary row on a wide screen; on a phone, a bar fixed to the foot of the screen. */
+
+.action-bar {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  /*
+   * 56px: a 44px button and 6px either side of it. The bar is the canvas with a hairline over it, and
+   * the button keeps its own width, so the accent stays a small mark rather than a band across the screen.
+   */
+  .action-bar {
+    position: fixed;
+    z-index: 5;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    box-sizing: border-box;
+    min-height: 56px;
+    /* a phone's home indicator, or a browser bar drawn over the page, is kept clear of */
+    padding: 5px var(--gutter) calc(6px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg);
+    border-top: 1px solid var(--border-strong);
+  }
+
+  .action-bar .button {
+    min-width: 144px;
+  }
+
+  /* the page ends above the bar, so its last lines can be scrolled clear of it */
+  .pane:has(.action-bar) {
+    padding-bottom: calc(64px + 56px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* with the menu open the bar goes back into the page: the list is not to be covered */
+  .shell:has(.nav.open) .action-bar {
+    position: static;
+    min-height: 0;
+    padding: 0;
+    border-top: 0;
+  }
+}

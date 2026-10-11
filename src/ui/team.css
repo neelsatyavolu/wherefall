@@ -1,0 +1,109 @@
+/* Teams: picking one in a lobby, and a teammate's pin on the map while a round is played. */
+
+/* --- picking a team ------------------------------------------------------------------------ */
+
+.team-picker {
+  display: grid;
+  gap: 16px;
+}
+
+.team-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.team-box {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+}
+
+.team-box.own {
+  border-color: var(--border-strong);
+}
+
+.team-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.team-head .label,
+.team-box .fine,
+.team-picker > .fine {
+  margin: 0;
+}
+
+.team-head .tag {
+  margin-left: 0;
+}
+
+.team-head .button {
+  margin-left: auto;
+  padding: 4px 10px;
+}
+
+.team-box .player-list {
+  border-top-color: var(--border);
+}
+
+.team-box .player-row:last-child {
+  border-bottom: 0;
+}
+
+/* --- in a match's results ------------------------------------------------------------------- */
+
+/* the winning team's mark sits beside its name, in the label's own line */
+.team-figures .label .tag {
+  color: var(--fg);
+}
+
+@media (max-width: 720px) {
+  /* a team's name with "(yours)" needs the cell's whole width: its health goes under it, with what the round took at its side */
+  .team-health .health-name {
+    grid-column: 1 / -1;
+  }
+
+  .team-health .health-lost {
+    grid-column: auto;
+    min-height: 0;
+    align-self: center;
+    text-align: right;
+  }
+}
+
+/* --- on the map ---------------------------------------------------------------------------- */
+
+/* a teammate's pin while it can still move: outlined, by name. Clicks pass through it to the map */
+.pin.pin-mate {
+  padding: 0 6px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px dashed var(--fg);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* once it is their guess it is final: filled */
+.pin.pin-mate.final {
+  background: var(--fg);
+  color: var(--bg);
+  border-style: solid;
+}
+
+@media (max-width: 520px) {
+  /* side by side the two teams would leave a name no room */
+  .team-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .team-head .button {
+    min-height: 44px;
+  }
+}

@@ -1,0 +1,16 @@
+/* The welcome a new visitor gets before the home screen: the wordmark, two sentences, two buttons. Its column is .home's. */
+
+/* what the tutorial is belongs to the buttons above it, not to a block of its own */
+.welcome .fine {
+  margin-top: -16px;
+}
+
+@media (max-width: 720px) {
+  .welcome {
+    padding-top: 48px;
+  }
+
+  .welcome .button {
+    min-height: 44px;
+  }
+}

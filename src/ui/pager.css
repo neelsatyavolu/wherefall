@@ -1,0 +1,21 @@
+/* The foot of a list that comes a page at a time: Previous, the page, Next. */
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.pager-page {
+  margin: 0;
+  font: 14px/1.4 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-2);
+}
+
+@media (max-width: 720px) {
+  .pager .button {
+    min-height: 44px;
+  }
+}

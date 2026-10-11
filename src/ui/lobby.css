@@ -1,0 +1,115 @@
+/*
+ * The party lobby. Left-aligned like the panes, in the two widths they use: 880 for the screen,
+ * 640 for what is read or filled in. On a wide screen the chat stands beside the rest in a
+ * right-hand column, so it is on the first screen however many players are in; on a narrow one it
+ * follows the players.
+ */
+
+.lobby {
+  /* 880 of content, inside the padding */
+  max-width: 976px;
+  margin: 0;
+  padding: 56px 48px 96px;
+  display: grid;
+  gap: 32px;
+}
+
+.lobby-grid,
+.lobby-main,
+.lobby-side {
+  display: grid;
+  gap: 32px;
+  min-width: 0;
+  align-content: start;
+}
+
+.lobby-main > *,
+.lobby-side > * {
+  max-width: 640px;
+}
+
+@media (min-width: 960px) {
+  .lobby-grid {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+}
+
+/* how many are in, whether the party is locked, and the host's shuffle at the far end */
+.lobby-count {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-height: 36px;
+}
+
+.lobby-count .tag {
+  margin-left: 0;
+}
+
+.lobby-count .button {
+  margin-left: auto;
+}
+
+.lobby-start .fine,
+.lobby-settings .fine {
+  margin: 0;
+}
+
+.lobby-form:empty {
+  display: none;
+}
+
+/* the settings form opens under the line it changes, set off from it by a rule */
+.lobby-form {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/*
+ * A party holds forty. Its rows are all of one height (48px with its hairline, `.host-row` in
+ * host.css), and a long list scrolls inside itself, so the page under it (the chat on a phone)
+ * stays within reach and Start stays near the top: nine and a half rows of one list, five and a
+ * half of a team's, the half row saying there is more.
+ */
+.lobby {
+  --player-row: 48px;
+}
+
+.lobby .player-list {
+  max-height: calc(9.5 * var(--player-row));
+  overflow-y: auto;
+}
+
+.lobby .team-box .player-list {
+  max-height: calc(5.5 * var(--player-row));
+}
+
+/* the one list ends on a hairline of its own, so a row cut off by the scroll is cut on a line; the last row then needs none */
+.lobby-players > .player-list {
+  border-bottom: 1px solid var(--border);
+}
+
+.lobby-players > .player-list > .player-row:last-child {
+  border-bottom: 0;
+}
+
+@media (min-width: 721px) {
+  /*
+   * The lobby's column is narrower than a pane, and a third of it is too little for the longest
+   * mode ("No move, pan or zoom"). Here each of the three modes is first given the width of its
+   * words and they share what is left, so none goes onto a second line while all three fit; where
+   * they cannot (French), the short ones still stay whole and only the longest gives way.
+   */
+  .lobby-form .choice-row:has(input[name='lobby-mode']) .choices {
+    grid-auto-columns: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .lobby {
+    max-width: none;
+    padding: 32px var(--gutter) 48px;
+  }
+}

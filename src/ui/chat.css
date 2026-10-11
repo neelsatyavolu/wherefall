@@ -1,0 +1,332 @@
+/* Chat: laid open in a lobby, and behind a button over the round screen. */
+
+/* a match's corner: the chat button and, for a party's host, the Host button beside it. Each opens its panel under itself */
+.match-corner {
+  position: absolute;
+  top: var(--edge, 16px);
+  right: var(--edge, 16px);
+  z-index: 4;
+  max-width: calc(100% - 2 * var(--edge, 16px));
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  gap: 8px;
+  /* the corner is as large as its open panels; only the buttons and panels themselves take the pointer */
+  pointer-events: none;
+}
+
+.chat.folded {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.chat.folded > * {
+  pointer-events: auto;
+}
+
+.chat-panel {
+  width: min(320px, calc(100vw - 32px));
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+}
+
+.chat-toast {
+  margin: 0;
+  max-width: 280px;
+  padding: 6px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  font: 14px/1.4 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.chat-toast:empty {
+  display: none;
+}
+
+.chat-body {
+  display: grid;
+  gap: 12px;
+}
+
+.chat-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  display: grid;
+  gap: 4px;
+}
+
+.chat-list:empty {
+  display: none;
+}
+
+.chat-line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  font: 14px/1.4 var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.chat-name {
+  font-family: var(--font-mono);
+  color: var(--fg-3);
+}
+
+/* a reaction is told from a message by its face, not by a colour: the accent is not for decoration */
+.chat-line.reaction .chat-text {
+  font-family: var(--font-mono);
+  color: var(--fg);
+}
+
+.chat-reactions {
+  display: grid;
+  /* twenty reactions: four full rows of five */
+  grid-template-columns: repeat(5, 1fr);
+  border: 1px solid var(--border);
+}
+
+.chat-reaction {
+  appearance: none;
+  min-height: 36px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--fg-2);
+  font: 14px/1.3 var(--font-mono);
+  cursor: pointer;
+  transition: background-color 150ms var(--ease);
+}
+
+.chat-reaction:not(:nth-child(5n + 1)) {
+  border-left: 1px solid var(--border);
+}
+
+.chat-reaction:nth-child(n + 6) {
+  border-top: 1px solid var(--border);
+}
+
+.chat-reaction:hover {
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+
+.chat-form {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-form .chat-input {
+  min-width: 0;
+  padding: 7px 10px;
+  font-size: 15px;
+}
+
+.chat.open {
+  max-width: 480px;
+}
+
+/* --- to everyone, or to the team ---------------------------------------------------------- */
+
+/* the switch sits on one line with its label, over the message field */
+.chat-scope {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-scope legend {
+  float: left;
+  margin: 0;
+}
+
+.chat-scope .choices {
+  flex: 1;
+}
+
+.chat-scope .choice span {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+/* a line that only the sender's team was sent */
+.chat-team {
+  margin: 0 8px 0 0;
+}
+
+/* --- muting ------------------------------------------------------------------------------- */
+
+.chat-mutes {
+  font: 14px/1.4 var(--font-sans);
+}
+
+.chat-mutes summary {
+  padding: 4px 0;
+  font-family: var(--font-mono);
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.chat-mutes summary:hover {
+  color: var(--fg);
+}
+
+.chat-mutes .fine {
+  margin: 8px 0;
+}
+
+/* a party can hold twenty: the list scrolls inside the chat instead of pushing it off the screen */
+.mute-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 132px;
+  overflow-y: auto;
+  display: grid;
+  gap: 2px;
+}
+
+.mute-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.mute-name {
+  min-width: 0;
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.mute-row .tag {
+  margin-left: 0;
+}
+
+.mute-row .link-button {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  /* while guessing, the corner keeps to the bottom left, across from the map button: chat lowest, and each panel opens upwards */
+  .match-corner {
+    top: auto;
+    right: auto;
+    bottom: var(--edge, 16px);
+    left: var(--edge, 16px);
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+
+  /*
+   * With the map's sheet open, its bar (Close map and Guess) has the foot of the screen: the corner
+   * stands on top of the bar until the sheet is closed. The bar's height is --sheet-bar, which
+   * map-panel.css sets on the screen while the sheet is open.
+   */
+  .play[data-phase='guessing']:has(.map-panel.open) .match-corner {
+    bottom: calc(var(--sheet-bar, 56px) + 8px);
+  }
+
+  .chat.folded {
+    justify-items: start;
+  }
+
+  .chat.folded .chat-toggle {
+    order: 3;
+  }
+
+  .chat.folded .chat-toast {
+    order: 2;
+  }
+
+  .chat.folded .chat-panel {
+    order: 1;
+  }
+
+  .chat-reaction,
+  .chat-toggle {
+    min-height: 44px;
+  }
+
+  /* big enough to touch: the fold of the mutes, each Mute, and a guest's way to sign up */
+  .chat-mutes summary {
+    min-height: 44px;
+    padding: 12px 0;
+    box-sizing: border-box;
+  }
+
+  .mute-row {
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .mute-row .link-button {
+    min-height: 44px;
+    padding: 0 0 0 12px;
+  }
+
+  /* on a line of its own under the sentence: a link 44px tall inside the sentence would push its lines apart */
+  .chat-guest .guest-link {
+    display: block;
+    width: fit-content;
+    padding: 12px 0;
+  }
+
+  /* three rows of 44px */
+  .mute-list {
+    max-height: 136px;
+  }
+
+  /*
+   * One panel at a time is open in the corner (opening the chat closes the host's): it may be as
+   * tall as the screen less the two buttons under it, and scrolls inside itself beyond that.
+   */
+  .chat-panel {
+    max-height: calc(100vh - 152px);
+    max-height: calc(100dvh - 152px);
+    overflow-y: auto;
+  }
+
+  /*
+   * A reveal or a standing is a sheet at the foot of the screen: there the corner is a row under
+   * the HUD (and under the health, where a match has any) at the right, chat last. A panel opens
+   * under the row without moving it, across the screen from the right edge.
+   */
+  .play.match[data-phase='result'] .match-corner,
+  .play.match[data-phase='summary'] .match-corner {
+    top: var(--match-top);
+    right: var(--edge, 16px);
+    bottom: auto;
+    left: auto;
+    flex-direction: row-reverse;
+    align-items: flex-start;
+  }
+
+  .play.match[data-phase='result'] .chat.folded,
+  .play.match[data-phase='summary'] .chat.folded {
+    justify-items: end;
+  }
+
+  .play.match[data-phase='result'] .chat.folded .chat-toggle,
+  .play.match[data-phase='summary'] .chat.folded .chat-toggle {
+    order: 0;
+  }
+
+  .play.match[data-phase='result'] .match-corner .chat-panel,
+  .play.match[data-phase='summary'] .match-corner .chat-panel,
+  .play.match[data-phase='result'] .match-corner .host-panel,
+  .play.match[data-phase='summary'] .match-corner .host-panel {
+    position: absolute;
+    top: 52px;
+    right: 0;
+    max-height: calc(100vh - var(--match-top) - 52px - var(--edge, 16px));
+    max-height: calc(100dvh - var(--match-top) - 52px - var(--edge, 16px));
+  }
+}

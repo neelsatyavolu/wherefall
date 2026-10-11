@@ -1,0 +1,163 @@
+/*
+ * Where a panel that reports on play goes on the round screen, and how it ends: one slot, and one
+ * rule for the buttons at its foot. A local game's result and summary, the end of a streak and of a
+ * guesser run keep to it. The numbers (--edge, --hud-foot, --rail) are set on .play in play.css.
+ */
+
+/*
+ * The one place for a panel that reports on play: a round's result, a game's summary, the end of a
+ * streak or a guesser run. It is the rail under the HUD, widened to 440px over the map (which has
+ * the whole screen by then), and as tall as the panel needs, down to the screen's foot at most.
+ */
+.panel-host {
+  position: absolute;
+  left: var(--edge);
+  top: var(--hud-foot);
+  bottom: var(--edge);
+  width: min(440px, calc(100% - 2 * var(--edge)));
+  display: flex;
+  align-items: flex-start;
+  z-index: 3;
+  /* the slot runs the height of the screen and the panel seldom does: the map under the rest of it stays in reach */
+  pointer-events: none;
+}
+
+.panel-host > * {
+  pointer-events: auto;
+}
+
+.panel-host:empty {
+  display: none;
+}
+
+/* a notice (something would not load) is not a report on play: it stands in the middle, over a screen with nothing else on it */
+.play[data-phase='loading'] .panel-host {
+  left: 50%;
+  top: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: min(520px, calc(100% - 2 * var(--edge)));
+}
+
+/*
+ * The foot of a panel: what can be done from here, two to a row. The first is the action that
+ * moves play on, in the accent, and the only accent button on the panel; the rest are ghosts, the
+ * way out last. It keeps to the panel's foot while a long table scrolls above it.
+ */
+.panel:has(> .panel-actions) {
+  padding-bottom: 0;
+}
+
+.panel-actions {
+  position: sticky;
+  bottom: 0;
+  margin: 0 -20px;
+  padding: 12px 20px 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+/* an odd one out has the row to itself: no button is left alone beside an empty cell */
+.panel-actions > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+/* a single action is as wide as its words, at the left */
+.panel-actions > :only-child {
+  justify-self: start;
+}
+
+/*
+ * What can be done with a result (share it, copy its link) is not a way on, so it is not at the
+ * foot: two ghost buttons side by side in the panel's own part, which scrolls on a phone.
+ */
+.share-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.share-actions > :only-child {
+  justify-self: start;
+}
+
+/* the text itself, shown where the browser would not copy it, has the row */
+.share-actions > .link-field {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+}
+
+/* a result reads down the rail: how far and how many points side by side, the country under them on a line of its own */
+.result-panel .figures {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.result-panel .figure:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
+.result-panel .figure-value {
+  font-size: 21px;
+  overflow-wrap: break-word;
+}
+
+/* "/ 5,000" stays whole, and with its number when there is room */
+.play .figure-detail {
+  white-space: nowrap;
+}
+
+/* a place's link is big enough for a finger, and never a button's weight */
+.play .place-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 720px) {
+  /* on a phone a panel that reports on play is a sheet at the foot of the screen, and the map has the rest */
+  .panel-host {
+    left: var(--edge);
+    right: var(--edge);
+    top: auto;
+    bottom: var(--edge);
+    width: auto;
+    align-items: flex-end;
+  }
+
+  /* the sheet takes no more than three fifths of the screen; a longer table scrolls inside it, above its buttons */
+  .panel-host > * {
+    max-height: 60vh;
+    max-height: 60dvh;
+  }
+
+  .play[data-phase='loading'] .panel-host {
+    right: auto;
+  }
+
+  .play[data-phase='loading'] .panel-host > * {
+    max-height: calc(100vh - 2 * var(--edge));
+  }
+
+  .panel-actions > :only-child {
+    justify-self: stretch;
+  }
+
+  /* one to a row, each on one line in any language, and big enough for a finger */
+  .share-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .share-actions > :only-child {
+    justify-self: stretch;
+  }
+
+  .share-actions .button {
+    min-height: 44px;
+  }
+
+  .play .place-link {
+    min-height: 44px;
+  }
+}

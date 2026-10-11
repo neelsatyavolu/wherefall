@@ -1,0 +1,295 @@
+/* Other players: profiles and their charts, the boards, friends, and who is online. */
+
+/* --- presence: a dot and a line of data, blue while the player is online -------------------- */
+
+.presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: 12px/1.3 var(--font-mono);
+  color: var(--fg-3);
+}
+
+/* the dot is filled for a player who is online and hollow for one who is away, so it is not colour alone */
+.presence::before {
+  content: '';
+  flex: none;
+  box-sizing: border-box;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--fg-4);
+  border-radius: 50%;
+}
+
+.presence.online {
+  color: var(--fg-2);
+}
+
+.presence.online::before {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+/*
+ * how many players are online: above the wordmark, in the room the sidebar already keeps there, so
+ * the nav is no taller for it
+ */
+.online-count {
+  position: absolute;
+  top: 24px;
+  left: var(--gutter);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: 12px/1.3 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-3);
+}
+
+.online-count[hidden] {
+  display: none;
+}
+
+.online-count::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* --- a profile's head ----------------------------------------------------------------------- */
+
+.profile-who {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.profile-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.friend-offer {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  margin-top: 8px;
+}
+
+.friend-offer:empty {
+  display: none;
+}
+
+.pane-title .flag {
+  margin-right: 12px;
+}
+
+/* --- progress charts: four small charts sharing hairlines, two across ----------------------- */
+
+.chart-body {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* another range is on its way: what is drawn holds the frame until it arrives */
+.chart-body.stale {
+  opacity: 0.45;
+}
+
+.charts.four .chart:nth-child(odd) {
+  border-left: 0;
+}
+
+.charts.four .chart:nth-child(n + 3) {
+  border-top: 1px solid var(--border);
+}
+
+/* the value now, or on the day the pointer is reading */
+.chart-read {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.chart-when {
+  font: 12px/1.3 var(--font-mono);
+  color: var(--fg-3);
+  white-space: nowrap;
+}
+
+.chart-now.unrecorded {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--fg-3);
+}
+
+/* the two ends of the axis beside the line, the days it covers beneath it */
+.chart-plot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.chart-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* room for six figures, so charts stacked on a phone start their lines at the same place */
+  min-width: 6ch;
+  padding: 2px 0;
+  text-align: right;
+  font: 12px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-3);
+}
+
+.chart-axis.level-line {
+  justify-content: center;
+}
+
+.chart-plot .chart-range {
+  grid-column: 2;
+}
+
+.charts .chart-line {
+  cursor: crosshair;
+  /* a finger moving across reads the chart; moving down still scrolls the page */
+  touch-action: pan-y;
+}
+
+.charts .chart-line:focus-visible {
+  outline: 2px solid var(--accent-muted);
+  outline-offset: 2px;
+}
+
+.charts .chart-path {
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* a point: a square of the line's colour with a ring of the surface, so it stays clear where it sits on the line */
+.charts .chart-end,
+.chart-mark {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 4;
+  paint-order: stroke;
+}
+
+.chart-mark {
+  fill: var(--fg);
+  pointer-events: none;
+}
+
+.chart-cross {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.chart-table summary {
+  width: fit-content;
+  padding: 4px 0;
+  font: 14px/1.4 var(--font-mono);
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.chart-table summary:hover {
+  color: var(--fg);
+}
+
+.chart-table[open] summary {
+  margin-bottom: 8px;
+}
+
+/* --- boards ---------------------------------------------------------------------------------- */
+
+.board-about {
+  display: grid;
+  gap: 4px;
+}
+
+/* a place of two or three digits keeps clear of the name beside it */
+.board .rounds .num:first-child {
+  padding-right: 12px;
+}
+
+/* the player's own row, under a page of the board they are not on */
+.board-own-row td {
+  border-top: 1px solid var(--border-strong);
+}
+
+/* the top three: a filled square, an inverted one and an outlined one, each with its place written in it */
+.medal {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  font: 500 12px/1 var(--font-mono);
+}
+
+.medal-1 {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.medal-2 {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.medal-3 {
+  border: 1px solid var(--border-strong);
+  color: var(--fg);
+}
+
+@media (max-width: 720px) {
+  /* on a phone the count sits at the far end of the wordmark's line */
+  .sidebar:has(> .online-count) {
+    position: relative;
+  }
+
+  .online-count {
+    top: 20px;
+    right: var(--gutter);
+    left: auto;
+    height: 22px;
+  }
+
+  /* five columns of numbers on a phone: the cells keep only the room between them */
+  .chart-table .rounds th,
+  .chart-table .rounds td {
+    padding-right: 0;
+  }
+
+  .chart-table .rounds .num {
+    padding-left: 8px;
+  }
+
+  .chart-table summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media (max-width: 520px) {
+  /* a board on a phone: place, player and value, nothing else */
+  .board .board-extra {
+    display: none;
+  }
+}

@@ -1,0 +1,78 @@
+/* The guess map's tools beyond zoom and size (those are in map.css): keep-open, full screen, the map type and its credit. */
+
+/* the left side of the tools: sizes with keep-open and full screen, and the map types under them */
+.map-side {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.map-row {
+  display: flex;
+  gap: 6px;
+}
+
+.map-hold,
+.map-types {
+  display: flex;
+  border: 1px solid var(--border-strong);
+  pointer-events: auto;
+}
+
+.map-hold .map-tool + .map-tool,
+.map-types .map-tool + .map-tool {
+  border-left: 1px solid var(--border);
+}
+
+.map-tool svg {
+  display: block;
+  margin: auto;
+}
+
+/* a map type is named in a word, so its button is as wide as the word */
+.map-tool.map-type {
+  width: auto;
+  padding: 0 10px;
+  font: 500 12px/1 var(--font-sans);
+}
+
+/* the types wait until the map is opened: over the small corner map they would hide too much of it */
+.map-types {
+  display: none;
+}
+
+.map-panel:hover .map-types,
+.map-panel:focus-within .map-types,
+.map-panel.keep .map-types,
+.map-panel.full .map-types,
+.map-panel.open .map-types {
+  display: flex;
+}
+
+/* who the satellite or terrain pictures are by: on the map for as long as they are */
+.map-credit {
+  margin: 0;
+  padding: 4px 8px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  font: 11px/1.4 var(--font-sans);
+  color: var(--fg-3);
+  overflow-wrap: anywhere;
+}
+
+.map-credit a {
+  color: var(--fg-2);
+  text-underline-offset: 2px;
+}
+
+/* the hybrid map's second credit, for the names and borders over the pictures: on a line of its own under the pictures' */
+.map-credit-line {
+  display: block;
+}
+
+@media (max-width: 720px) {
+  /* the map is a sheet of one size on a phone: only the map type is left to choose */
+  .map-row {
+    display: none;
+  }
+}

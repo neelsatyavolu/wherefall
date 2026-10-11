@@ -1,0 +1,138 @@
+/* The screen before a ranked duel's first round: the two players, and "versus" between them. */
+
+.versus {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  /* it is only looked at: the view under it can still be turned while the round gets ready */
+  pointer-events: none;
+}
+
+.versus[hidden] {
+  display: none;
+}
+
+.versus-box {
+  /* wide enough for two names of twenty characters, each with its flag */
+  width: min(780px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  padding: 28px 24px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+}
+
+.versus-card {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.versus-card:last-child {
+  justify-items: end;
+  text-align: right;
+}
+
+.versus-name {
+  font: 500 21px/1.3 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.versus-rating {
+  font: 500 28px/1.1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.versus-card.own .versus-rating {
+  color: var(--accent);
+}
+
+.versus-league {
+  font: 12px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.versus-word {
+  font: italic 21px/1 var(--font-serif);
+  color: var(--fg-2);
+}
+
+/* when the round starts: a line of status across the foot of the box, which stands where the round screen's own line would */
+.versus-count {
+  grid-column: 1 / -1;
+  justify-self: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  max-width: none;
+  justify-content: center;
+  grid-template-columns: auto auto;
+}
+
+.versus-count .status-inline {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  /* on a phone the two stand one above the other, each across the whole box */
+  .versus-box {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 20px 16px;
+  }
+
+  .versus-card:last-child {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .versus-name {
+    font-size: 17px;
+  }
+
+  .versus-rating {
+    font-size: 21px;
+  }
+}
+
+/* the two come in from their own sides; for a player who asked for less motion they are simply there */
+@media (prefers-reduced-motion: no-preference) {
+  .versus-card {
+    animation: versus-in 420ms var(--ease) both;
+  }
+
+  .versus-card:last-child {
+    animation-name: versus-in-right;
+  }
+
+  .versus-word {
+    animation: versus-word 420ms var(--ease) 160ms both;
+  }
+}
+
+@keyframes versus-in {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+@keyframes versus-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes versus-word {
+  from {
+    opacity: 0;
+  }
+}

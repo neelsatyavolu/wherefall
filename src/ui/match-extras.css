@@ -1,0 +1,251 @@
+/*
+ * The inside of a match's panels: a revealed round and the final standing. Both stand in the round
+ * screen's one panel slot (panel-slot.css) and end as its panels end: a foot with what comes next
+ * first and the way out beside it. Their tables scroll inside the panel, between its head and that
+ * foot, with the player's own row kept in sight.
+ */
+
+.match-panel {
+  --match-gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--match-gap);
+}
+
+.match-panel > * {
+  flex: none;
+  min-width: 0;
+}
+
+/* the tables: all that gives way when the panel is as tall as it may be */
+.match-panel > .match-scroll {
+  flex: 0 1 auto;
+  /* never less than the headings and two rows */
+  min-height: 112px;
+  overflow-y: auto;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+/* a late joiner's standing is a notice in the middle of the screen: it is no taller than the screen */
+.play.match[data-phase='loading'] .match-panel {
+  max-height: calc(100vh - 2 * var(--edge));
+  max-height: calc(100dvh - 2 * var(--edge));
+}
+
+/* --- the tables ------------------------------------------------------------------------------ */
+
+/* each cell keeps its own hairline, so a row that stays put while the rest scrolls keeps its line too */
+.match-scroll .rounds {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* the headings stay at the top of the scrolling tables */
+.match-scroll .rounds th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  height: 28px;
+  padding-top: 3px;
+  background: var(--bg);
+}
+
+/* one line each: a heading, a number, a distance, a rating. Only a name may take two */
+.match-scroll .rounds th,
+.match-scroll .rounds .num {
+  white-space: nowrap;
+}
+
+/*
+ * The player's own row is always in sight, and never by lying on another row: while it is scrolled
+ * out of the box, a copy of it stands in a strip of its own between the box and the panel's foot
+ * (`match-own-row.ts`). The strip is the canvas, opaque, under a hairline; the row's own tint is
+ * on its cells, whose widths are the table's.
+ */
+.match-panel > .own-strip {
+  /* near the box it belongs to, and plainly not part of it: a little canvas, then the hairline, then the row */
+  margin-top: calc(6px - var(--match-gap));
+  background: var(--bg);
+  border-top: 1px solid var(--border-strong);
+}
+
+.own-strip .rounds {
+  table-layout: fixed;
+}
+
+.own-strip .rounds td {
+  border-bottom: 0;
+}
+
+/* one rule for a name in a match's tables: the flag, the name, then its marks, which go to a line of their own where the cell is narrow */
+.match-panel .rounds .player {
+  display: inline-flex;
+  align-items: baseline;
+  max-width: 100%;
+  margin-right: 8px;
+}
+
+/* a long name goes onto a second line beside its flag, not under it */
+.match-panel .rounds .player > :last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  /* and its two lines are of a length, not a line and one letter */
+  text-wrap: balance;
+}
+
+.match-panel .rounds .player-name .tag {
+  display: inline-block;
+  margin: 0 8px 0 0;
+}
+
+/* a team has no flag before its name, so its mark keeps its distance on the left */
+.match-panel .team-table .player-name .tag {
+  margin: 0 0 0 8px;
+}
+
+/* a touch screen has no pointer resting on a name: one that was tapped is not left underlined beside the others */
+@media (hover: none) {
+  .match-panel .rounds .profile-link:hover {
+    text-decoration: none;
+  }
+}
+
+/* the Perfect mark goes under the player's own points, so the column is no wider than its numbers */
+.match-result .rounds .num .tag {
+  display: block;
+  margin-left: 0;
+}
+
+/* a rating's change, in a cell of its own: green and "+" for up, red and "−" for down */
+.match-panel .rounds .delta {
+  width: 1%;
+  padding-left: 8px;
+}
+
+.match-panel .rounds .delta.up {
+  color: var(--ok);
+}
+
+.match-panel .rounds .delta.down {
+  color: var(--danger);
+}
+
+/* the end of a row: the button that reports its player, a flag on a small ghost button */
+.match-panel .rounds .row-end {
+  width: 1%;
+  padding: 2px 0 2px 8px;
+  text-align: right;
+}
+
+.report-button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  color: var(--fg-2);
+}
+
+.report-button:hover:not(:disabled) {
+  color: var(--fg);
+}
+
+/* --- under the tables -------------------------------------------------------------------------- */
+
+/* what the round earned, and the place itself to look at, side by side while there is room */
+.match-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+
+.match-meta:empty {
+  display: none;
+}
+
+/* a reveal moves on by itself: where another panel has its forward button, this one counts down, with the way out beside it */
+.panel-actions.match-foot {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.countdown .status-inline {
+  font-variant-numeric: tabular-nums;
+}
+
+/* what the standing has to say before its buttons: who goes back to the lobby, and a refusal */
+.final-notes {
+  display: grid;
+  gap: 8px;
+}
+
+.final-notes:empty {
+  display: none;
+}
+
+.final-notes .account-error {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  /*
+   * On a phone the panel is a sheet at the foot of the screen, and no more than 45% of it: the map
+   * above keeps room for the guess and the place. A long table scrolls inside the sheet.
+   */
+  .play.match[data-phase='result'] .panel-host > *,
+  .play.match[data-phase='summary'] .panel-host > * {
+    max-height: 45vh;
+    max-height: 45dvh;
+  }
+
+  /* every line of the sheet counts: it is a little closer set than the panel of a wide screen */
+  .match-panel {
+    --match-gap: 8px;
+    padding-top: 16px;
+  }
+
+  .match-panel > .match-scroll {
+    gap: 8px;
+  }
+
+  /* a name is a link, and a link on a phone is 44px tall: the row is as tall as its name, no taller */
+  .match-panel .rounds td.player-name {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .match-panel .rounds .player > .profile-link,
+  .match-panel .rounds .player > .guest-name {
+    display: inline-block;
+    box-sizing: border-box;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px 0;
+  }
+
+  .match-panel .rounds .row-end {
+    padding: 0 0 0 4px;
+  }
+
+  .report-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  /*
+   * A revealed round on a phone is the name, how far and how many points: the running total gives
+   * its room to the name, which then fits on a line. The player's own total is in the HUD, the
+   * teams' are in their own table, and everyone's is in the final standing. A duel's standing has
+   * the rating and its change to show instead: its points are left out too, and its health is in
+   * the bars at the top of the screen.
+   */
+  .match-result .rounds .col-total,
+  .match-standing .rounds.rated .col-total {
+    display: none;
+  }
+}

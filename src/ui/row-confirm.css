@@ -1,0 +1,16 @@
+/* A question asked in a row before something that is not lightly undone: the sentence, then the two answers at the row's right edge. */
+
+.row-actions.asking {
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.row-confirm {
+  flex: 1 1 200px;
+  margin: 0;
+  font: 14px/1.4 var(--font-sans);
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}

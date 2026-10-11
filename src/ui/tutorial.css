@@ -1,0 +1,35 @@
+/* The tutorial's own lines on the panels it shares with every game: a fact with a result, and the ways on at its end. */
+
+/* a sentence about the place: prose like the panel's other lines, in the first ink so it reads as the thing to take away */
+.place-fact {
+  color: var(--fg);
+  text-wrap: pretty;
+}
+
+@media (max-width: 720px) {
+  /* the sheet shares a phone's screen with the map and the tip above it: the fact is set a step smaller, as the tip is */
+  .place-fact {
+    font-size: 15px;
+  }
+
+  /* three ways on, one to a row: each label on one line in any language, each row a finger's height */
+  .tutorial-ways {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tutorial-ways .button {
+    min-height: 44px;
+  }
+}
+
+/*
+ * A short phone: the tip stands above and the result's sheet below, and the map between them still
+ * has to show the line the tip talks about. With a fact in it the sheet stops at half the screen;
+ * the fact stays in sight and the lines under it scroll, above the button.
+ */
+@media (max-width: 720px) and (max-height: 720px) {
+  .panel-host > .result-panel:has(.place-fact) {
+    max-height: 50vh;
+    max-height: 50dvh;
+  }
+}

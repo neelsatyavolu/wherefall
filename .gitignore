@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+test-results
+playwright-report
+.vercel
+.DS_Store
+locations.sample.json
+.env
+.env.*
+!.env.example
+.data
+locations.google.sample.json

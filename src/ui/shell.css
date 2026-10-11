@@ -1,0 +1,698 @@
+/* The home screen: a sidebar of nav links and the pane for the selected one. */
+
+.shell {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 56px 0 8px;
+  border-right: 1px solid var(--border);
+}
+
+.sidebar .wordmark {
+  padding: 0 var(--gutter) 24px;
+  font-size: 28px;
+}
+
+/*
+ * nav: mono text items under small group labels, groups set apart by hairlines, the selected one marked by a blue rule.
+ * The groups sit close enough that the whole list fits a screen 840px tall; with Moderation and the install offer it scrolls.
+ */
+.nav-group {
+  padding: 12px 0 8px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-label {
+  margin: 0;
+  padding: 0 var(--gutter) 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px var(--gutter) 6px calc(var(--gutter) - 2px);
+  border-left: 2px solid transparent;
+  font: 14px/1.4 var(--font-mono);
+  color: var(--fg-2);
+  text-decoration: none;
+  transition:
+    background-color 150ms var(--ease),
+    color 150ms var(--ease);
+}
+
+.nav-item:hover {
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+
+.nav-item:focus-visible {
+  outline-offset: -2px;
+}
+
+.nav-item[aria-current='page'] {
+  border-left-color: var(--accent);
+  background: var(--surface);
+  color: var(--fg);
+}
+
+/* how many requests and invites are waiting on the friends pane */
+.badge {
+  min-width: 20px;
+  padding: 1px 6px;
+  background: var(--accent);
+  color: var(--bg);
+  font: 500 12px/1.5 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* only a phone folds the nav away */
+.menu-toggle {
+  display: none;
+}
+
+/* --- pane ------------------------------------------------------------------------------- */
+
+.pane {
+  min-width: 0;
+  padding: 56px 48px 96px;
+}
+
+/* one column for every pane, at the left of the room beside the sidebar, so each starts on the same line */
+.pane-column {
+  max-width: 880px;
+  display: grid;
+  gap: 32px;
+}
+
+/*
+ * Two widths and no others. What a pane holds is 640 wide: ledes, forms, options, lists and simple
+ * tables. What needs the room is marked `wide` and takes the column's 880: charts, tables of many
+ * columns, the figures of an account, the editor's map. The rule has no weight of its own, so a
+ * narrower measure a block sets for itself (a line of fine print) still holds.
+ */
+:where(.pane-section, .pane-stack, .pane-body, .account-body) > :where(:not(.pane-section, .pane-stack, .pane-body, .account-body, .account, .wide)) {
+  max-width: 640px;
+}
+
+.resume-host:empty {
+  display: none;
+}
+
+.pane-section,
+.pane-body,
+.pane-stack {
+  display: grid;
+  gap: 32px;
+  min-width: 0;
+}
+
+.pane-stack,
+.notice,
+.queue {
+  justify-items: start;
+}
+
+.pane-stack > *,
+.pane-section > * {
+  min-width: 0;
+}
+
+.pane-stack > .setup,
+.pane-stack > .account-section,
+.pane-stack > .account-stats,
+.pane-stack > .account-table,
+.pane-stack > .level,
+.pane-stack > .panel,
+.pane-stack > .inline-form,
+.pane-stack > .map-frame,
+.pane-stack > .rounds,
+.pane-stack > .pane-stack {
+  justify-self: stretch;
+}
+
+.pane-head {
+  display: grid;
+  gap: 12px;
+}
+
+.pane-head.with-action {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.pane-title {
+  margin: 0;
+  font: 500 28px/1.1 var(--font-mono);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/* the same measure for what stands outside a pane's own blocks (the offer to rejoin) or deeper inside them */
+.setup,
+.account-form,
+.inline-form,
+.intro,
+.challenge,
+.resume,
+.notice,
+.queue,
+.pane .prose {
+  max-width: 640px;
+}
+
+.setup {
+  width: 100%;
+}
+
+/* a link dressed as a button: the sign-in notice sends the visitor to another pane */
+a.button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.prose a {
+  color: var(--accent);
+}
+
+.notice,
+.queue,
+.facts {
+  display: grid;
+  gap: 16px;
+}
+
+.facts {
+  gap: 4px;
+}
+
+/* a game's settings, or one fact about it, as a line of data */
+.settings-line {
+  margin: 0;
+  font: 14px/1.5 var(--font-mono);
+  color: var(--fg-2);
+}
+
+.queue-status {
+  margin: 0;
+  font: 500 21px/1.3 var(--font-mono);
+}
+
+.queue-waiting {
+  margin: 0;
+  font: 14px/1.4 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-2);
+}
+
+.code-input {
+  max-width: 12em;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.daily-facts {
+  display: grid;
+  gap: 8px;
+}
+
+/* --- pieces of panes -------------------------------------------------------------------- */
+
+.intro,
+.resume {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+}
+
+.resume {
+  border-color: var(--accent);
+}
+
+.intro-steps {
+  margin: 0;
+  padding-left: 1.4em;
+  font: 17px/1.5 var(--font-serif);
+  color: var(--fg-2);
+}
+
+.intro-steps li + li {
+  margin-top: 4px;
+}
+
+/* the two ways on from the how-to are quiet: the pane's one filled button is the game's own */
+.intro .actions {
+  margin-top: 4px;
+}
+
+.map-picker {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+
+.country-picker {
+  display: grid;
+  gap: 8px;
+}
+
+.country-list {
+  max-height: 232px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+}
+
+.country-list:empty {
+  display: none;
+}
+
+.country-option {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.country-option + .country-option {
+  border-top: 1px solid var(--border);
+}
+
+.country-option input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.country-option > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  font: 14px/1.4 var(--font-mono);
+  color: var(--fg-2);
+}
+
+.country-option:hover > span {
+  background: var(--surface-hover);
+}
+
+.country-option input:checked + span {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.country-option input:focus-visible + span {
+  outline: 2px solid var(--accent-muted);
+  outline-offset: -2px;
+}
+
+.country-count {
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.country-option input:checked + span .country-count {
+  color: inherit;
+  opacity: 0.6;
+}
+
+/* a label, then a field and its button on one line */
+.inline-form {
+  display: grid;
+  gap: 8px;
+}
+
+.inline-fields {
+  display: flex;
+  gap: 8px;
+}
+
+.inline-fields .account-input {
+  min-width: 0;
+}
+
+.inline-fields .button {
+  flex: none;
+}
+
+.level {
+  display: grid;
+  gap: 12px;
+}
+
+.level-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+/* --- maps --------------------------------------------------------------------------------- */
+
+/* who made a map, between its name and its numbers */
+.by {
+  color: var(--fg-3);
+}
+
+.by .profile-link {
+  color: var(--fg-2);
+}
+
+.list-foot:empty {
+  display: none;
+}
+
+/* the long list of countries waits behind its own heading */
+.more-maps summary {
+  padding: 12px 0;
+  font: 14px/1.4 var(--font-mono);
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.more-maps summary:hover {
+  color: var(--fg);
+}
+
+.more-maps[open] summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.more-maps .player-list {
+  border-top: 0;
+}
+
+.pane-stack > .stats-host,
+.pane-stack > .account-form {
+  justify-self: stretch;
+}
+
+.editor-map {
+  height: min(64vh, 520px);
+}
+
+textarea.account-input {
+  resize: vertical;
+  min-height: 72px;
+  font-family: var(--font-sans);
+}
+
+.report-form {
+  width: 100%;
+}
+
+/* what the report is about stands clear of the note under it */
+.report-form > .choice-row {
+  margin-bottom: 8px;
+}
+
+/* --- progress charts ------------------------------------------------------------------------ */
+
+.progress-host:empty {
+  display: none;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--border);
+}
+
+.chart {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.chart + .chart {
+  border-left: 1px solid var(--border);
+}
+
+.chart-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chart-now {
+  font: 500 21px/1.1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-line {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chart-path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-end {
+  fill: var(--accent);
+}
+
+.chart-rule {
+  stroke: var(--border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-range {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font: 12px/1.3 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-3);
+}
+
+/* the offer to install the site as an app, at the foot of the nav */
+.nav-item.install {
+  appearance: none;
+  width: 100%;
+  margin-top: 8px;
+  border-width: 0 0 0 2px;
+  border-top: 1px solid var(--border);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* what reporters wrote, under the row it is about */
+.reasons {
+  flex-basis: 100%;
+  margin: 0;
+  padding-left: 1.2em;
+  font: 15px/1.5 var(--font-serif);
+  color: var(--fg-2);
+}
+
+/* what a report of a player is about, before the note that came with it */
+.reasons .reason-category {
+  margin: 0 8px 0 0;
+}
+
+@media (max-width: 720px) {
+  .shell {
+    display: block;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    overflow: visible;
+    padding: 20px var(--gutter) 0;
+    border-right: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .sidebar .wordmark {
+    padding: 0;
+    font-size: 21px;
+  }
+
+  /* the nav folds away behind a row that names the pane showing; the row opens the whole list */
+  .menu-toggle {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--border-strong);
+    border-left: 2px solid var(--accent);
+    border-radius: 0;
+    background: var(--surface);
+    color: var(--fg);
+    font: 14px/1.4 var(--font-mono);
+    cursor: pointer;
+  }
+
+  /* the word says what a tap does, and the chevron after it that the row opens: a button, not a field to type in */
+  .menu-word {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .menu-word::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-word::after {
+    transform: translateY(2px) rotate(-135deg);
+  }
+
+  .nav {
+    display: none;
+    margin: -16px 0 0;
+    border: 1px solid var(--border-strong);
+    border-top: 0;
+  }
+
+  .nav.open {
+    display: block;
+  }
+
+  .nav-group:first-child {
+    border-top: 0;
+  }
+
+  .nav-group {
+    padding: 12px 0 8px;
+  }
+
+  .nav-label {
+    padding-inline: 14px;
+  }
+
+  .nav-item {
+    min-height: 44px;
+    padding-inline: 12px 14px;
+  }
+
+  .pane {
+    padding: 24px var(--gutter) 64px;
+  }
+
+  .pane-column,
+  .pane-section,
+  .pane-body,
+  .pane-stack {
+    gap: 24px;
+  }
+
+  .pane-title {
+    font-size: 21px;
+  }
+
+  .inline-fields {
+    flex-direction: column;
+  }
+
+  .charts {
+    grid-template-columns: 1fr;
+  }
+
+  .chart + .chart {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .more-maps summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /*
+   * A name in a row or a table that leads somewhere, and an action written as a link, take a finger:
+   * 44px high, and wide enough by their padding, which the margin takes back so nothing moves.
+   * A name inside a sentence stays a link in a sentence.
+   */
+  .pane :is(.player-row, .rounds) .profile-link,
+  .pane .link-button {
+    display: inline-flex;
+    align-items: center;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .pane :is(.player-row, .rounds) .profile-link {
+    min-width: 0;
+    padding-inline: 10px;
+    margin-inline: -10px;
+  }
+
+  /* the row gives its own padding up to them, so it is no taller for it */
+  .pane .player-row {
+    padding-block: 2px;
+  }
+
+  .pane .rounds tr:has(.profile-link) > td {
+    padding-block: 0;
+  }
+
+  .pane .rounds tr:has(.link-button) > td {
+    padding-block: 4px;
+  }
+
+  /* the word beside the player's own name on a board stays beside it (in a round's table a tag goes under its number) */
+  .pane .board .tag,
+  .pane .daily-board .tag {
+    display: inline;
+    margin-left: 8px;
+  }
+
+  .country-option > span {
+    align-items: center;
+    min-height: 44px;
+  }
+}

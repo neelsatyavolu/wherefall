@@ -1,0 +1,402 @@
+/* Multiplayer: the party lobby, and what a match adds to the round screen. */
+
+/* --- lobby ------------------------------------------------------------------------------ */
+
+.screen-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* the size of a pane's title: the lobby is one more screen of the same kind */
+.screen-title {
+  margin: 0;
+  font: 500 28px/1.1 var(--font-mono);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.lobby-invite {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+}
+
+.lobby-code {
+  font-size: 40px;
+  letter-spacing: 0.08em;
+}
+
+.lobby-link {
+  display: flex;
+  gap: 8px;
+}
+
+.lobby-link .link-field {
+  min-width: 0;
+}
+
+.lobby-link .button {
+  flex: none;
+}
+
+.lobby-invite .figure {
+  min-width: 0;
+}
+
+/* --- in a match: where its own parts stand ------------------------------------------------ */
+
+.play.match {
+  /*
+   * Where a match's own parts begin under the HUD. On a wide screen that is the HUD's foot: health
+   * stands beside the HUD, at the top of the screen. On a phone the health bars run the screen's
+   * width under the HUD, and everything else begins under them (--health-rise, their height and a gap).
+   */
+  --health-rise: 0px;
+  --match-top: calc(var(--hud-foot) + var(--health-rise));
+}
+
+/*
+ * The side: the rail under the HUD while a round is played. A lost connection first, then what the
+ * round has to say (no timer, the host's End round), then who has guessed. It ends above the
+ * compass and its buttons at the rail's foot, and the guess map never comes into the rail, at any
+ * size: so nothing here lies on the map or its tools, and a long list scrolls inside itself.
+ */
+.match-side {
+  position: absolute;
+  top: var(--match-top);
+  left: var(--edge);
+  bottom: 190px;
+  z-index: 1;
+  width: min(var(--rail), calc(100% - 2 * var(--edge)));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* only its parts take the pointer: the view under the rest of the rail can still be turned */
+  pointer-events: none;
+}
+
+.match-side > * {
+  flex: none;
+  min-width: 0;
+  pointer-events: auto;
+}
+
+/* full screen, the map's own buttons have the top of the rail: the side begins under them */
+.play[data-phase='guessing']:has(.map-panel.full) .match-side {
+  top: calc(var(--hud-foot) + 96px);
+}
+
+/* over a reveal or a standing the panel has the rail: what is left of the side (a lost connection) stands beside the panel */
+.play.match[data-phase='result'] .match-side,
+.play.match[data-phase='summary'] .match-side {
+  left: calc(440px + 2 * var(--edge));
+  bottom: auto;
+}
+
+/* a lost connection: a red dot and the line in mono, as the round screen's own news is drawn */
+.net-banner {
+  margin: 0;
+  padding: 8px 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  font: 14px/1.4 var(--font-mono);
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.net-banner::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--danger);
+  transform: translateY(-2px);
+}
+
+.net-banner:empty {
+  display: none;
+}
+
+/* --- who has guessed: once the player's own guess is in ------------------------------------ */
+
+.roster {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+}
+
+/* "3 / 8 guessed": a line of status that opens and folds the list of names */
+.roster-toggle {
+  appearance: none;
+  flex: none;
+  width: 100%;
+  max-width: none;
+  padding: 10px 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms var(--ease);
+}
+
+.roster-toggle:hover {
+  background: var(--surface-hover);
+}
+
+.roster-toggle .status-dot,
+.round-label .status-dot {
+  margin-top: 0;
+}
+
+/* open or folded, said by a plus or a minus at the line's end */
+.roster-toggle::after,
+.round-label::after {
+  content: '+';
+  margin-left: 12px;
+  font: 14px/1 var(--font-mono);
+  color: var(--fg-3);
+}
+
+.roster-toggle[aria-expanded='true']::after,
+.round-fold[open] > .round-label::after {
+  content: '−';
+}
+
+.roster-list {
+  margin: 0;
+  padding: 0 14px 10px;
+  list-style: none;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  gap: 4px;
+}
+
+.roster-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  font: 14px/1.4 var(--font-mono);
+}
+
+/* a long name goes onto a second line beside its flag, not under it */
+.roster-name {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  overflow-wrap: anywhere;
+  /* and its two lines are of a length, not a line and two letters */
+  text-wrap: balance;
+}
+
+.roster-status {
+  color: var(--fg-3);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg-4);
+}
+
+.roster-row.guessed .dot {
+  background: var(--ok);
+}
+
+.roster-row.guessing .dot {
+  background: var(--accent);
+}
+
+.roster-row.away .roster-name {
+  color: var(--fg-3);
+}
+
+/* another player's pin: ink on the canvas, so the blue stays the viewer's own */
+.pin-other {
+  background: var(--bg);
+  color: var(--fg);
+  border-color: var(--fg);
+}
+
+/* --- health: each player's in a ranked duel, each team's in 2v2 (`.has-health` on the screen) -- */
+
+/* beside the HUD at the top of the screen, in every phase: the panels of a match stand under the HUD, clear of it */
+.health {
+  position: absolute;
+  top: var(--edge);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: min(440px, calc(100% - 2 * var(--edge)));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+}
+
+.health-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
+  padding: 8px 14px;
+  font: 14px/1.4 var(--font-mono);
+}
+
+.health-row + .health-row {
+  border-left: 1px solid var(--border);
+}
+
+.health-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg-2);
+}
+
+.health-value {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.health-lost {
+  grid-column: 1 / -1;
+  min-height: 1.4em;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--danger);
+}
+
+.health-row .bar {
+  grid-column: 1 / -1;
+  height: 4px;
+}
+
+.health-row:not(.own) .bar-fill {
+  background: var(--fg-2);
+}
+
+/* --- over a reveal and a standing ---------------------------------------------------------- */
+
+/* the chat button has the top right corner: the map's zoom buttons sit under it, and the credit for its pictures under them */
+.play.match[data-phase='result'] .map-tools,
+.play.match[data-phase='summary'] .map-tools {
+  top: 64px;
+}
+
+.play.match[data-phase='result'] .map-credit,
+.play.match[data-phase='summary'] .map-credit {
+  top: 144px;
+}
+
+.summary-panel > .figure .outcome {
+  font-size: 28px;
+}
+
+.team-figures {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 720px) {
+  .lobby-code {
+    font-size: 28px;
+  }
+
+  .lobby-link {
+    flex-direction: column;
+  }
+
+  /* chat has the bottom left corner in a match: the compass and its tools move up a row */
+  .play.match .pano-tools {
+    bottom: 120px;
+  }
+
+  /* the health bars run the screen's width under the HUD: 66px of them and a gap */
+  .play.match.has-health {
+    --health-rise: 74px;
+  }
+
+  .health {
+    top: var(--hud-foot);
+    left: var(--edge);
+    right: var(--edge);
+    width: auto;
+    height: 66px;
+    overflow: hidden;
+    transform: none;
+  }
+
+  .health-row {
+    padding: 6px 12px;
+    align-content: start;
+  }
+
+  /*
+   * Under the HUD, and under the health where there is any: each part as wide as its words, one
+   * under the other, so the view beside them is still in reach. The walk arrow, the compass and
+   * the map's button are all far below.
+   */
+  .match-side {
+    right: var(--edge);
+    bottom: auto;
+    width: auto;
+    align-items: flex-start;
+  }
+
+  .match-side > * {
+    max-width: 100%;
+  }
+
+  /* one line on a phone, "1 / 8 guessed", which opens the names under itself and no further than two fifths of the screen */
+  .roster-toggle {
+    min-height: 44px;
+  }
+
+  .roster-list {
+    max-height: 40vh;
+    max-height: 40dvh;
+  }
+
+  /* a reveal or a standing is a sheet at the screen's foot: a lost connection is said under the chat button, short of the zoom buttons */
+  .play.match[data-phase='result'] .match-side,
+  .play.match[data-phase='summary'] .match-side {
+    top: calc(var(--match-top) + 52px);
+    left: var(--edge);
+    right: 68px;
+  }
+
+  /* the chat button stands under the HUD (and the health) at the right, and the map's own buttons one row further down */
+  .play.match[data-phase='result'] .map-tools,
+  .play.match[data-phase='summary'] .map-tools {
+    top: calc(var(--match-top) + 52px);
+  }
+
+  .play.match[data-phase='result'] .map-credit,
+  .play.match[data-phase='summary'] .map-credit {
+    top: calc(var(--match-top) + 152px);
+  }
+
+  /* the map library's own credit keeps the left side of that first row, under the health where there is any */
+  .play.match[data-phase='result'] .map .maplibregl-ctrl-bottom-right,
+  .play.match[data-phase='summary'] .map .maplibregl-ctrl-bottom-right {
+    top: var(--match-top);
+  }
+
+  .summary-panel > .figure .outcome {
+    font-size: 21px;
+  }
+}

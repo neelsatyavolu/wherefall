@@ -1,0 +1,279 @@
+/* What only a party's host has: actions on a player in a row, the Host panel over a match, and End round. */
+
+/* --- in a row of players ------------------------------------------------------------------ */
+
+/*
+ * A row of players that can carry the host's actions (a lobby's lists, the Host panel): one line,
+ * and one height whatever the name. Who it is has the row's width less the actions; the name gives
+ * way with an ellipsis, its tags stay whole. The lists measure themselves, so a narrow one (a
+ * phone, a team's box, the Host panel) folds a row's actions behind one button.
+ */
+.lobby .player-list,
+.host-list {
+  container: players / inline-size;
+}
+
+.player-row.host-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 12px;
+  min-height: 48px;
+  padding: 0;
+}
+
+.player-who {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.host-row .player-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-who .tag {
+  flex: none;
+}
+
+/* the actions are the row's own cells: the button of three dots, and what it opens */
+.row-actions.host-actions {
+  display: contents;
+}
+
+.host-actions .button {
+  padding: 4px 10px;
+}
+
+/* on a wide row both actions stand at its end, and there is nothing to open */
+.host-more {
+  display: none;
+}
+
+.host-menu {
+  grid-column: 2;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* the question a kick asks takes the row's full width, under the name */
+.host-actions.asking .host-menu {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  justify-content: start;
+  justify-items: start;
+  padding-bottom: 10px;
+}
+
+@container players (max-width: 400px) {
+  /* one button a finger can hit, the same on every row: three dots and no box, so forty of them are not a column of boxes */
+  .button.host-more {
+    grid-column: 2;
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-color: transparent;
+    background: none;
+    color: var(--fg-2);
+  }
+
+  .button.host-more:hover:not(:disabled),
+  .button.host-more[aria-expanded='true'] {
+    background: var(--surface-hover);
+    color: var(--fg);
+  }
+
+  .host-menu {
+    display: none;
+  }
+
+  /* opened, the actions stand under the name, at the left, where the question a kick asks will stand too */
+  .host-actions.open .host-menu {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-start;
+    padding-bottom: 10px;
+  }
+
+  .host-actions.open .host-menu .button {
+    min-height: 44px;
+  }
+
+  .host-actions.asking .host-menu {
+    display: grid;
+  }
+}
+
+.host-confirm {
+  margin: 0;
+  font: 14px/1.4 var(--font-sans);
+  color: var(--fg);
+}
+
+/* --- over a match ------------------------------------------------------------------------- */
+
+/* the Host button shares the corner with chat (`.match-corner` in chat.css) and opens the same way */
+.host-fold {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  min-width: 0;
+  /* only the button and the panel take the pointer: the view beside them can still be turned */
+  pointer-events: none;
+}
+
+.host-fold > * {
+  pointer-events: auto;
+}
+
+.host-panel {
+  width: min(320px, calc(100vw - 32px));
+  max-height: calc(100vh - 96px);
+  max-height: calc(100dvh - 96px);
+  overflow-y: auto;
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+}
+
+.host-panel .account-error {
+  margin: 0;
+}
+
+/* over a round, in the rail (`.match-side` in match.css): that it has no timer, and the host's End round */
+.round-bar {
+  padding: 10px 14px;
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+}
+
+/* with a timer there is only the button, which is its own box */
+.round-bar:has(> .round-fold[hidden]) {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.round-fold {
+  width: 100%;
+}
+
+/* "No timer": a line of status that opens how the round ends then */
+.round-label {
+  max-width: none;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  list-style: none;
+  cursor: pointer;
+}
+
+.round-label::-webkit-details-marker {
+  display: none;
+}
+
+.round-label .status-word {
+  margin-right: 0;
+}
+
+.round-note {
+  margin: 8px 0 0;
+  font: 14px/1.4 var(--font-sans);
+  color: var(--fg-2);
+}
+
+.round-bar .account-error {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .host-fold {
+    justify-items: start;
+  }
+
+  /* on a phone the bar is one line: the status at the left, opening downwards, and End round at the right */
+  .round-bar {
+    padding: 0 0 0 14px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0 12px;
+  }
+
+  .round-bar:has(> .round-fold[hidden]) {
+    grid-template-columns: auto;
+  }
+
+  .round-label {
+    min-height: 44px;
+  }
+
+  .round-note {
+    margin: 0 0 10px;
+  }
+
+  .round-bar > .button {
+    border-width: 0 0 0 1px;
+  }
+
+  .round-bar:has(> .round-fold[hidden]) > .button {
+    border-width: 1px;
+  }
+
+  .round-bar .account-error {
+    grid-column: 1 / -1;
+    padding: 0 14px 10px 0;
+  }
+
+  /* while the chat is open the Host button steps aside: it would otherwise stand on the view, wherever the chat's panel pushed it */
+  .match-corner:has(.chat-panel:not([hidden])) .host-fold {
+    display: none;
+  }
+
+  /* one panel at a time is open in the corner: it may be as tall as the screen less the two buttons under it */
+  .host-panel {
+    max-height: calc(100vh - 152px);
+    max-height: calc(100dvh - 152px);
+  }
+
+  /* while guessing the corner is at the bottom left, so the panel opens upwards, above its button */
+  .host-fold .host-toggle {
+    order: 2;
+    min-height: 44px;
+  }
+
+  .host-fold .host-panel {
+    order: 1;
+  }
+
+  .host-actions .button {
+    min-height: 44px;
+  }
+
+  /* a reveal or a standing fills the bottom: there the corner is at the top right, and the panel opens downwards */
+  .play.match[data-phase='result'] .host-fold,
+  .play.match[data-phase='summary'] .host-fold {
+    justify-items: end;
+  }
+
+  .play.match[data-phase='result'] .host-fold .host-toggle,
+  .play.match[data-phase='summary'] .host-fold .host-toggle {
+    order: 0;
+  }
+
+  /* while guessing the host has a second button in the corner: the compass and its tools move a row further up */
+  .play.match.hosting .pano-tools {
+    bottom: 172px;
+  }
+}

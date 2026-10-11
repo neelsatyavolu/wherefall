@@ -1,0 +1,123 @@
+/*
+ * Reactions floating over a match's round screen, and the slot they share with the list of who has
+ * guessed. Both stand in the rail (`.match-side` in match.css), in its flow: under the list on a
+ * wide screen, beside its one line on a phone. Nothing here is laid over another control.
+ */
+
+.roster-slot {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* only the list takes the pointer: a reaction is there to be seen, and the view under it can still be turned */
+.match-side > .roster-slot,
+.match-side .reaction-floats {
+  pointer-events: none;
+}
+
+.roster-slot > .roster {
+  pointer-events: auto;
+}
+
+.reaction-floats {
+  flex: none;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+}
+
+.reaction-floats:empty {
+  display: none;
+}
+
+/* who, and the word: the name gives way with an ellipsis, the word is always whole */
+.reaction-float {
+  margin: 0;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  font: 14px/1.4 var(--font-mono);
+  color: var(--fg-2);
+  /* its length is set where the reaction is shown, to the time it stands there */
+  animation: reaction-float 2600ms linear both;
+}
+
+.reaction-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reaction-word {
+  flex: none;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+/* up a little way as it comes, then still, then out */
+@keyframes reaction-float {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  10% {
+    opacity: 1;
+    transform: none;
+  }
+
+  85% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* it appears and it goes: nothing moves and nothing fades */
+@media (prefers-reduced-motion: reduce) {
+  .reaction-float {
+    animation: none;
+  }
+}
+
+@media (max-width: 720px) {
+  /* beside the one line that says how many have guessed, in the row it stands in */
+  .roster-slot {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .roster-slot > .roster {
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+
+  .roster-slot > .reaction-floats {
+    flex: 1 1 0;
+  }
+
+  /* as tall as that line */
+  .reaction-float {
+    min-height: 44px;
+    align-items: center;
+    padding: 0 12px;
+  }
+
+  /* the row has room for one: the newest */
+  .reaction-float:not(:last-child) {
+    display: none;
+  }
+}

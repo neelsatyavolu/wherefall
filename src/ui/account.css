@@ -1,0 +1,330 @@
+/* The account pane. Sits in the home pane and reuses its buttons, labels, figures and table. */
+
+.account {
+  display: grid;
+  gap: 32px;
+  min-width: 0;
+}
+
+.account-body {
+  display: grid;
+  gap: 32px;
+  min-width: 0;
+}
+
+/* --- sign in / create account ----------------------------------------------------------- */
+
+.account-form {
+  display: grid;
+  gap: 24px;
+}
+
+.account-field {
+  display: grid;
+  gap: 8px;
+}
+
+.account-input {
+  appearance: none;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  color: var(--fg);
+  caret-color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  /* 17px keeps iOS from zooming the page when the field is focused */
+  font: 17px/1.4 var(--font-sans);
+  transition: border-color 150ms var(--ease);
+}
+
+.account-input:hover {
+  border-color: var(--border-strong);
+}
+
+.account-input:focus {
+  border-color: var(--accent);
+}
+
+/* a refusal or a failure beside the control it is about: the status dot, then the sentence, both in the danger colour */
+.account-error {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font: 14px/1.4 var(--font-sans);
+  color: var(--danger);
+}
+
+.account-error::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--danger);
+  /* the dot sits on the middle of the first line's letters */
+  transform: translateY(-2px);
+}
+
+.account-error:empty {
+  display: none;
+}
+
+/* --- signed in -------------------------------------------------------------------------- */
+
+.account-who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.account-who .account-error {
+  flex-basis: 100%;
+}
+
+/* the name and the login streak, side by side while there is room */
+.account-who-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 48px;
+  min-width: 0;
+}
+
+.account-who .flag {
+  margin-right: 10px;
+}
+
+/* cells share hairlines rather than sitting in separate boxes */
+.account-stats {
+  display: grid;
+  grid-template-columns: repeat(var(--stat-columns, 5), minmax(0, 1fr));
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+
+.account-stats .figure {
+  align-content: start;
+  padding: 16px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.account-stats .figure-value {
+  font-size: 21px;
+}
+
+.account-stats .figure-detail {
+  display: block;
+  margin-top: 4px;
+}
+
+.account-section {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.account-section h2,
+.account-section h3 {
+  margin: 0;
+}
+
+.account-table {
+  overflow-x: auto;
+}
+
+/* on a narrow screen only the map name gives way */
+.account-table td {
+  white-space: nowrap;
+}
+
+.account-table .account-map {
+  white-space: normal;
+}
+
+.account-of {
+  color: var(--fg-3);
+}
+
+/* --- the history: every game, a page at a time ---------------------------------------------- */
+
+.history-host {
+  min-width: 0;
+}
+
+.history-host:empty {
+  display: none;
+}
+
+/* a setting is a form: it keeps the forms' measure */
+.settings {
+  max-width: 640px;
+}
+
+/* --- the two groups of settings: saved with the account, kept in this browser ---------------- */
+
+.settings-group {
+  display: grid;
+  gap: 8px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.settings-group-title {
+  margin: 0;
+  font: 500 17px/1.2 var(--font-mono);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+/* the country as it is now, above the list it is picked from */
+.country-now {
+  color: var(--fg);
+}
+
+.country-option .flag {
+  margin-right: 10px;
+}
+
+/* --- the recovery code: shown once, typed back to get in without the password ----------------- */
+
+/* the code itself: the one thing in its box to be read letter by letter */
+.recovery-code-value {
+  margin: 4px 0;
+  font: 500 21px/1.2 var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+  /* one click takes the whole code, for a browser that will not copy for the button */
+  user-select: all;
+}
+
+.recovery-warning,
+.recovery-none {
+  color: var(--fg);
+}
+
+/* said in the pane's own voice, not as prose: it is a fact about the account */
+.recovery-none {
+  font: 14px/1.5 var(--font-sans);
+}
+
+/* a code is typed as it was shown: in capitals, whatever the keyboard gives */
+.recovery-input {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* --- the session ended elsewhere: the way to sign in, at the end of the line that says so ------- */
+
+.session-link {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+/* --- the player's own reports ---------------------------------------------------------------- */
+
+.my-reports {
+  min-width: 0;
+}
+
+.my-reports:empty {
+  display: none;
+}
+
+.report-day {
+  font-size: 12px;
+  color: var(--fg-3);
+}
+
+/* where a report stands: a dot and a word, at the row's right edge */
+.report-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  font: 12px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+  white-space: nowrap;
+}
+
+/* hollow where nothing came of it, so the dot is not colour alone */
+.report-status::before {
+  content: '';
+  flex: none;
+  box-sizing: border-box;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--fg-3);
+  border-radius: 50%;
+}
+
+.report-status[data-tone='live']::before {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.report-status[data-tone='ok']::before {
+  border-color: var(--ok);
+  background: var(--ok);
+}
+
+/* what the player wrote with the report, under the row it belongs to */
+.report-note {
+  flex: 0 0 100%;
+  margin: 0;
+  font: 14px/1.5 var(--font-sans);
+  color: var(--fg-2);
+  overflow-wrap: anywhere;
+}
+
+
+@media (max-width: 960px) {
+  .account-stats:not(.few) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  /* the games table gives up its least needed parts rather than crowd the rest */
+  .account-mode,
+  .account-of {
+    display: none;
+  }
+
+  /* the history keeps the day, the kind and how it went, the score and the way in; the rest is in the game itself */
+  .history .account-map,
+  .history .history-wide {
+    display: none;
+  }
+
+  .history .history-kind {
+    white-space: normal;
+  }
+
+  /* the result goes under the kind, so the column is only as wide as the longer of the two */
+  .history .history-kind .tag {
+    display: block;
+    margin-left: 0;
+  }
+
+  .account-table td,
+  .account-table th {
+    padding-right: 12px;
+  }
+
+  .account-stats .figure {
+    padding: 12px;
+  }
+
+  .account-input {
+    min-height: 44px;
+  }
+}

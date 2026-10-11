@@ -1,0 +1,92 @@
+import type { solo as english } from '../en/solo.ts';
+import type { Part } from '../index.ts';
+
+/** Wave 5: singleplayer options, the two guessers, settings and the About pane. Every key of `../en/solo.ts`, or the type check fails. */
+export const solo: Part<typeof english> = {
+  'nav.item.country': 'Adivina el país',
+  'nav.item.continent': 'Adivina el continente',
+  'nav.item.about': 'Acerca de',
+
+  'time.seconds': '{seconds} s',
+  'time.minutes': '{minutes} min',
+  'time.minutesSeconds': '{minutes} min {seconds} s',
+  'time.less': 'Menos tiempo',
+  'time.more': 'Más tiempo',
+
+  'singleplayer.roadNames': 'Nombres de calles en el mapa',
+  'singleplayer.roadNames.off': 'Ocultos',
+  'singleplayer.roadNames.on': 'Visibles',
+
+  'prefs.volume': 'Volumen',
+
+  'continent.africa': 'África',
+  'continent.asia': 'Asia',
+  'continent.europe': 'Europa',
+  'continent.north-america': 'América del Norte',
+  'continent.oceania': 'Oceanía',
+  'continent.south-america': 'América del Sur',
+
+  'guesser.country.lede': 'Diez lugares, en cualquier parte del mundo. Cada uno viene con seis países: elige aquel en el que está. Cada acierto vale 1000 puntos.',
+  'guesser.continent.lede': 'Diez lugares, en cualquier parte del mundo. Elige para cada uno el continente en el que está. Cada acierto vale 1000 puntos.',
+  'guesser.best': 'Tu mejor puntuación: {score} de {max}',
+  'guesser.fine': 'Con la sesión iniciada, tu mejor puntuación se conserva y cada acierto da 20 XP.',
+  'guesser.continent.note': 'Centroamérica y el Caribe cuentan como América del Norte; Turquía y el Cáucaso, como Asia. Rusia es Europa al oeste de los Urales y Asia al este.',
+
+  'guesser.country.ask': '¿Qué país es este?',
+  'guesser.continent.ask': '¿Qué continente es este?',
+  'guesser.wrong': 'Incorrecto',
+  'guesser.itWas': 'Incorrecto. Era {answer}.',
+  'guesser.answer': 'Respuesta',
+  'guesser.yours': 'Tu respuesta',
+  'guesser.outOfPlaces': 'No quedan más lugares que mostrar, así que esta partida no se puede terminar.',
+  'guesser.save.signedOut': 'No has iniciado sesión, así que esta puntuación no se guarda.',
+  'guesser.save.failed': 'Esta puntuación no se pudo guardar.',
+  'guesser.save.best': 'Tu mejor puntuación es de {score}.',
+
+  'save.xpCapped': 'Ya has alcanzado el límite de XP de hoy para las partidas en solitario, así que no se ha sumado XP.',
+  'save.xpCut': 'Con esto alcanzas el límite de XP de hoy para las partidas en solitario, así que solo se ha sumado una parte.',
+  'save.placesChanged': 'Wherefall se actualizó mientras esta página estaba abierta y sus lugares cambiaron. Tu próxima partida se jugará con los actuales.',
+
+  'about.lede': 'Un juego gratuito que consiste en averiguar en qué parte del mundo está una calle.',
+  'about.what.title': 'Qué es Wherefall',
+  'about.what.1': 'Wherefall te deja en algún lugar de la Tierra, a pie de calle. Miras a tu alrededor, deduces dónde estás y pones un marcador en el mapa. Es gratis, no tiene anuncios y la cuenta es opcional.',
+  'about.what.2': 'Juega por tu cuenta, haz el desafío diario o enfréntate a otras personas en duelos clasificatorios, partidas 2v2, partidas normales y salas privadas. Los jugadores crean sus propios mapas y los comparten.',
+  'about.scoring.title': 'Cómo se puntúa',
+  'about.scoring.1': 'Una ronda vale hasta 5000 puntos. Un marcador a menos de 30 m del lugar es una ronda perfecta.',
+  'about.scoring.2': 'A partir de ahí, la puntuación baja con la distancia. En el mapa del mundo la escala es de 20 000 km: unos 3000 puntos si el marcador queda a 1000 km y unos 400 a 5000 km. Una región, un país o un mapa de la comunidad se puntúan según su propio tamaño, así que el mismo error cuesta más en un mapa pequeño.',
+  'about.scoring.3': 'Una pista dibuja en el mapa un círculo con el lugar dentro y deja esa ronda en la mitad de puntos. En Adivina el país y Adivina el continente, cada acierto vale 1000 puntos.',
+  'about.faq.title': 'Preguntas',
+  'about.faq.account.q': '¿Necesito una cuenta?',
+  'about.faq.account.a': 'No. Todo lo que juegas por tu cuenta funciona sin ella, y como invitado puedes entrar en partidas normales y en salas. Una cuenta conserva tus estadísticas y tus mejores puntuaciones, te pone en los rankings y hace falta para los duelos clasificatorios, el 2v2, los amigos y la creación de mapas.',
+  'about.faq.link.q': '¿Mi enlace le da a un amigo los mismos lugares?',
+  'about.faq.link.a': 'Sí, si tu amigo ve las mismas imágenes que tú. Un enlace lleva el mapa, los ajustes y una semilla, y la semilla decide los lugares. Street View y Panoramax tienen cada uno su propia lista de lugares, así que quien juegue con la otra fuente verá otros.',
+  'about.faq.imagery.q': '¿Por qué a veces salen imágenes de Panoramax?',
+  'about.faq.imagery.a': 'Street View tiene un cupo diario en este sitio. Cuando se agota, o cuando no se puede conectar con Google, el juego sigue con las imágenes abiertas de Panoramax.',
+  'about.faq.repeats.q': '¿Me saldrá el mismo lugar dos veces?',
+  'about.faq.repeats.a': 'Rara vez. Este navegador recuerda los últimos 5000 lugares que te ha mostrado y procura que las partidas nuevas no los repitan. Los enlaces de desafío, el desafío diario y las partidas con otros jugadores no cambian, para que todos vean los mismos lugares.',
+  'about.faq.phone.q': '¿Puedo jugar en el móvil?',
+  'about.faq.phone.a': 'Sí. Wherefall funciona en el navegador del móvil y, si el navegador lo permite, puedes instalarlo como aplicación desde el menú.',
+  'about.credits.title': 'Créditos',
+  'about.credits.google': 'Imágenes de calle de Google Street View, © Google.',
+  'about.credits.panoramax': 'Imágenes de calle abiertas de colaboradores de {panoramax}, con licencias abiertas.',
+  'about.credits.maps': 'El mapa lo dibuja {openfreemap} con datos © de los colaboradores de OpenStreetMap.',
+  'about.credits.tiles': 'Mapa de satélite: EOxCloudless de EOX IT Services GmbH (contiene datos modificados de Copernicus Sentinel 2024), CC BY-NC-SA 4.0. Mapa de relieve: OpenTopoMap (CC-BY-SA), con datos de OpenStreetMap y SRTM.',
+  'about.changes.title': 'Novedades',
+  'about.changes.version': 'Actualización {number}',
+  'about.changes.5': 'Puntuación con una escala mundial de 20 000 km, un desafío diario de tres rondas con rachas, invitados en las partidas en línea, Adivina el país y Adivina el continente, equipos y más opciones para las salas, tiempos de ronda de 10 segundos a 5 minutos, un ajuste de volumen y esta página.',
+  'about.changes.4': 'Cinco idiomas, sonidos, una aplicación que se puede instalar, saltar un lugar que no carga, entrar en una partida pública ya empezada y moderación.',
+  'about.changes.3': 'Mapas de la comunidad para jugar y para crear, gráficas de progreso en los perfiles y partidas públicas para más de dos jugadores.',
+  'about.changes.2': 'Un mapa detallado para el marcador, la racha de países, pistas, mapas de países, millas o kilómetros, ligas, XP y niveles, rankings, perfiles, historial de partidas, amigos y chat.',
+  'about.changes.1': 'La barra lateral, las cuentas, los duelos clasificatorios, las partidas normales y 2v2, las salas y el desafío diario.',
+
+  'home.menuClose': 'Cerrar',
+
+  // Oleada 6, la primera visita: la bienvenida y un dato con cada resultado del tutorial
+  'welcome.label': 'Bienvenida',
+  'welcome.lede': 'Wherefall es un juego gratuito que consiste en deducir en qué parte del mundo estás. Te deja en una calle de algún lugar de la Tierra: mira a tu alrededor y pon un marcador en el mapa.',
+  'welcome.tutorial': 'Enséñame a jugar',
+  'welcome.skip': 'Saltar',
+  'welcome.note': 'El tutorial son dos rondas cortas con consejos por el camino. No se guarda.',
+  'tutorial.fact.eiffel': 'La Torre Eiffel se construyó para la Exposición Universal de 1889 y fue la estructura más alta del mundo hasta 1930.',
+  'tutorial.fact.colosseum': 'El Coliseo se inauguró en el año 80 y es el mayor anfiteatro que construyeron los romanos.',
+};

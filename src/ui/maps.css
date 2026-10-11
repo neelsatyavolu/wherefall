@@ -1,0 +1,116 @@
+/* Community maps: the lists, a map's page and the editor. Tokens and components are those of styles.css. */
+
+/* a group of lists with nothing in it yet takes no room */
+.map-lists:empty {
+  display: none;
+}
+
+/* a map's short description, on a line of its own under the row */
+.map-about {
+  flex: 0 0 100%;
+  margin: 0;
+  font: 14px/1.5 var(--font-sans);
+  color: var(--fg-2);
+  overflow-wrap: anywhere;
+}
+
+/* the long description is plain text whose line breaks are its maker's */
+.map-details {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* Street View preview */
+.street-preview {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.street-view {
+  height: min(60vh, 480px);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+}
+
+.street-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.street-controls .settings-line {
+  font-variant-numeric: tabular-nums;
+}
+
+/* a field's hint with its live count at the far end */
+.field-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.field-count {
+  flex: none;
+  font: 12px/1.5 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-3);
+  white-space: nowrap;
+}
+
+/* outside its limits the count is in the text colour: said by weight, not by a new colour */
+.field-count[data-state='out'] {
+  color: var(--fg);
+}
+
+.paste-form {
+  display: grid;
+  gap: 12px;
+  max-width: 640px;
+}
+
+.paste-progress {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 4px;
+  border: 0;
+  background: var(--border);
+}
+
+.paste-progress::-webkit-progress-bar {
+  background: var(--border);
+}
+
+.paste-progress::-webkit-progress-value {
+  background: var(--accent);
+}
+
+.paste-progress::-moz-progress-bar {
+  background: var(--accent);
+}
+
+.paste-summary {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 14px/1.5 var(--font-mono);
+  color: var(--fg-2);
+}
+
+.paste-summary:empty {
+  display: none;
+}
+
+.places-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.places-pager .settings-line {
+  font-variant-numeric: tabular-nums;
+}

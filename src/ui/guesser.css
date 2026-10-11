@@ -1,0 +1,246 @@
+/* Country Guesser and Continent Guesser: six buttons on the round screen in place of the guess map. */
+
+/* no pin is placed in these games: the map stays away until the answer is in, then shows where the place was */
+.play.guesser[data-phase='guessing'] .map-panel.map-panel,
+.play.guesser[data-phase='guessing'] .map-toggle.map-toggle {
+  display: none;
+}
+
+/*
+ * The six buttons are how the round is played, as the guess map is in the other games, so they
+ * stand where the map does: at the foot of the screen on the right, the closed map's own width,
+ * one to a row. That leaves the rest of the screen as it is in every round: the compass and the
+ * way back at the foot of the rail, the walk arrow in the middle of the view. They stay there with
+ * the answer marked on them. Only the run's summary goes to the panel slot at the left.
+ */
+.play.guesser[data-phase='guessing'] .panel-host,
+.play.guesser[data-phase='result'] .panel-host {
+  left: auto;
+  right: var(--edge);
+  width: min(320px, calc(100% - var(--rail) - 3 * var(--edge)));
+  align-items: flex-end;
+}
+
+@media (min-width: 721px) {
+  /* Google draws its logo and legal line along the bottom edge; the buttons stay clear of them, and stay where they are once the answer is in */
+  .play.guesser[data-imagery='google'][data-phase='guessing'] .panel-host,
+  .play.guesser[data-imagery='google'][data-phase='result'] .panel-host {
+    bottom: 36px;
+  }
+}
+
+.guesser-panel {
+  gap: 12px;
+}
+
+/* a hairline grid: each cell's border overlaps its neighbour's */
+.guesser-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0 1px 1px 0;
+}
+
+.guesser-option {
+  appearance: none;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 0;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0 -1px -1px 0;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+  font: 500 14px/1.3 var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms var(--ease);
+}
+
+.guesser-option:hover:enabled {
+  background: var(--surface-hover);
+}
+
+.guesser-option:focus-visible {
+  z-index: 2;
+}
+
+.guesser-option:disabled {
+  cursor: default;
+  color: var(--fg-3);
+}
+
+/* a country's flag stands before its name, level with the middle of it however many lines the name takes */
+.guesser-option .flag {
+  flex: none;
+}
+
+/* a long name goes onto a second line at a space; only a word longer than the button is broken */
+.guesser-name {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* the answer is said in words as well as in colour */
+.guesser-option[data-state] {
+  z-index: 1;
+  color: var(--fg);
+}
+
+.guesser-option[data-state='right'] {
+  border-color: var(--ok);
+}
+
+.guesser-option[data-state='wrong'] {
+  border-color: var(--danger);
+}
+
+/* right or wrong, at the end of the button's row: the row is as tall after the answer as before it */
+.guesser-option .tag {
+  margin-left: auto;
+  padding-left: 8px;
+  flex: none;
+}
+
+.guesser-option[data-state='right'] .tag,
+.guesser-right {
+  color: var(--ok);
+}
+
+.guesser-option[data-state='wrong'] .tag {
+  color: var(--danger);
+}
+
+/* the way on at the left, as on every panel, and how the round went beside it */
+.guesser-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+/* how the round went, as a line of status: a dot, green for right and red for wrong, and the answer in mono */
+.guesser-verdict {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font: 14px/1.4 var(--font-mono);
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.guesser-verdict::before {
+  content: '';
+  flex: none;
+  /* level with the middle of the first line, however far the answer's name runs on */
+  align-self: flex-start;
+  margin-top: calc((1.4em - 6px) / 2);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+.guesser-verdict[data-state='ok']::before {
+  background: var(--ok);
+}
+
+.guesser-summary td {
+  overflow-wrap: anywhere;
+}
+
+/* the tenth round's number stays on one line */
+.guesser-summary .rounds .num {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+.guesser-missed {
+  color: var(--fg-2);
+}
+
+@media (max-width: 720px) {
+  /*
+   * A phone has no room for six buttons over the view, so the view ends where they begin: the
+   * screen is the view above and the buttons below, as it is the view and the map's sheet in the
+   * other games. What stands on the view (the compass, the way back, the walk arrow) is then all
+   * above the buttons, where it is in every round.
+   */
+  .play.guesser[data-phase='guessing'],
+  .play.guesser[data-phase='result'] {
+    display: grid;
+    grid-template: minmax(0, 1fr) auto / minmax(0, 1fr);
+  }
+
+  .play.guesser[data-phase='guessing'] .pano,
+  .play.guesser[data-phase='result'] .pano {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 1;
+  }
+
+  /* the compass and the way back at the foot of the view, at the left edge */
+  .play.guesser[data-phase='guessing'] .pano-tools.pano-tools {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    grid-area: 1 / 1;
+    align-self: end;
+    justify-self: start;
+    margin: 0 0 var(--edge) var(--edge);
+  }
+
+  /* Google's logo and legal line are along the foot of the view, wherever that is */
+  .play.guesser[data-imagery='google'][data-phase='guessing'] .pano-tools.pano-tools {
+    margin-bottom: 36px;
+  }
+
+  .play.guesser[data-phase='guessing'] .panel-host,
+  .play.guesser[data-phase='result'] .panel-host {
+    position: relative;
+    inset: auto;
+    grid-area: 2 / 1;
+    width: auto;
+    display: block;
+  }
+
+  /* a sheet from edge to edge, as the map's is: six buttons, two to a row, and the way on under them, as tall as that needs */
+  .play.guesser .panel-host > .guesser-panel {
+    max-height: 70vh;
+    max-height: 70dvh;
+    border-width: 1px 0 0;
+  }
+
+  .guesser-panel {
+    padding: 12px var(--edge) var(--edge);
+  }
+
+  .guesser-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* two to a row leaves no room beside a name: right or wrong goes under it */
+  .guesser-option .tag {
+    margin-left: 0;
+    padding-left: 0;
+    flex: 0 0 100%;
+  }
+
+  .guesser-foot .button {
+    min-height: 44px;
+  }
+
+  /* ten rows and the buttons under them fit the panel's share of a phone screen */
+  .guesser-summary .rounds th,
+  .guesser-summary .rounds td {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}

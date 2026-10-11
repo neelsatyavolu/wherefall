@@ -1,0 +1,124 @@
+/* What a result adds to its numbers: the Perfect mark, confetti, stars, a country's flag with its name. */
+
+/* a full 5,000 */
+.tag.perfect {
+  color: var(--accent);
+}
+
+/* beside the points where there is room, under them where there is not: as a box of its own it may take the next line, never be cut */
+.figure-value .tag.perfect {
+  display: inline-block;
+}
+
+/* one to three stars under a game's final score: earned ones in the accent, the rest only outlined */
+.stars {
+  display: flex;
+  gap: 4px;
+  font: 22px/1 var(--font-sans);
+  color: var(--fg-4);
+}
+
+.stars .earned {
+  color: var(--accent);
+}
+
+/* a country as its flag, a space and its name: the space is where a long name may go to the next line */
+.country .flag {
+  margin-right: 0;
+}
+
+/* a distance, a time or a score in the round table stays on one line; the country takes what is left */
+.summary-panel .rounds .num {
+  white-space: nowrap;
+}
+
+/* the text "Share result" copied, when the browser would not copy it: there to be copied by hand */
+textarea.link-field {
+  min-height: 96px;
+  resize: none;
+}
+
+/* a burst from the middle of the screen, over everything, touching nothing */
+.confetti {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  animation: confetti-fly 1300ms cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+}
+
+/* the paper's own tones, each edged in its opposite so it shows on the pale map and on a dark panel alike */
+.confetti-piece.tone-0 {
+  background: var(--accent);
+}
+
+.confetti-piece.tone-1 {
+  background: var(--fg);
+  outline: 1px solid var(--bg);
+}
+
+.confetti-piece.tone-2 {
+  background: var(--bg);
+  outline: 1px solid var(--fg);
+}
+
+@keyframes confetti-fly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  45% {
+    opacity: 1;
+    transform: translate(calc(var(--drift) * 0.7), var(--rise)) rotate(calc(var(--spin) * 0.5));
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--drift), var(--fall)) rotate(var(--spin));
+  }
+}
+
+/* no burst is thrown for a player who asked for less motion; should one be on screen, it is not shown */
+@media (prefers-reduced-motion: reduce) {
+  .confetti {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  /* six columns on a phone: the flag and the country's two letters stand for its name, and the hint mark goes under its number */
+  .rounds .country-name {
+    display: none;
+  }
+
+  .rounds .country[data-code]::after {
+    content: attr(data-code);
+  }
+
+  .rounds .country {
+    white-space: nowrap;
+  }
+
+  .rounds .tag {
+    display: block;
+    margin-left: 0;
+  }
+
+  .rounds th,
+  .rounds td {
+    padding-right: 4px;
+  }
+
+  .rounds .num {
+    padding-left: 6px;
+  }
+}

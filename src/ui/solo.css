@@ -1,0 +1,183 @@
+/* Wave 5, playing alone: the sliders (round time, volume) and the About pane. */
+
+/* --- a slider: the browser's own range control, drawn flat ------------------------------ */
+
+.slider {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  /* tall enough to take a thumb on a phone; the line itself is a hairline */
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--border-strong);
+}
+
+.slider::-moz-range-track {
+  height: 2px;
+  background: var(--border-strong);
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 24px;
+  margin-top: -11px;
+  background: var(--fg);
+  border: 0;
+  border-radius: 0;
+}
+
+.slider::-moz-range-thumb {
+  width: 14px;
+  height: 24px;
+  background: var(--fg);
+  border: 0;
+  border-radius: 0;
+}
+
+.slider:focus-visible {
+  outline: 2px solid var(--accent-muted);
+  outline-offset: 2px;
+}
+
+.slider:focus-visible::-webkit-slider-thumb {
+  background: var(--accent);
+}
+
+.slider:focus-visible::-moz-range-thumb {
+  background: var(--accent);
+}
+
+/* --- the time for a round: its value, then a slider with a step button either side --------- */
+
+.time-control,
+.volume-control {
+  max-width: 640px;
+}
+
+.time-value {
+  margin-bottom: 4px;
+}
+
+.time-value,
+.volume-value {
+  display: block;
+  font: 500 17px/1.3 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+
+.time-row,
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.time-step {
+  appearance: none;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+  font: 500 17px/1 var(--font-mono);
+  cursor: pointer;
+  transition: background-color 150ms var(--ease);
+}
+
+.time-step:hover:enabled {
+  background: var(--surface-hover);
+}
+
+.time-step:disabled {
+  color: var(--fg-4);
+  border-color: var(--border);
+  cursor: default;
+}
+
+.volume-row .volume-value {
+  flex: 0 0 4.5ch;
+  text-align: right;
+}
+
+/* --- About: sections of prose under small headings ------------------------------------- */
+
+.about {
+  display: grid;
+  gap: 32px;
+}
+
+.about-section {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.about-section h3,
+.about-section h4 {
+  margin: 0;
+}
+
+.about-question {
+  font: 500 15px/1.4 var(--font-sans);
+  color: var(--fg);
+}
+
+.about-answers {
+  display: grid;
+  gap: 16px;
+}
+
+.about-answer {
+  display: grid;
+  gap: 4px;
+}
+
+.about-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-list .prose a {
+  color: var(--accent);
+}
+
+/* the changelog: each update's number in the margin of its line */
+.about-changes {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.about-change {
+  display: grid;
+  gap: 4px;
+}
+
+.about-change dt {
+  font: 12px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.about-change dd {
+  margin: 0;
+}

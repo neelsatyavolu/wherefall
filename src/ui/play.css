@@ -1,0 +1,366 @@
+/* The round screen: street view, HUD and the panel over them. The guess map is in map-panel.css. Loaded with the game. */
+
+.play {
+  /*
+   * The screen's layout, in three numbers every part of it keeps to.
+   * --edge: how far anything stands from the screen's edge, and from its neighbour.
+   * --hud-foot: where the HUD ends, with the gap under it: nothing but the HUD is above this line.
+   * --rail: the width of the left column under the HUD. The compass and its buttons stand at its
+   * foot; a panel that reports on play (a result, a summary, a match's roster) takes it from the
+   * top. The guess map, whatever its size, never comes into it.
+   */
+  --edge: 16px;
+  --hud-foot: 88px;
+  --rail: 296px;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.pano {
+  position: absolute;
+  inset: 0;
+  /* own stacking context, so move arrows never draw over the map or panels */
+  isolation: isolate;
+  z-index: 0;
+}
+
+/* no pan or zoom: the first view is all the player gets */
+.pano.locked {
+  pointer-events: none;
+}
+
+/* Google draws its logo and legal line along the bottom edge; nothing of ours may cover them */
+.play[data-imagery='google'] .pano-tools,
+.play[data-imagery='google'] .map-panel,
+.play[data-imagery='google'] .map-toggle {
+  bottom: 36px;
+}
+
+.pano-tools,
+.map-panel,
+.status {
+  z-index: 1;
+}
+
+/* above the map, which fills the screen once a round is over: Exit has to be reachable then too */
+.hud {
+  z-index: 2;
+}
+
+/* .play prefix: these have to win over the libraries' own stylesheets, which load later */
+.play .psv-container {
+  background: var(--bg);
+}
+
+.play .psv-loader-container {
+  display: none;
+}
+
+/* the viewer's own "cannot be loaded" screen: the game says that itself, with a way on */
+.play .psv-overlay {
+  display: none;
+}
+
+.move-arrow {
+  display: grid;
+  place-items: center;
+  background: rgba(14, 14, 13, 0.72);
+  border: 1px solid rgba(242, 240, 234, 0.5);
+  color: #f2f0ea;
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease),
+    color 150ms var(--ease);
+}
+
+.move-arrow:hover {
+  background: #f2f0ea;
+  color: #0e0e0d;
+}
+
+.move-arrow-crossing {
+  border-style: dashed;
+}
+
+/* the foot of the rail: the compass with the way back to the start beside it, the hint under them, the pictures' credit last */
+.pano-tools {
+  position: absolute;
+  left: var(--edge);
+  bottom: var(--edge);
+  max-width: var(--rail);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  align-items: center;
+  gap: 8px;
+}
+
+.pano-tools .hint,
+.pano-tools .credit {
+  grid-column: 1 / -1;
+}
+
+.pano-tools .button {
+  text-align: left;
+}
+
+/* the drawing stands in for the words on a phone only */
+.return svg {
+  display: none;
+}
+
+/* shows which way the view faces; a click turns it north */
+.compass {
+  appearance: none;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 150ms var(--ease);
+}
+
+.compass:hover:not(:disabled) {
+  border-color: var(--fg-2);
+}
+
+.compass:disabled {
+  cursor: default;
+}
+
+.compass-needle {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* the tick that points north */
+.compass-needle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  width: 2px;
+  height: 9px;
+  margin-left: -1px;
+  background: var(--accent);
+}
+
+.compass-needle span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 500 12px/1 var(--font-mono);
+  color: var(--fg-2);
+}
+
+/* whose pictures these are: a caption under the buttons, not one of them */
+.credit {
+  padding: 2px 6px;
+  background: var(--bg);
+  font: 12px/1.4 var(--font-sans);
+  color: var(--fg-2);
+}
+
+/* news over the view: a dot, then the line in mono. Blue while something is under way, green for good news, red for bad */
+.status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: calc(100% - 2 * var(--edge));
+  margin: 0;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  font: 14px/1.4 var(--font-mono);
+  color: var(--fg);
+}
+
+.status::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.status[data-state='ok']::before {
+  background: var(--ok);
+}
+
+.status[data-state='error']::before {
+  background: var(--danger);
+}
+
+.status:empty {
+  display: none;
+}
+
+.play[data-phase='loading'] .pano-tools {
+  visibility: hidden;
+}
+
+.play[data-phase='result'] .pano-tools,
+.play[data-phase='summary'] .pano-tools {
+  display: none;
+}
+
+/* a touch screen has no pointer resting on a button: one that was just pressed must not stay dimmed */
+@media (hover: none) {
+  .play .button.primary:hover,
+  .play .button.accent:hover {
+    opacity: 1;
+  }
+}
+
+/* a question over the game: leave or stay */
+dialog.confirm {
+  max-width: min(420px, calc(100% - 32px));
+  padding: 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+dialog.confirm[open] {
+  display: grid;
+  gap: 20px;
+}
+
+dialog.confirm::backdrop {
+  background: rgba(14, 14, 13, 0.62);
+}
+
+/* the answer that cannot be taken back: quiet, and in the colour of danger */
+dialog.confirm .button.danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* while a question is open the map's buttons step back: dark boxes at the dialog's edge read as part of it */
+.play:has(dialog.confirm[open]) .map-tools {
+  visibility: hidden;
+}
+
+/* the tutorial's coach: one tip at a time at the top of the rail, clear of every control it talks about */
+.coach {
+  position: absolute;
+  top: var(--hud-foot);
+  left: var(--edge);
+  z-index: 3;
+  width: min(var(--rail), calc(100% - 2 * var(--edge)));
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+}
+
+.coach-text {
+  margin: 0;
+  font: 17px/1.5 var(--font-serif);
+  color: var(--fg);
+}
+
+/* a result has the rail: the tip about it stands beside the panel */
+.play[data-phase='result'] .coach {
+  left: calc(440px + 2 * var(--edge));
+  max-width: calc(100% - 440px - 3 * var(--edge));
+}
+
+.play[data-phase='summary'] .coach {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .play {
+    --hud-foot: 76px;
+  }
+
+  .credit {
+    display: none;
+  }
+
+  /*
+   * A phone has no room for words beside the view: the compass and the way back are a column of
+   * two 44px buttons at the left edge, which leaves the middle of the screen, where the walk arrow
+   * lies, to the arrow.
+   */
+  .pano-tools {
+    grid-template-columns: auto;
+  }
+
+  .compass,
+  .pano-tools .return {
+    width: 44px;
+    height: 44px;
+  }
+
+  .pano-tools .return {
+    min-height: 44px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .return svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* still the button's name for a screen reader */
+  .return .tool-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* the hint says what it costs, so it keeps its words: under the HUD, where it is in reach with the map open too */
+  .pano-tools .hint {
+    position: fixed;
+    top: var(--hud-foot);
+    left: var(--edge);
+    max-width: calc(100% - 2 * var(--edge));
+    min-height: 44px;
+  }
+
+  /* keep the whole summary, buttons included, on one screen */
+  .summary-panel .prose:not(.story) {
+    display: none;
+  }
+
+  .coach {
+    width: auto;
+    right: var(--edge);
+  }
+
+  /* over a result the map's zoom buttons are under the HUD at the right: the tip stops short of them */
+  .play[data-phase='result'] .coach {
+    left: var(--edge);
+    right: 68px;
+    max-width: none;
+  }
+
+  .coach-text {
+    font-size: 15px;
+  }
+}

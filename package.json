@@ -1,0 +1,40 @@
+{
+  "name": "plonk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Free street-view guessing game on open imagery",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "locations": "node scripts/build-locations.ts",
+    "locations:google": "node scripts/build-google-locations.ts"
+  },
+  "dependencies": {
+    "@photo-sphere-viewer/core": "^5.15.1",
+    "@photo-sphere-viewer/equirectangular-tiles-adapter": "^5.15.1",
+    "@photo-sphere-viewer/markers-plugin": "^5.15.1",
+    "@rapideditor/country-coder": "^5.6.1",
+    "@vercel/functions": "^3.9.11",
+    "maplibre-gl": "^5.0.0",
+    "pg": "^8.23.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@mapbox/vector-tile": "^3.0.0",
+    "@playwright/test": "^1.64.0",
+    "@types/google.maps": "^3.66.6",
+    "@types/node": "^26.6.5",
+    "@types/pg": "^8.23.1",
+    "@vitest/coverage-v8": "^5.0.3",
+    "pbf": "^5.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
+  }
+}
