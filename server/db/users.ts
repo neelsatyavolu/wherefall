@@ -39,13 +39,15 @@ export interface User {
   sessionVersion: number;
   /** The recovery code, hashed like a password, or null for an account that has none. */
   recoveryHash: string | null;
+  /** Trimmed and in lower case. Null for a guest, and for an account made before emails until it adds one. */
+  email: string | null;
   teamWins: number;
   teamLosses: number;
   teamTies: number;
 }
 
 /** A new account starts with the database's defaults for everything it has not played for yet. */
-export type NewUser = Pick<User, 'id' | 'username' | 'passwordHash' | 'createdAt'> & { country?: string | null; recoveryHash?: string | null };
+export type NewUser = Pick<User, 'id' | 'username' | 'passwordHash' | 'createdAt'> & { country?: string | null; recoveryHash?: string | null; email?: string | null };
 
 function rowToUser(row: Row): User {
   return {
@@ -72,18 +74,19 @@ function rowToUser(row: Row): User {
     hideLastSeen: row.hide_last_seen as boolean,
     sessionVersion: row.session_version as number,
     recoveryHash: row.recovery_hash as string | null,
+    email: row.email as string | null,
     teamWins: row.team_wins as number,
     teamLosses: row.team_losses as number,
     teamTies: row.team_ties as number,
   };
 }
 
-/** False when the username already belongs to an account. */
+/** False when the username, or the email, already belongs to an account. */
 export async function insertUser(q: Queryable, user: NewUser): Promise<boolean> {
   const rows = await q.query(
-    `INSERT INTO users (id, username, password_hash, created_at, country, recovery_hash) VALUES ($1, $2, $3, $4, $5, $6)
-     ON CONFLICT (username) DO NOTHING RETURNING id`,
-    [user.id, user.username, user.passwordHash, toTs(user.createdAt), user.country ?? null, user.recoveryHash ?? null],
+    `INSERT INTO users (id, username, password_hash, created_at, country, recovery_hash, email) VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT DO NOTHING RETURNING id`,
+    [user.id, user.username, user.passwordHash, toTs(user.createdAt), user.country ?? null, user.recoveryHash ?? null, user.email ?? null],
   );
   return rows.length === 1;
 }
@@ -91,6 +94,12 @@ export async function insertUser(q: Queryable, user: NewUser): Promise<boolean> 
 /** Whoever has the name, a deleted account included: signing in is how one is restored. */
 export async function findUserByUsername(q: Queryable, username: string): Promise<User | null> {
   const rows = await q.query('SELECT * FROM users WHERE username = $1', [username]);
+  return rows[0] ? rowToUser(rows[0]) : null;
+}
+
+/** The account with that email. Null when there is none, and for an account that has been deleted. */
+export async function findUserByEmail(q: Queryable, email: string): Promise<User | null> {
+  const rows = await q.query('SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL AND NOT guest', [email]);
   return rows[0] ? rowToUser(rows[0]) : null;
 }
 
@@ -185,6 +194,35 @@ export async function spendRecoveryCode(q: Queryable, id: string, from: string, 
 export async function endSessions(q: Queryable, id: string): Promise<number | null> {
   const [row] = await q.query<{ session_version: number }>('UPDATE users SET session_version = session_version + 1 WHERE id = $1 RETURNING session_version', [id]);
   return row?.session_version ?? null;
+}
+
+const UNIQUE_VIOLATION = '23505';
+
+/** What came of giving an account an email: saved, taken by another account, or refused. */
+export type EmailChange = 'saved' | 'taken' | 'refused';
+
+/**
+ * Gives an account an email. An account that has none needs nothing more for
+ * it, and `passwordHash` is null. One that has an email is changing a way back
+ * in, so `passwordHash` is the hash its current password was checked against.
+ * 'refused' when that no longer holds: the account was given an email, or its
+ * password changed, while this request was being checked.
+ */
+export async function replaceEmail(q: Queryable, id: string, email: string, passwordHash: string | null): Promise<EmailChange> {
+  try {
+    const rows = await q.query(
+      `UPDATE users SET email = $2
+        WHERE id = $1 AND deleted_at IS NULL AND NOT guest AND (($3::text IS NULL AND email IS NULL) OR password_hash = $3::text)
+        RETURNING id`,
+      [id, email, passwordHash],
+    );
+    return rows.length === 1 ? 'saved' : 'refused';
+  } catch (error) {
+    if ((error as { code?: unknown }).code === UNIQUE_VIOLATION) {
+      return 'taken';
+    }
+    throw error;
+  }
 }
 
 export async function setCountry(q: Queryable, id: string, country: string | null): Promise<boolean> {

@@ -52,7 +52,7 @@ const gameOn = (map: string, places: readonly Spot[], change: Record<string, unk
 });
 
 async function signUp(username: string): Promise<string> {
-  const body = { username, password: 'correct horse battery' };
+  const body = { username, password: 'correct horse battery', email: `${username}@example.com` };
   return cookieFrom(await register(apiRequest('POST', '/api/account/register', { body }), at(NOW)));
 }
 

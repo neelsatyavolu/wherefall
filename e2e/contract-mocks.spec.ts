@@ -394,13 +394,13 @@ test('registering takes a country, and holds usernames to the new rule', async (
   const name = 'Choose a username of 3 to 20 letters, numbers or single underscores, not starting or ending with one.';
 
   for (const username of ['_neel', 'neel_', 'ne__el', 'ne', 'neel!', 'a'.repeat(21)]) {
-    expect(await register(username, 'correct horse battery', 'IN', send), username).toEqual(refused(name));
+    expect(await register(username, 'correct horse battery', 'neel@example.com', 'IN', send), username).toEqual(refused(name));
   }
-  expect(await register('neel_s', 'short', 'IN', send)).toEqual(refused('Choose a password of at least 8 characters.'));
-  expect(data(await register('Neel_S', 'correct horse battery', 'IN', send)).username).toBe('neel_s');
+  expect(await register('neel_s', 'short', 'neel@example.com', 'IN', send)).toEqual(refused('Choose a password of at least 8 characters.'));
+  expect(data(await register('Neel_S', 'correct horse battery', 'neel@example.com', 'IN', send)).username).toBe('neel_s');
   expect(data(await getAccount(send)).account).toMatchObject({ username: 'neel_s', country: 'IN', rating: 500, league: 'Trekker' });
   // a country that is not a code is stored as none, not refused
-  expect(data(await register('sam', 'correct horse battery', 'India', send)).username).toBe('sam');
+  expect(data(await register('sam', 'correct horse battery', 'neel@example.com', 'India', send)).username).toBe('sam');
   expect(data(await getAccount(send)).account?.country).toBeNull();
 });
 

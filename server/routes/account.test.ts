@@ -32,6 +32,7 @@ const NEW_ACCOUNT = {
   hideChat: false,
   hideLastSeen: false,
   hasRecoveryCode: true,
+  email: 'neel@example.com',
 };
 const USERNAME_RULE = 'Choose a username of 3 to 20 letters, numbers or single underscores, not starting or ending with one.';
 // Every attempt hashes a password, which is slow on purpose, and these tests make dozens.
@@ -40,7 +41,8 @@ const MANY_ATTEMPTS_TIMEOUT_MS = 60_000;
 let db: Db;
 
 const at = (now: number, moderators?: readonly string[]): Context => ({ db, now, secret: TEST_SECRET, ...(moderators ? { moderators } : {}) });
-const credentials = (username = 'neel', password = PASSWORD) => ({ username, password });
+const emailOf = (username: string): string => `${username.trim().toLowerCase()}@example.com`;
+const credentials = (username = 'neel', password = PASSWORD) => ({ username, password, email: emailOf(username) });
 
 async function signUp(username = 'neel'): Promise<string> {
   const response = await register(apiRequest('POST', '/api/account/register', { body: credentials(username) }), at(NOW));
@@ -138,6 +140,42 @@ describe('register', () => {
     expect(response.status).toBe(409);
     expect(response.headers.getSetCookie()).toEqual([]);
     expect((await response.json()).error).toMatch(/taken/);
+  });
+
+  it('refuses a sign-up with no email, or one that is no address, once the name and the password would do', async () => {
+    for (const email of [undefined, null, '', 'neel', 'neel@example', `${'a'.repeat(250)}@example.com`]) {
+      const response = await register(apiRequest('POST', '/api/account/register', { body: { username: 'neel', password: PASSWORD, email } }), at(NOW));
+      expect(response.status).toBe(400);
+      expect(response.headers.getSetCookie()).toEqual([]);
+      expect(await response.json()).toEqual({ success: false, error: 'Enter a valid email address.' });
+    }
+    expect(await db.query('SELECT id FROM users')).toEqual([]);
+  });
+
+  it('stores the email trimmed and in lower case, and shows it to the account itself', async () => {
+    const body = { ...credentials(), email: '  Neel.S@Example.COM ' };
+    const response = await register(apiRequest('POST', '/api/account/register', { body }), at(NOW));
+    expect(response.status).toBe(201);
+    expect(await db.query('SELECT email FROM users')).toEqual([{ email: 'neel.s@example.com' }]);
+    const me = await account(apiRequest('GET', '/api/account', { cookie: cookieFrom(response) }), at(NOW));
+    expect((await me.json()).data.account.email).toBe('neel.s@example.com');
+  });
+
+  it('refuses an email that another account has, however it is typed, and says so', async () => {
+    await signUp('neel');
+    const body = { ...credentials('someone_else'), email: ' NEEL@example.com' };
+    const response = await register(apiRequest('POST', '/api/account/register', { body }), at(NOW));
+    expect(response.status).toBe(409);
+    expect(response.headers.getSetCookie()).toEqual([]);
+    expect(await response.json()).toEqual({ success: false, error: 'That email already has an account. Sign in, or use another address.' });
+    expect(await db.query('SELECT username FROM users')).toEqual([{ username: 'neel' }]);
+  });
+
+  it('says the username is taken when both it and the email are', async () => {
+    await signUp('neel');
+    const response = await register(apiRequest('POST', '/api/account/register', { body: credentials('neel', 'another password') }), at(NOW));
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({ success: false, error: 'That username is taken. Choose another, or sign in.' });
   });
 
   it('refuses a moderator’s name as it does a taken one, whether or not anyone has it yet', async () => {

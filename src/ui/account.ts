@@ -2,6 +2,7 @@ import './account.css';
 import { getAccount, logout, type AccountState, type AccountStats } from '../account/client.ts';
 import { t } from '../i18n/index.ts';
 import { getProfile, rename } from '../social/client.ts';
+import { emailPrompt, emailSection } from './account-email.ts';
 import { duelFigures, statFigures, streakDetail, teamFigures } from './account-figures.ts';
 import { recoverySection } from './account-recovery.ts';
 import { myReportsSection } from './account-reports.ts';
@@ -12,11 +13,14 @@ import { deleteAccountSection, deletedNotice } from './delete-account.ts';
 import { el, formatScore } from './dom.ts';
 import { flag } from './flag.ts';
 import { historyList } from './history-list.ts';
+import { hrefFor } from './nav.ts';
 import { progressCharts } from './line-chart.ts';
 import { errorLine, pane, statusLine, type Pane } from './pane.ts';
 import { figure } from './panels.ts';
 import { passwordForm } from './password-form.ts';
 import { recoveryCodeBox } from './recovery-code-box.ts';
+import { showOrigin } from './referrer.ts';
+import { resetForm } from './reset-form.ts';
 import { onSessionEnded, sayRefusal } from './session-ended.ts';
 import { groupHead, settingsRows } from './settings.ts';
 import { signInForm, type CodeFrom } from './sign-in-form.ts';
@@ -142,7 +146,8 @@ function signedInView(state: SignedIn, handlers: Handlers): HTMLElement[] {
     groupHead(t('account.group.account'), t('account.group.account.note')),
     countrySetting(account.country, who.setCountry),
     renameForm(account.username, handlers.reload),
-    // getting in and staying in: the password, the code that stands in for it, and every session at once
+    // getting in and staying in: the email a reset link goes to, the password, the code that stands in for it, and every session at once
+    emailSection(account.email),
     passwordForm(),
     recoverySection(account.hasRecoveryCode),
     signOutEverywhereSection(handlers.reload),
@@ -159,11 +164,12 @@ const endedNote = (): HTMLElement => statusBox('idle', t('session.ended.label'),
 /**
  * The account pane: a sign-in form for a visitor; for a player, their level and stats, every game
  * they have played (each opening round by round), what is saved with the account (country, name,
- * password, recovery code, its sessions, three switches, its reports, deleting it) and the
+ * email, password, recovery code, its sessions, three switches, its reports, deleting it) and the
  * settings kept in this browser. It loads its own data. `onChange` is called when who is signed in
- * may have changed.
+ * may have changed. `resetToken` is the token of a password-reset link the page was opened by: the
+ * pane then begins with the form that sets the new password.
  */
-export function accountPane(onChange: () => void, onTutorial: () => void): Pane {
+export function accountPane(onChange: () => void, onTutorial: () => void, resetToken = ''): Pane {
   const body = el('div', { class: 'account-body' });
   const host = el('div', { class: 'account' });
   let disposed = false;
@@ -189,12 +195,35 @@ export function accountPane(onChange: () => void, onTutorial: () => void): Pane 
    * player says they have it.
    */
   function showCode(code: string, from: CodeFrom): void {
-    body.replaceChildren(recoveryCodeBox(code, t(`recovery.made.${from}`), () => void load()));
+    body.replaceChildren(recoveryCodeBox(code, t(`recovery.made.${from}`), () => void load(false, false, 'arrived')));
     onChange();
   }
 
-  /** `ended` is set when the pane is read again because the session was found to be over. */
-  async function load(changed = false, ended = false): Promise<void> {
+  /** The reset link has done its work, or will not: its token leaves the address, and with it the reason to say nothing of where requests come from. */
+  function dropResetToken(): void {
+    history.replaceState(null, '', `${location.pathname}${hrefFor('account')}`);
+    showOrigin();
+  }
+
+  /**
+   * The page was opened by a reset link: the new password is chosen before anything else of the
+   * pane. Setting it signs the browser in, and the account follows. A link that will not do leads
+   * to the sign-in form, opened on the way to ask for another.
+   */
+  function showReset(token: string): void {
+    const leave = (then: () => void) => () => {
+      dropResetToken();
+      then();
+    };
+    body.replaceChildren(resetForm({ token, onDone: leave(() => void load(true)), onAgain: leave(() => void load(false, false, 'forgot')) }));
+  }
+
+  /**
+   * `ended` is set when the pane is read again because the session was found to be over. `then`
+   * says what brought the player here: 'arrived' when they have just signed in, which is when an
+   * account with no email is asked for one, and 'forgot' to open the sign-in form on its ways back in.
+   */
+  async function load(changed = false, ended = false, then: 'arrived' | 'forgot' | null = null): Promise<void> {
     body.replaceChildren(statusLine(t('account.loading')));
     const result = await getAccount();
     // the sidebar is told even when the player has moved on: who is signed in changed all the same
@@ -213,11 +242,17 @@ export function accountPane(onChange: () => void, onTutorial: () => void): Pane 
     if (account && stats) {
       // a pane read again because the session was over, and found signed in after all, is not read a third time for it
       signedIn = !ended;
+      if (then === 'arrived' && account.email === null) {
+        // asked each time the player signs in, until there is one; either answer goes on to the account
+        body.replaceChildren(emailPrompt(() => void load()));
+        return;
+      }
       body.replaceChildren(...signedInView({ ...result.data, account, stats }, { reload, openGame: (id) => void openGame(id), onTutorial, onDeleted: showDeleted }));
       return;
     }
     signedIn = false;
-    body.replaceChildren(...(ended ? [endedNote()] : []), signInForm({ onSignedIn: reload, onCode: showCode }), ...settingsRows(onTutorial));
+    const arrived = () => void load(true, false, 'arrived');
+    body.replaceChildren(...(ended ? [endedNote()] : []), signInForm({ onSignedIn: arrived, onCode: showCode }, then === 'forgot'), ...settingsRows(onTutorial));
   }
 
   // The session can end from another browser while this pane is open. Whichever part of the pane
@@ -232,7 +267,11 @@ export function accountPane(onChange: () => void, onTutorial: () => void): Pane 
     void load(false, true);
   });
 
-  void load();
+  if (resetToken === '') {
+    void load();
+  } else {
+    showReset(resetToken);
+  }
 
   const home = pane(t('nav.item.account'), t('account.lede'), body);
   host.append(home);

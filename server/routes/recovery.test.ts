@@ -27,7 +27,7 @@ const at = (now: number): Context => ({ db, now, secret: TEST_SECRET });
 
 /** A new account: the browser it was made in, and the recovery code it was shown. */
 async function signUp(username = 'neel'): Promise<{ cookie: string; code: string }> {
-  const response = await register(apiRequest('POST', '/api/account/register', { body: { username, password: PASSWORD } }), at(NOW));
+  const response = await register(apiRequest('POST', '/api/account/register', { body: { username, password: PASSWORD, email: `${username}@example.com` } }), at(NOW));
   expect(response.status).toBe(201);
   return { cookie: cookieFrom(response), code: (await response.json()).data.recoveryCode };
 }
@@ -61,7 +61,7 @@ beforeEach(async () => {
 
 describe('a recovery code', () => {
   it('is shown once, when the account is made: twelve characters in three groups, kept only as a hash', async () => {
-    const response = await register(apiRequest('POST', '/api/account/register', { body: { username: 'Neel', password: PASSWORD } }), at(NOW));
+    const response = await register(apiRequest('POST', '/api/account/register', { body: { username: 'Neel', password: PASSWORD, email: 'neel@example.com' } }), at(NOW));
     expect(response.status).toBe(201);
     const made = (await response.json()).data;
     expect(made).toEqual({ username: 'neel', recoveryCode: expect.stringMatching(CODE_SHAPE) });

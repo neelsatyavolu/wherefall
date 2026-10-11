@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { RESTORE_WINDOW_MS, changePassword, deleteAccount, issueRecoveryCode } from '../account/accounts.js';
 import { SIGN_IN_FIRST, accountSession, noAccount, noSession, playerIn } from '../account/identity.js';
-import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, countrySchema, givenPasswordSchema, newPasswordSchema } from '../account/input.js';
+import { EMAIL_RULE, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, countrySchema, emailSchema, givenPasswordSchema, newPasswordSchema } from '../account/input.js';
 import { verifyPassword } from '../account/password.js';
+import { deleteResetTokensOf } from '../db/password-resets.js';
 import { hitRateLimit } from '../db/rate-limit.js';
-import { changeSettings, endSessions, getUser, setCountry, type User } from '../db/users.js';
+import { changeSettings, endSessions, getUser, replaceEmail, setCountry, type User } from '../db/users.js';
 import { fail, ok, readBody, sameOrigin } from '../http.js';
 import type { Context } from '../serve.js';
 import { isModerator } from '../social/moderation.js';
@@ -19,7 +20,9 @@ const NOT_YOUR_PASSWORD = 'That is not your current password.';
 const CHANGES_PER_HOUR = 120;
 const SLOW_DOWN = 'Too many requests. Slow down a little.';
 
-const ACTIONS = ['password', 'delete', 'country', 'settings', 'recoveryCode', 'signOutEverywhere'] as const;
+const EMAIL_IN_USE = 'That email already has an account. Use another address.';
+
+const ACTIONS = ['password', 'delete', 'country', 'settings', 'recoveryCode', 'signOutEverywhere', 'email'] as const;
 type Action = (typeof ACTIONS)[number];
 
 const actionNameSchema = z.looseObject({ action: z.enum(ACTIONS) });
@@ -27,6 +30,7 @@ const currentPasswordSchema = z.looseObject({ current: givenPasswordSchema });
 const nextPasswordSchema = z.looseObject({ next: newPasswordSchema });
 const passwordGivenSchema = z.looseObject({ password: givenPasswordSchema });
 const countryChangeSchema = z.looseObject({ country: countrySchema.nullable() });
+const emailChangeSchema = z.looseObject({ email: emailSchema });
 const settingsSchema = z.looseObject({ allowFriendRequests: z.boolean().optional(), hideChat: z.boolean().optional(), hideLastSeen: z.boolean().optional() });
 
 type Handler = (body: unknown, user: User, request: Request, context: Context) => Promise<Response>;
@@ -114,6 +118,45 @@ const newSettings: Handler = async (body, user, _request, context) => {
     : fail(SIGN_IN_FIRST, 401);
 };
 
+/**
+ * The account's email, which reset links are sent to. An account that has none
+ * is adding a way back in, and its session is enough for that. One that has an
+ * email is taking a way back in from whoever reads the old address, so it
+ * gives its password, out of the same tries as every other check of it. The
+ * address is looked at first, so a mistyped one costs no try. Reset links
+ * already sent went to the old address, and stop working.
+ */
+const newEmail: Handler = async (body, user, _request, context) => {
+  if (!(await mayChange('email', user, context))) {
+    return fail(SLOW_DOWN, 429);
+  }
+  const chosen = emailChangeSchema.safeParse(body);
+  if (!chosen.success) {
+    return fail(EMAIL_RULE, 400);
+  }
+  const changing = user.email !== null;
+  if (changing) {
+    if (!(await mayTryPassword(user, context))) {
+      return fail(TOO_MANY_TRIES, 429);
+    }
+    const given = passwordGivenSchema.safeParse(body);
+    if (!given.success || !(await verifyPassword(given.data.password, user.passwordHash))) {
+      return fail(NOT_YOUR_PASSWORD, 403);
+    }
+  }
+  const { email } = chosen.data;
+  const outcome = await replaceEmail(context.db, user.id, email, changing ? user.passwordHash : null);
+  if (outcome === 'taken') {
+    return fail(EMAIL_IN_USE, 409);
+  }
+  if (outcome === 'refused') {
+    // Another request gave the account an email, or a new password, while this one was being checked.
+    return fail(NOT_YOUR_PASSWORD, 403);
+  }
+  await deleteResetTokensOf(context.db, user.id);
+  return ok({ email });
+};
+
 const HANDLERS: Record<Action, Handler> = {
   password: newPassword,
   delete: removeAccount,
@@ -121,6 +164,7 @@ const HANDLERS: Record<Action, Handler> = {
   settings: newSettings,
   recoveryCode: newRecoveryCode,
   signOutEverywhere,
+  email: newEmail,
 };
 
 /** What a player changes about their own account: `{ action, ... }`. */

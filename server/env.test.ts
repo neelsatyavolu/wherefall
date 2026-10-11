@@ -10,6 +10,8 @@ describe('parseEnv', () => {
       SESSION_SECRET,
       MODERATORS: [],
       GOOGLE_VIEWERS_PER_DAY: 150,
+      RESEND_API_KEY: undefined,
+      APP_URL: 'http://localhost:3000',
     });
   });
 
@@ -34,6 +36,42 @@ describe('parseEnv', () => {
     expect(() => withExtra({ GOOGLE_VIEWERS_PER_DAY: value })).toThrow('GOOGLE_VIEWERS_PER_DAY: must be a whole number, 0 or more');
   });
 
+  it('reads the key email is sent with, and goes without one outside production when it is empty or left out', () => {
+    expect(withExtra({ RESEND_API_KEY: 're_made_up' }).RESEND_API_KEY).toBe('re_made_up');
+    expect(withExtra({ RESEND_API_KEY: '' }).RESEND_API_KEY).toBeUndefined();
+    expect(withExtra({}).RESEND_API_KEY).toBeUndefined();
+    expect(withExtra({ NODE_ENV: 'development', VERCEL_ENV: 'development' }).RESEND_API_KEY).toBeUndefined();
+    expect(withExtra({ NODE_ENV: 'production', VERCEL_ENV: 'preview' }).RESEND_API_KEY).toBeUndefined();
+  });
+
+  it('reads the address of the site as its origin, and takes it to be this machine outside production when it is left out', () => {
+    expect(withExtra({ APP_URL: 'https://wherefall.vercel.app' }).APP_URL).toBe('https://wherefall.vercel.app');
+    expect(withExtra({ APP_URL: 'https://wherefall.vercel.app/' }).APP_URL).toBe('https://wherefall.vercel.app');
+    expect(withExtra({ APP_URL: 'http://localhost:5173' }).APP_URL).toBe('http://localhost:5173');
+    expect(withExtra({ APP_URL: '' }).APP_URL).toBe('http://localhost:3000');
+    expect(withExtra({}).APP_URL).toBe('http://localhost:3000');
+  });
+
+  it.each(['wherefall.vercel.app', 'ftp://wherefall.vercel.app', 'https://wherefall.vercel.app/play', 'https://wherefall.vercel.app/?a=1', 'https://user@wherefall.vercel.app', 'not a url'])(
+    'says what the address of the site has to be when it is %s',
+    (value) => {
+      expect(() => withExtra({ APP_URL: value })).toThrow('APP_URL: must be the origin of the site, as https://wherefall.vercel.app');
+    },
+  );
+
+  const PRODUCTION = { RESEND_API_KEY: 're_made_up', APP_URL: 'https://wherefall.vercel.app' };
+
+  it.each<Record<string, string>>([{ VERCEL_ENV: 'production' }, { NODE_ENV: 'production' }, { VERCEL_ENV: 'production', NODE_ENV: 'production' }])(
+    'needs both the key and the address in production (%j), and names whichever is missing or empty',
+    (production) => {
+      expect(withExtra({ ...production, ...PRODUCTION })).toMatchObject(PRODUCTION);
+      expect(() => withExtra(production)).toThrow('Invalid environment. RESEND_API_KEY: is not set; APP_URL: is not set');
+      expect(() => withExtra({ ...production, ...PRODUCTION, RESEND_API_KEY: '' })).toThrow('Invalid environment. RESEND_API_KEY: is not set');
+      expect(() => withExtra({ ...production, ...PRODUCTION, APP_URL: '' })).toThrow('Invalid environment. APP_URL: is not set');
+      expect(() => withExtra({ ...production, RESEND_API_KEY: 're_made_up' })).toThrow('Invalid environment. APP_URL: is not set');
+    },
+  );
+
   it('names every setting that is missing', () => {
     expect(() => parseEnv({})).toThrow('Invalid environment. DATABASE_URL: is not set; SESSION_SECRET: is not set');
     expect(() => parseEnv({ SESSION_SECRET, DATABASE_URL: '' })).toThrow('Invalid environment. DATABASE_URL: is empty');
@@ -49,6 +87,12 @@ describe('parseEnv', () => {
     const secret = 'c2VjcmV0LXZhbHVl';
     expect(() => parseEnv({ DATABASE_URL: 'pglite://memory', SESSION_SECRET: secret })).toThrow(
       expect.objectContaining({ message: expect.not.stringContaining(secret) }),
+    );
+  });
+
+  it('never repeats the address of the site in the error either', () => {
+    expect(() => withExtra({ APP_URL: 'https://wherefall.vercel.app/secret-path' })).toThrow(
+      expect.objectContaining({ message: expect.not.stringContaining('secret-path') }),
     );
   });
 });

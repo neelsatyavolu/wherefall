@@ -34,6 +34,8 @@ const CODE_PATTERN = /^[A-Za-z0-9]{1,12}$/;
 /** the shape every username has */
 const USERNAME_PATTERN = /^[A-Za-z0-9_]{3,20}$/;
 const NEW_MAP = 'new';
+/** what a reset token is made of; the server says whether one of that make is any good */
+const RESET_TOKEN_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
 
 export const hrefFor = (id: NavId) => `#${id}`;
 
@@ -53,6 +55,12 @@ export function profileUser(search: string): string {
   return USERNAME_PATTERN.test(username) ? username : '';
 }
 
+/** The token a password-reset link (`?reset=TOKEN`) carries, or an empty string. */
+export function resetToken(search: string): string {
+  const token = new URLSearchParams(search).get('reset') ?? '';
+  return RESET_TOKEN_PATTERN.test(token) ? token : '';
+}
+
 /** The address of a community map's page. */
 export const mapHref = (slug: string) => `?community=${encodeURIComponent(slug)}`;
 
@@ -67,8 +75,9 @@ function slugParam(search: string, name: string): string {
 
 /**
  * The view an address selects. The hash names a nav item and wins; without one a profile link
- * opens that profile and a party link opens Join party. Challenge links (`?map=…&seed=…`) carry
- * neither and so stay on Singleplayer.
+ * opens that profile, a party link opens Join party and a password-reset link opens the account
+ * pane, where the new password is chosen. Challenge links (`?map=…&seed=…`) carry none of these and
+ * so stay on Singleplayer.
  */
 export function viewFor(hash: string, search: string): View {
   const named = NAV_ITEMS.find((item) => hrefFor(item.id) === hash);
@@ -86,6 +95,9 @@ export function viewFor(hash: string, search: string): View {
   const params = new URLSearchParams(search);
   if (params.get('edit') === NEW_MAP || slugParam(search, 'edit')) {
     return { pane: 'editor', slug: params.get('edit') === NEW_MAP ? null : slugParam(search, 'edit') };
+  }
+  if (resetToken(search)) {
+    return { pane: 'account' };
   }
   return { pane: partyCode(search) ? 'join' : DEFAULT_ITEM };
 }

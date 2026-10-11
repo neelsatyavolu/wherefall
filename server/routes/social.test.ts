@@ -702,7 +702,7 @@ describe('rename', () => {
   });
 
   it('keeps the password: the player signs in under the new name, and no longer under the old', async () => {
-    const credentials = { username: 'traveller', password: 'correct horse battery' };
+    const credentials = { username: 'traveller', password: 'correct horse battery', email: 'traveller@example.com' };
     const registered = await register(apiRequest('POST', '/api/account/register', { body: credentials }), at(NOW));
     const cookie = registered.headers.getSetCookie()[0]?.split(';')[0] ?? '';
     const renamed = await socialPost(apiRequest('POST', '/api/social', { body: { action: 'rename', username: 'wanderer' }, cookie }), at(NOW));

@@ -511,7 +511,7 @@ export const en = {
   'account.username': 'Username',
   'account.password': 'Password',
   'account.usernameHint': '3 to 20 letters, numbers or single underscores, not starting or ending with one.',
-  'account.passwordHint': 'At least 8 characters. You are given a recovery code once the account is made: the only way back in if you forget the password.',
+  'account.passwordHint': 'At least 8 characters. You are given a recovery code once the account is made: a way back in if you forget the password.',
   'account.missing': 'Enter a username and a password.',
 
   // Account: a signed-in player

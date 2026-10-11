@@ -25,7 +25,7 @@ let db: Db;
 const at = (now: number, moderators: readonly string[] = []): Context => ({ db, now, secret: TEST_SECRET, moderators });
 
 async function signUp(username = 'neel', now = NOW): Promise<string> {
-  const response = await register(apiRequest('POST', '/api/account/register', { body: { username, password: PASSWORD } }), at(now));
+  const response = await register(apiRequest('POST', '/api/account/register', { body: { username, password: PASSWORD, email: `${username}@example.com` } }), at(now));
   expect(response.status).toBe(201);
   return cookieFrom(response);
 }
@@ -330,7 +330,7 @@ describe('a deleted account', () => {
   });
 
   it('keeps its username: nobody can register it or rename to it', async () => {
-    const taken = await register(apiRequest('POST', '/api/account/register', { body: { username: 'neel', password: PASSWORD } }), at(NOW + DAY));
+    const taken = await register(apiRequest('POST', '/api/account/register', { body: { username: 'neel', password: PASSWORD, email: 'neel@example.com' } }), at(NOW + DAY));
     expect(taken.status).toBe(409);
     expect(await refusal(act(friend, { action: 'rename', username: 'neel' }))).toEqual([409, 'That username is taken. Choose another.']);
   });
@@ -361,7 +361,7 @@ describe('a deleted account', () => {
     expect(await refusal(signIn(PASSWORD, NOW + 30 * DAY, { restore: true }))).toEqual([401, 'Wrong username or password.']);
     expect(await db.query("SELECT 1 FROM users WHERE username = 'neel'")).toEqual([]);
     expect(await db.query('SELECT 1 FROM friendships')).toEqual([]);
-    const again = await register(apiRequest('POST', '/api/account/register', { body: { username: 'neel', password: NEXT } }), at(NOW + 30 * DAY));
+    const again = await register(apiRequest('POST', '/api/account/register', { body: { username: 'neel', password: NEXT, email: 'neel@example.com' } }), at(NOW + 30 * DAY));
     expect(again.status).toBe(201);
     expect(await me(cookieFrom(again), NOW + 30 * DAY)).toMatchObject({ username: 'neel', xp: 0 });
   });

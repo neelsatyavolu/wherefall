@@ -57,6 +57,7 @@ const signedIn: AccountState = {
     hideChat: false,
     hideLastSeen: false,
     hasRecoveryCode: true,
+    email: 'neel@example.com',
   },
   guest: null,
   stats: {
@@ -123,6 +124,7 @@ describe('getAccount', () => {
     ['the 2v2 record has no ties', { ...signedIn, account: { ...signedIn.account, teams: { wins: 1, losses: 0, winRate: 100 } } }],
     ['the last seen switch is missing', { ...signedIn, account: { ...signedIn.account, hideLastSeen: undefined } }],
     ['it does not say whether there is a recovery code', { ...signedIn, account: { ...signedIn.account, hasRecoveryCode: undefined } }],
+    ['it does not say whether there is an email', { ...signedIn, account: { ...signedIn.account, email: undefined } }],
     ['a recent game has no id', { ...signedIn, recentGames: [{ ...recentGame, id: undefined }] }],
     ['a recent game is on a map that is not one', { ...signedIn, recentGames: [{ ...recentGame, map: 'country:france' }] }],
     ['the rated game count is missing', { ...signedIn, stats: { ...signedIn.stats, ratedGames: undefined } }],
@@ -134,21 +136,22 @@ describe('getAccount', () => {
   });
 });
 
-const registerPlain = (username: string, password: string, fetchFn: typeof fetch) => register(username, password, undefined, fetchFn);
+const EMAIL = 'neel@example.com';
+const registerPlain = (username: string, password: string, fetchFn: typeof fetch) => register(username, password, EMAIL, undefined, fetchFn);
 
 const CODE = 'K7QM-2XHD-9RWP';
 
 describe.each([
-  ['register', registerPlain, '/api/account/register', 201, { username: 'neel', recoveryCode: CODE }],
-  ['login', login, '/api/account/login', 200, { username: 'neel' }],
-] as const)('%s', (_name, send, path, status, reply) => {
-  it('posts the username and password as JSON', async () => {
+  ['register', registerPlain, '/api/account/register', 201, { username: 'neel', recoveryCode: CODE }, { email: EMAIL }],
+  ['login', login, '/api/account/login', 200, { username: 'neel' }, {}],
+] as const)('%s', (_name, send, path, status, reply, more) => {
+  it('posts the username and password as JSON, and with a new account its email', async () => {
     const { fetchFn, calls } = fakeFetch(success(reply, status));
     expect(await send('Neel', 'correct horse battery', fetchFn)).toEqual({ ok: true, data: reply });
     expect(calls[0]?.url).toBe(path);
     expect(calls[0]?.init?.method).toBe('POST');
     expect(new Headers(calls[0]?.init?.headers).get('content-type')).toBe('application/json');
-    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ username: 'Neel', password: 'correct horse battery' });
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ username: 'Neel', password: 'correct horse battery', ...more });
   });
 
   it("passes on the server's own explanation when it refuses", async () => {
@@ -164,29 +167,36 @@ describe.each([
 describe('register with a country', () => {
   it('sends the country along', async () => {
     const { fetchFn, calls } = fakeFetch(success({ username: 'neel', recoveryCode: CODE }, 201));
-    expect(await register('neel', 'correct horse battery', 'IN', fetchFn)).toEqual({ ok: true, data: { username: 'neel', recoveryCode: CODE } });
+    expect(await register('neel', 'correct horse battery', EMAIL, 'IN', fetchFn)).toEqual({ ok: true, data: { username: 'neel', recoveryCode: CODE } });
     expect(calls[0]?.url).toBe('/api/account/register');
-    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ username: 'neel', password: 'correct horse battery', country: 'IN' });
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ username: 'neel', password: 'correct horse battery', email: EMAIL, country: 'IN' });
   });
 
   it('refuses a reply without the recovery code, which is shown only then', async () => {
-    expect(await register('neel', 'correct horse battery', 'IN', fakeFetch(success({ username: 'neel' }, 201)).fetchFn)).toEqual({ ok: false, error: UNEXPECTED });
+    expect(await register('neel', 'correct horse battery', EMAIL, 'IN', fakeFetch(success({ username: 'neel' }, 201)).fetchFn)).toEqual({ ok: false, error: UNEXPECTED });
   });
 
   it("passes on the refusal for a name that is taken, which is also a moderator's", async () => {
     const taken = 'That username is taken. Choose another, or sign in.';
-    expect(await register('mod', 'correct horse battery', 'IN', fakeFetch(failure(taken, 409)).fetchFn)).toEqual({ ok: false, error: taken });
+    expect(await register('mod', 'correct horse battery', EMAIL, 'IN', fakeFetch(failure(taken, 409)).fetchFn)).toEqual({ ok: false, error: taken });
   });
 
   it('sends no country when none could be guessed', async () => {
     const { fetchFn, calls } = fakeFetch(success({ username: 'neel', recoveryCode: CODE }, 201));
-    await register('neel', 'correct horse battery', null, fetchFn);
-    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ username: 'neel', password: 'correct horse battery', country: null });
+    await register('neel', 'correct horse battery', EMAIL, null, fetchFn);
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ username: 'neel', password: 'correct horse battery', email: EMAIL, country: null });
+  });
+
+  it.each([
+    ['Enter a valid email address.', 400],
+    ['That email already has an account. Sign in, or use another address.', 409],
+  ])('passes on the refusal "%s"', async (refusal, status) => {
+    expect(await register('neel', 'correct horse battery', 'nope', 'IN', fakeFetch(failure(refusal, status)).fetchFn)).toEqual({ ok: false, error: refusal });
   });
 
   it("passes on the server's word on a bad username", async () => {
     const refusal = 'Choose a username of 3 to 20 letters, numbers or single underscores, not starting or ending with one.';
-    expect(await register('_neel', 'correct horse battery', 'IN', fakeFetch(failure(refusal, 400)).fetchFn)).toEqual({ ok: false, error: refusal });
+    expect(await register('_neel', 'correct horse battery', EMAIL, 'IN', fakeFetch(failure(refusal, 400)).fetchFn)).toEqual({ ok: false, error: refusal });
   });
 });
 

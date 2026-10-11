@@ -217,8 +217,8 @@ test('a recovery code is shown once, replaced when issued again and when used, a
   const wrong = 'Wrong username or recovery code.';
 
   account.taken = ['mod'];
-  expect(await register('mod', 'correct horse battery', 'IN', send)).toEqual(refused('That username is taken. Choose another, or sign in.'));
-  const made = data(await register('neel', 'correct horse battery', 'IN', send));
+  expect(await register('mod', 'correct horse battery', 'neel@example.com', 'IN', send)).toEqual(refused('That username is taken. Choose another, or sign in.'));
+  const made = data(await register('neel', 'correct horse battery', 'neel@example.com', 'IN', send));
   expect(made).toEqual({ username: 'neel', recoveryCode: expect.stringMatching(CODE) });
   expect(data(await getAccount(send)).account).toMatchObject({ username: 'neel', hasRecoveryCode: true, hideLastSeen: false, teams: { wins: 0, losses: 0, ties: 0, winRate: 0 } });
 

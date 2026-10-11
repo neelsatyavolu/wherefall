@@ -508,7 +508,7 @@ export const fr: Translation = {
   'account.username': 'Nom d’utilisateur',
   'account.password': 'Mot de passe',
   'account.usernameHint': '3 à 20 lettres, chiffres ou tirets bas isolés, jamais au début ni à la fin.',
-  'account.passwordHint': 'Au moins 8 caractères. À la création du compte, vous recevez un code de récupération : le seul moyen de revenir si vous oubliez le mot de passe.',
+  'account.passwordHint': 'Au moins 8 caractères. À la création du compte, vous recevez un code de récupération : un moyen de revenir si vous oubliez le mot de passe.',
   'account.missing': 'Saisissez un nom d’utilisateur et un mot de passe.',
 
   // Compte : un joueur connecté

@@ -509,7 +509,7 @@ export const es: Translation = {
   'account.username': 'Nombre de usuario',
   'account.password': 'Contraseña',
   'account.usernameHint': 'De 3 a 20 letras, números o guiones bajos sueltos, nunca al principio ni al final.',
-  'account.passwordHint': 'Al menos 8 caracteres. Al crear la cuenta recibes un código de recuperación: la única forma de volver a entrar si olvidas la contraseña.',
+  'account.passwordHint': 'Al menos 8 caracteres. Al crear la cuenta recibes un código de recuperación: una forma de volver a entrar si olvidas la contraseña.',
   'account.missing': 'Escribe un nombre de usuario y una contraseña.',
 
   // Cuenta: un jugador con la sesión iniciada

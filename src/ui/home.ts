@@ -24,7 +24,7 @@ import { mapsPane } from './maps-pane.ts';
 import { createPartyPane, joinPartyPane, queuePane } from './multiplayer-panes.ts';
 import { install, watchInstall } from '../pwa.ts';
 import { moderationPane } from './moderation-pane.ts';
-import { NAV_GROUPS, RESTRICTED, hrefFor, navFor, navGroupName, navName, partyCode, sameView, type NavId, type View } from './nav.ts';
+import { NAV_GROUPS, RESTRICTED, hrefFor, navFor, navGroupName, navName, partyCode, resetToken, sameView, type NavId, type View } from './nav.ts';
 import { onlineCount } from './online-count.ts';
 import type { Pane } from './pane.ts';
 import { profilePane } from './profile-pane.ts';
@@ -127,7 +127,7 @@ function buildPane(view: View, handlers: HomeHandlers, session: Session): Pane {
     case 'friends':
       return friendsPane({ onMatch: handlers.onMatch, onPending: session.setPending });
     case 'account':
-      return accountPane(session.refresh, handlers.onTutorial);
+      return accountPane(session.refresh, handlers.onTutorial, resetToken(location.search));
     case 'profile':
       return profilePane(view.username);
     case 'maps':

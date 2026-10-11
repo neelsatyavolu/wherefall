@@ -115,6 +115,19 @@ describe('register', () => {
     expect(await signIn(db, { username: 'neel', password: 'another password' })).toBeNull();
   });
 
+  it('stores the email it is given, and none for an account made without one', async () => {
+    const withOne = await register(db, { username: 'neel', password: PASSWORD, email: 'neel@example.com', now: NOW });
+    const without = await register(db, { username: 'older', password: PASSWORD, now: NOW });
+    expect((await getUser(db, withOne ?? ''))?.email).toBe('neel@example.com');
+    expect((await getUser(db, without ?? ''))?.email).toBeNull();
+  });
+
+  it('is null when the email is taken, and leaves the first account alone', async () => {
+    const first = await register(db, { username: 'neel', password: PASSWORD, email: 'neel@example.com', now: NOW });
+    expect(await register(db, { username: 'another', password: PASSWORD, email: 'neel@example.com', now: NOW + 1 })).toBeNull();
+    expect(await db.query('SELECT id FROM users')).toEqual([{ id: first }]);
+  });
+
   it('gives each account its own id', async () => {
     const one = await register(db, { username: 'one', password: PASSWORD, now: NOW });
     const two = await register(db, { username: 'two', password: PASSWORD, now: NOW });

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { purgeDeleted, register as createAccount } from '../account/accounts.js';
 import { accountSession, hasSession, noSession, playerIn, type Player } from '../account/identity.js';
-import { MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH, newUsernameSchema, registerSchema } from '../account/input.js';
+import { EMAIL_RULE, MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH, newPasswordSchema, newUsernameSchema, registerSchema } from '../account/input.js';
 import { leagueFor, levelFor } from '../account/progress.js';
 import { duelRecord } from '../social/duels.js';
 import { isModerator } from '../social/moderation.js';
@@ -9,7 +9,7 @@ import { teamRecord } from '../social/teams.js';
 import { recentGamesFor, statsFor } from '../db/games.js';
 import { hitRateLimit } from '../db/rate-limit.js';
 import { ratingRankOf } from '../db/social.js';
-import { countLogin, getUser, type User } from '../db/users.js';
+import { countLogin, findUserByUsername, getUser, type User } from '../db/users.js';
 import { clientIp, fail, hashIp, ok, readBody, sameOrigin } from '../http.js';
 import type { Context } from '../serve.js';
 
@@ -25,6 +25,7 @@ const ACCOUNTS_PER_ADDRESS = 20;
 const USERNAME_RULE = `Choose a username of ${MIN_USERNAME_LENGTH} to ${MAX_USERNAME_LENGTH} letters, numbers or single underscores, not starting or ending with one.`;
 const PASSWORD_RULE = `Choose a password of at least ${MIN_PASSWORD_LENGTH} characters.`;
 const TAKEN = 'That username is taken. Choose another, or sign in.';
+const EMAIL_TAKEN = 'That email already has an account. Sign in, or use another address.';
 
 const RECENT_GAMES = 10;
 const SIGNED_OUT = { account: null, guest: null, stats: null, recentGames: [] };
@@ -35,6 +36,7 @@ const startSession = accountSession;
 const endSession = noSession;
 
 const namedSchema = z.looseObject({ username: newUsernameSchema });
+const passwordChosenSchema = z.looseObject({ password: newPasswordSchema });
 
 /** Makes an account and signs the browser in. The reply carries the recovery code, which is never shown again. */
 export async function register(request: Request, context: Context): Promise<Response> {
@@ -48,8 +50,11 @@ export async function register(request: Request, context: Context): Promise<Resp
   const sent = await readBody(request, z.unknown());
   const body = registerSchema.safeParse(sent);
   if (!body.success) {
-    // With a name that would do, what is wrong is the password.
-    return fail(namedSchema.safeParse(sent).success ? PASSWORD_RULE : USERNAME_RULE, 400);
+    if (!namedSchema.safeParse(sent).success) {
+      return fail(USERNAME_RULE, 400);
+    }
+    // With a name that would do, what is wrong is the password; with both, the email.
+    return fail(passwordChosenSchema.safeParse(sent).success ? EMAIL_RULE : PASSWORD_RULE, 400);
   }
   const { username } = body.data;
   // Moderators are known by their usernames, so a moderator's name is not there for the taking. It is
@@ -61,7 +66,8 @@ export async function register(request: Request, context: Context): Promise<Resp
   await purgeDeleted(db, now);
   const made = await createAccount(db, { ...body.data, now });
   if (!made) {
-    return fail(TAKEN, 409);
+    // Either the name or the email is somebody's. The name is said first: an account that has both is one to sign in to.
+    return fail((await findUserByUsername(db, username)) ? TAKEN : EMAIL_TAKEN, 409);
   }
   return ok({ username, recoveryCode: made.recoveryCode }, 201, startSession(made.id, 0, request, context));
 }
@@ -101,6 +107,8 @@ function accountView(user: User, rank: number | null, moderators: readonly strin
     hideLastSeen: user.hideLastSeen,
     // Whether there is a code, never the code: that was shown once, when it was made.
     hasRecoveryCode: user.recoveryHash !== null,
+    // The account's own, and shown to nobody else: no other view of a player carries it.
+    email: user.email,
   };
 }
 

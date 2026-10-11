@@ -38,7 +38,7 @@ const maps = send(mapsPost, '/api/maps');
 const match = send(matchPost, '/api/match');
 
 async function signUp(username: string, now = NOW): Promise<string> {
-  return cookieFrom(await register(apiRequest('POST', '/api/account/register', { body: { username, password: PASSWORD } }), at(now)));
+  return cookieFrom(await register(apiRequest('POST', '/api/account/register', { body: { username, password: PASSWORD, email: `${username}@example.com` } }), at(now)));
 }
 const data = async (response: Response | Promise<Response>) => {
   const body = await (await response).json();

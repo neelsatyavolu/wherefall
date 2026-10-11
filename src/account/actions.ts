@@ -6,6 +6,8 @@ import { call, countrySchema, post, type Result } from './client.ts';
 const ACCOUNT = '/api/account';
 
 export const PASSWORD_LIMITS = { min: 8, max: 200 } as const;
+/** the longest email address the server takes */
+export const EMAIL_LIMITS = { max: 254 } as const;
 
 const changedSchema = z.object({ changed: z.literal(true) });
 const deletedSchema = z.object({ deleted: z.literal(true), /** ISO 8601: the account can be restored until then */ restoreUntil: z.string() });
@@ -13,6 +15,7 @@ const countryReplySchema = z.object({ country: countrySchema });
 const settingsSchema = z.object({ allowFriendRequests: z.boolean(), hideChat: z.boolean(), hideLastSeen: z.boolean() });
 const recoveryCodeSchema = z.object({ recoveryCode: z.string() });
 const signedOutSchema = z.object({ signedOut: z.literal(true) });
+const emailReplySchema = z.object({ email: z.string() });
 
 export type AccountSettings = z.infer<typeof settingsSchema>;
 export type DeletedAccount = z.infer<typeof deletedSchema>;
@@ -60,4 +63,14 @@ export function issueRecoveryCode(password: string, fetchFn: typeof fetch = fetc
 /** Signs the account out of every browser, this one too. `logout` in `client.ts` signs out this browser only. */
 export function signOutEverywhere(fetchFn: typeof fetch = fetch): Reply<{ signedOut: true }> {
   return call(fetchFn, ACCOUNT, signedOutSchema, post({ action: 'signOutEverywhere' }));
+}
+
+/**
+ * Sets the email reset links are sent to; the answer is the address as stored, trimmed and in lower
+ * case. An account that has none needs no password for it. One that has an email gives its current
+ * password, out of the same ten tries an hour as `changePassword`: 403 "That is not your current
+ * password." without it. 409 when another account has the address.
+ */
+export function setEmail(email: string, password?: string, fetchFn: typeof fetch = fetch): Reply<{ email: string }> {
+  return call(fetchFn, ACCOUNT, emailReplySchema, post({ action: 'email', email, ...(password === undefined ? {} : { password }) }));
 }

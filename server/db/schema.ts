@@ -354,6 +354,20 @@ const STATEMENTS = [
 
   // Old windows are cleared out by when they began.
   `CREATE INDEX IF NOT EXISTS rate_limits_window_idx ON rate_limits (window_start)`,
+
+  // Email on accounts, and password resets sent to it.
+
+  // Trimmed and in lower case. Null for a guest, and for an account made before emails until it adds one.
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS email text`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS users_email_idx ON users (email) WHERE email IS NOT NULL`,
+  // One row for each reset link that can still be used. The link carries the token; only its SHA-256 is kept.
+  `CREATE TABLE IF NOT EXISTS password_resets (
+    token_hash text PRIMARY KEY,
+    user_id uuid NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    expires_at timestamptz NOT NULL,
+    created_at timestamptz NOT NULL
+  )`,
+  `CREATE INDEX IF NOT EXISTS password_resets_user_idx ON password_resets (user_id)`,
 ];
 
 /**

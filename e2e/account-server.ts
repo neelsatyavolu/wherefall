@@ -77,6 +77,7 @@ export const account = (username: string, rating = 1000, change: Partial<Account
   hideChat: false,
   hideLastSeen: false,
   hasRecoveryCode: true,
+  email: `${username}@example.com`,
   ...change,
 });
 

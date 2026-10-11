@@ -22,6 +22,7 @@ const account = (change: Partial<Account> = {}): Account => ({
   hideChat: false,
   hideLastSeen: false,
   hasRecoveryCode: true,
+  email: 'neel@example.com',
   ...change,
 });
 

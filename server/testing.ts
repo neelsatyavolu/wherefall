@@ -24,7 +24,7 @@ async function isolatedSchema(url: string): Promise<Db> {
 }
 
 const TABLES = [
-  ...['queue_waits', 'daily_attempts', 'online_games', 'viewer_days', 'player_reports'],
+  ...['password_resets', 'queue_waits', 'daily_attempts', 'online_games', 'viewer_days', 'player_reports'],
   ...['queue_gathering', 'progress_days', 'map_reports', 'map_likes', 'community_maps', 'party_invites', 'friendships', 'streak_runs'],
   ...['match_guesses', 'match_players', 'match_queue', 'matches', 'game_rounds', 'games', 'rate_limits', 'users'],
 ];

@@ -174,6 +174,8 @@ const accountStateSchema = z.object({
       hideLastSeen: z.boolean(),
       /** false for an account made before recovery codes until it issues one. The code itself is never sent here */
       hasRecoveryCode: z.boolean(),
+      /** where reset links are sent; null for an account made before emails until it adds one. Sent to its owner only */
+      email: z.string().nullable(),
     })
     .nullable(),
   /** the guest name ("Guest #4821") when this browser holds a guest session, else null */
@@ -266,12 +268,20 @@ export function getAccount(fetchFn: typeof fetch = fetch): Promise<Result<Accoun
 }
 
 /**
- * Creates the account and signs this browser in to it. `country` is the two-letter code guessed from
- * the browser, or null for none; left out, the request says nothing about a country. The answer
- * carries the account's recovery code (`K7QM-2XHD-9RWP`), which is never sent again: show it now.
+ * Creates the account and signs this browser in to it. `email` is where a reset link is sent if the
+ * password is forgotten: refused with 400 "Enter a valid email address." and 409 when another
+ * account has it. `country` is the two-letter code guessed from the browser, or null for none; left
+ * out, the request says nothing about a country. The answer carries the account's recovery code
+ * (`K7QM-2XHD-9RWP`), which is never sent again: show it now.
  */
-export function register(username: string, password: string, country?: string | null, fetchFn: typeof fetch = fetch): Promise<Result<WithRecoveryCode>> {
-  return call(fetchFn, '/api/account/register', withCodeSchema, post(country === undefined ? { username, password } : { username, password, country }));
+export function register(
+  username: string,
+  password: string,
+  email: string,
+  country?: string | null,
+  fetchFn: typeof fetch = fetch,
+): Promise<Result<WithRecoveryCode>> {
+  return call(fetchFn, '/api/account/register', withCodeSchema, post({ username, password, email, ...(country === undefined ? {} : { country }) }));
 }
 
 /**

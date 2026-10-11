@@ -508,7 +508,7 @@ export const de: Translation = {
   'account.username': 'Benutzername',
   'account.password': 'Passwort',
   'account.usernameHint': '3 bis 20 Buchstaben, Ziffern oder einzelne Unterstriche, nicht am Anfang oder Ende.',
-  'account.passwordHint': 'Mindestens 8 Zeichen. Nach dem Erstellen bekommst du einen Wiederherstellungscode: Nur mit ihm kommst du zurück, wenn du das Passwort vergisst.',
+  'account.passwordHint': 'Mindestens 8 Zeichen. Nach dem Erstellen bekommst du einen Wiederherstellungscode: Mit ihm kommst du zurück, wenn du das Passwort vergisst.',
   'account.missing': 'Gib einen Benutzernamen und ein Passwort ein.',
 
   // Account: a signed-in player

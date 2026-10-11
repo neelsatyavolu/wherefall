@@ -306,3 +306,42 @@ export const FIFTH_WAVE = [
     WHERE m.likes <> (SELECT count(*) FROM map_likes l WHERE l.slug = m.slug)`,
   `CREATE INDEX IF NOT EXISTS community_maps_liked_idx ON community_maps (likes DESC, plays DESC, created_at DESC, slug)`,
 ];
+
+/** What the sixth wave added, as it stood when email and password resets were written. */
+export const SIXTH_WAVE = [
+  // Sixth wave: hardening after the security review, recovery codes, 2v2 records, report categories.
+
+  // Raised to end every session of the account: a token carries the version it was made at.
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS session_version integer NOT NULL DEFAULT 0`,
+  // The recovery code, hashed like a password. Null until the account is given one.
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS recovery_hash text`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS team_wins integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS team_losses integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS team_ties integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS hide_last_seen boolean NOT NULL DEFAULT false`,
+  // XP earned from solo play on one UTC day (YYYY-MM-DD), which is capped. Kept on the row so the cap is one atomic update.
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS solo_xp integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS solo_xp_day text`,
+
+  // Whether a party takes players with no account.
+  `ALTER TABLE matches ADD COLUMN IF NOT EXISTS guests boolean NOT NULL DEFAULT true`,
+  // How many writes the player has sent the match since `acts_from`: the per-seat rate limit, kept with the heartbeat.
+  `ALTER TABLE match_players ADD COLUMN IF NOT EXISTS acts integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE match_players ADD COLUMN IF NOT EXISTS acts_from timestamptz`,
+
+  `ALTER TABLE player_reports ADD COLUMN IF NOT EXISTS category text NOT NULL DEFAULT 'other'`,
+  // open, actioned or dismissed: what the reporter is shown.
+  `ALTER TABLE player_reports ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'open'`,
+  `CREATE INDEX IF NOT EXISTS player_reports_reporter_idx ON player_reports (reporter_id, created_at DESC)`,
+
+  // How long each player waited in a queue before their match was found: the "typical wait" shown to the next one.
+  `CREATE TABLE IF NOT EXISTS queue_waits (
+    kind text NOT NULL,
+    found_at timestamptz NOT NULL,
+    waited_ms integer NOT NULL
+  )`,
+  `CREATE INDEX IF NOT EXISTS queue_waits_kind_idx ON queue_waits (kind, found_at)`,
+
+  // Old windows are cleared out by when they began.
+  `CREATE INDEX IF NOT EXISTS rate_limits_window_idx ON rate_limits (window_start)`,
+];

@@ -45,11 +45,17 @@ Moderators are the accounts named in the `MODERATORS` environment variable (comm
 
 ## Accounts
 
-An account is optional. Signed-in players get each finished game saved, and an account screen with games played, average and best round, perfect rounds, best game and recent games. The backend is nine Vercel Functions in `api/` over Postgres (code in `server/`); the account part is ported from Gambit: scrypt passwords, a signed HttpOnly session cookie, rate limits on sign-up, sign-in and saves, and an Origin check on writes. Sign-in is username and password only.
+An account is optional. Signed-in players get each finished game saved, and an account screen with games played, average and best round, perfect rounds, best game and recent games. The backend is ten Vercel Functions in `api/` over Postgres (code in `server/`); the account part is ported from Gambit: scrypt passwords, a signed HttpOnly session cookie, rate limits on sign-up, sign-in and saves, and an Origin check on writes. Sign-in is username and password only.
 
 The server does not store scores as the browser sends them: it looks each place up in its own copy of the two location sets (or the community map), and recomputes each round's distance and score from that place and the guess. Daily, streak and guesser runs begin with a start the server issues, and a finish that arrives faster than two seconds a round is refused. That stops made-up scores. It cannot stop a player who reads the answer out of their own browser, which no browser-rendered game can.
 
-It needs `DATABASE_URL` and `SESSION_SECRET` (see `.env.example`). In production these are set on the Vercel project; the database is the Neon resource `plonk-db`.
+An account has an email, asked for at sign-up and shown to nobody but its owner. An account made before emails is asked for one each time it signs in ("Not now" goes on), and can add or change it on the account screen; changing it takes the current password.
+
+A forgotten password has two ways back. "Forgot password" sends a reset link to the account's email, in the language the page was in: the link works once, for an hour, and setting the new password signs every other browser out. The link carries a random token of which the database keeps only the SHA-256, and it is built on `APP_URL`, never on anything a request says. Asking is answered the same whether or not any account has the address, and is limited to five requests a network in 15 minutes, three emails an address in an hour and 50 emails a day for the whole site. The recovery code shown once at sign-up still works as before, for a player who cannot get to that email.
+
+Email goes out through [Resend](https://resend.com) from `Wherefall <no-reply@n3el.dev>` (`server/mail/`). Without `RESEND_API_KEY`, which is only allowed outside production, no email is sent and the reset link is written to the server log instead.
+
+It needs `DATABASE_URL` and `SESSION_SECRET`, and in production `RESEND_API_KEY` and `APP_URL` too (see `.env.example`). In production these are set on the Vercel project; the database is the Neon resource `plonk-db`.
 
 ## Run it
 
@@ -91,8 +97,8 @@ src/imagery/   the two imagery sources behind one interface (provider.ts)
 src/ui/        screens, the two street views and the guess map
 src/i18n/      the five language catalogs
 src/account/, src/multiplayer/, src/social/, src/daily/   browser clients for the API
-api/           Vercel Function routes (thin wrappers; the plan allows 12, nine are used)
-server/        server code: database, sessions, matches, ratings, daily, social, maps
+api/           Vercel Function routes (thin wrappers; the plan allows 12, ten are used)
+server/        server code: database, sessions, email, matches, ratings, daily, social, maps
 scripts/       the location-set builders
 e2e/           Playwright tests against local stand-ins
 e2e-live/      scripts that drive real browsers against a deployed site

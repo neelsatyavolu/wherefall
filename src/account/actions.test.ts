@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { changePassword, deleteAccount, issueRecoveryCode, saveAccountSettings, setCountry, signOutEverywhere } from './actions.ts';
+import { changePassword, deleteAccount, issueRecoveryCode, saveAccountSettings, setCountry, setEmail, signOutEverywhere } from './actions.ts';
 import { UNEXPECTED, bodyOf, failure, fakeFetch, success } from './testing.ts';
 
 const posted = (calls: ReturnType<typeof fakeFetch>['calls']) => {
@@ -147,5 +147,33 @@ describe('signOutEverywhere', () => {
 
   it('refuses a reply that does not say so', async () => {
     expect(await signOutEverywhere(fakeFetch(success({ signedIn: false })).fetchFn)).toEqual({ ok: false, error: UNEXPECTED });
+  });
+});
+
+describe('setEmail', () => {
+  it('posts the address alone for an account that has none, and reads it back as the server stored it', async () => {
+    const { fetchFn, calls } = fakeFetch(success({ email: 'neel@example.com' }));
+    expect(await setEmail(' Neel@Example.com ', undefined, fetchFn)).toEqual({ ok: true, data: { email: 'neel@example.com' } });
+    expect(posted(calls)).toEqual({ action: 'email', email: ' Neel@Example.com ' });
+  });
+
+  it('posts the current password with it when the account is changing the email it has', async () => {
+    const { fetchFn, calls } = fakeFetch(success({ email: 'new@example.com' }));
+    expect(await setEmail('new@example.com', 'my password', fetchFn)).toEqual({ ok: true, data: { email: 'new@example.com' } });
+    expect(posted(calls)).toEqual({ action: 'email', email: 'new@example.com', password: 'my password' });
+  });
+
+  it.each([
+    ['Enter a valid email address.', 400],
+    ['That email already has an account. Use another address.', 409],
+    ['That is not your current password.', 403],
+    ['Too many tries at your password in the last hour. Try again later.', 429],
+    ['Sign in first.', 401],
+  ])('passes on the refusal "%s"', async (error, status) => {
+    expect(await setEmail('neel@example.com', 'pw', fakeFetch(failure(error, status)).fetchFn)).toEqual({ ok: false, error });
+  });
+
+  it('refuses a reply without the email', async () => {
+    expect(await setEmail('neel@example.com', undefined, fakeFetch(success({ changed: true })).fetchFn)).toEqual({ ok: false, error: UNEXPECTED });
   });
 });

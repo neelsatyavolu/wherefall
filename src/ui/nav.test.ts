@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { NAV_GROUPS, RESTRICTED, editorHref, hrefFor, mapHref, navFor, navGroupName, navName, partyCode, profileUser, sameView, viewFor } from './nav.ts';
+import { NAV_GROUPS, RESTRICTED, editorHref, hrefFor, mapHref, navFor, navGroupName, navName, partyCode, profileUser, resetToken, sameView, viewFor } from './nav.ts';
+
+/** a reset token as an email carries it */
+const TOKEN = 'Zk3v9Qx1LrT8mB2nYc7WdA5sHj0PqUeXoIiGfRtN4wE';
 
 describe('the nav list', () => {
   it('has the items in their groups', () => {
@@ -62,6 +65,33 @@ describe('viewFor', () => {
     expect(viewFor('', '?user=sam_1')).toEqual({ pane: 'profile', username: 'sam_1' });
     expect(viewFor('#daily', '?user=sam_1')).toEqual({ pane: 'daily' });
     expect(viewFor('', '?user=x')).toEqual({ pane: 'singleplayer' });
+  });
+
+  it('opens the account pane for a reset link, where the new password is chosen, unless the hash names a pane', () => {
+    expect(viewFor('', `?reset=${TOKEN}`)).toEqual({ pane: 'account' });
+    expect(viewFor('#account', `?reset=${TOKEN}`)).toEqual({ pane: 'account' });
+    expect(viewFor('#leaderboards', `?reset=${TOKEN}`)).toEqual({ pane: 'leaderboards' });
+    expect(viewFor('', '?reset=')).toEqual({ pane: 'singleplayer' });
+  });
+});
+
+describe('resetToken', () => {
+  it('reads the token a reset link carries', () => {
+    expect(resetToken(`?reset=${TOKEN}`)).toBe(TOKEN);
+    expect(resetToken(`?lang=fr&reset=${TOKEN}`)).toBe(TOKEN);
+  });
+
+  it('takes a link cut short as a token still, so the server can say it will not do', () => {
+    expect(resetToken('?reset=Zk3v9Qx1')).toBe('Zk3v9Qx1');
+  });
+
+  it('is empty without one, and for anything that could not be part of a token', () => {
+    expect(resetToken('')).toBe('');
+    expect(resetToken('?party=ABC123')).toBe('');
+    expect(resetToken('?reset=')).toBe('');
+    expect(resetToken('?reset=<script>')).toBe('');
+    expect(resetToken('?reset=a%20b')).toBe('');
+    expect(resetToken(`?reset=${'a'.repeat(129)}`)).toBe('');
   });
 });
 

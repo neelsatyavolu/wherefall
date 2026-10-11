@@ -12,12 +12,12 @@ const ATTEMPTS_PER_ADDRESS = 10;
 // Slows guessing spread over many addresses. Set above the per-address limit,
 // so it takes several addresses to lock an account's owner out for the window.
 const ATTEMPTS_PER_USERNAME = 30;
-const LOCKED = 'Too many attempts. Try again in 15 minutes.';
+export const LOCKED = 'Too many attempts. Try again in 15 minutes.';
 // One answer for every failed sign-in, so it never says whether the username exists.
 const WRONG_CREDENTIALS = 'Wrong username or password.';
 // And one for every failed recovery: an unknown name, an account with no code, a wrong code.
 const WRONG_RECOVERY = 'Wrong username or recovery code.';
-const NEW_PASSWORD_RULE = `Choose a new password of ${MIN_PASSWORD_LENGTH} to ${MAX_PASSWORD_LENGTH} characters.`;
+export const NEW_PASSWORD_RULE = `Choose a new password of ${MIN_PASSWORD_LENGTH} to ${MAX_PASSWORD_LENGTH} characters.`;
 const DELETED = 'This account was deleted. Restore it to sign in.';
 
 const newPasswordGivenSchema = z.looseObject({ newPassword: newPasswordSchema });

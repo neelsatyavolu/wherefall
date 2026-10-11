@@ -3,6 +3,7 @@ import { GET as getAccount, POST as postAccount } from '../api/account/index.js'
 import { POST as postLogin } from '../api/account/login.js';
 import { POST as postLogout } from '../api/account/logout.js';
 import { POST as postRegister } from '../api/account/register.js';
+import { POST as postReset } from '../api/account/reset.js';
 import { GET as getDaily, POST as postDaily } from '../api/daily.js';
 import { GET as getGame, POST as postGame } from '../api/games.js';
 import { GET as getMaps, POST as postMaps } from '../api/maps.js';
@@ -14,6 +15,8 @@ import { apiRequest, cookieFrom, scoredRound } from './testing.js';
 // The route files as Vercel calls them: one Request in, settings from the environment.
 const SESSION_SECRET = Buffer.alloc(32, 5).toString('base64');
 const credentials = { username: 'neel', password: 'correct horse battery' };
+/** What signing up sends: each account has an email of its own. */
+const newAccount = (username = credentials.username) => ({ ...credentials, username, email: `${username}@example.com` });
 const game = { map: 'world', mode: 'move', timeLimit: 0, seed: 'abc', rounds: [scoredRound(4990)] };
 
 beforeEach(() => {
@@ -23,12 +26,13 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
 describe('the API routes', () => {
   it('register, save a game, read it back, sign out and sign in again', async () => {
-    const registered = await postRegister(apiRequest('POST', '/api/account/register', { body: credentials }));
+    const registered = await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount() }));
     expect(registered.status).toBe(201);
     const cookie = cookieFrom(registered);
 
@@ -56,7 +60,7 @@ describe('the API routes', () => {
 
   it('open a party, join it, poll it and leave it, on the real clock', async () => {
     const signUp = async (username: string) =>
-      cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username } })));
+      cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount(username) })));
     const host = await signUp('host');
     const guest = await signUp('guest');
 
@@ -84,7 +88,7 @@ describe('the API routes', () => {
   });
 
   it('save a game with its places, read it back, and show up on the XP leaderboard and in a profile', async () => {
-    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username: 'historian' } })));
+    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount('historian') })));
     // A real place, named by its id and guessed exactly: the server reads the place lists for itself.
     const [place] = spreadPlaces(1) as [ReturnType<typeof spreadPlaces>[number]];
     const { id, lng, lat } = place;
@@ -113,7 +117,7 @@ describe('the API routes', () => {
   });
 
   it('change the country and the settings of an account, then delete it and restore it', async () => {
-    const registered = await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username: 'leaver', country: 'FR' } }));
+    const registered = await postRegister(apiRequest('POST', '/api/account/register', { body: { ...newAccount('leaver'), country: 'FR' } }));
     const cookie = cookieFrom(registered);
     const ask = (body: unknown) => postAccount(apiRequest('POST', '/api/account', { body, cookie }));
     expect((await (await ask({ action: 'country', country: 'JP' })).json()).data).toEqual({ country: 'JP' });
@@ -134,7 +138,7 @@ describe('the API routes', () => {
   });
 
   it('give a recovery code at sign-up, take it for a forgotten password, and sign every other browser out', async () => {
-    const body = { ...credentials, username: 'forgetful' };
+    const body = newAccount('forgetful');
     const registered = await postRegister(apiRequest('POST', '/api/account/register', { body }));
     const first = cookieFrom(registered);
     const { username, recoveryCode } = (await registered.json()).data;
@@ -163,7 +167,7 @@ describe('the API routes', () => {
   });
 
   it('start a streak run for an account, and take no run that was not started', async () => {
-    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username: 'runner' } })));
+    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount('runner') })));
     const started = await postGame(apiRequest('POST', '/api/games', { body: { action: 'start', kind: 'streak' }, cookie }));
     expect(started.status).toBe(201);
     const { run } = (await started.json()).data;
@@ -186,7 +190,7 @@ describe('the API routes', () => {
 
   it('make friends through the route file', async () => {
     const signUp = async (username: string) =>
-      cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username } })));
+      cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount(username) })));
     const asker = await signUp('asker');
     const asked = await signUp('asked');
     const requested = await postSocial(apiRequest('POST', '/api/social', { body: { action: 'request', username: 'asked' }, cookie: asker }));
@@ -201,7 +205,7 @@ describe('the API routes', () => {
   });
 
   it('publish a community map, list it, play it and open a party on it', async () => {
-    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username: 'mapmaker' } })));
+    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount('mapmaker') })));
     const locations = [0, 1, 2, 3, 4].map((index) => [`p${index}`, 2 + index, 48, 'FR']);
     const published = await postMaps(apiRequest('POST', '/api/maps', { body: { action: 'save', name: 'Across France', description: 'Five places in a line across France.', locations }, cookie }));
     expect(published.status).toBe(201);
@@ -229,18 +233,18 @@ describe('the API routes', () => {
     expect(await ask('198.51.100.2')).toEqual({ google: true, usedToday: 2, limit: 3 });
     // The last third of the day's viewers is kept for signed-in accounts.
     expect(await ask('198.51.100.3')).toEqual({ google: false, usedToday: 2, limit: 3 });
-    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username: 'viewer' } })));
+    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount('viewer') })));
     const asAccount = await postDaily(apiRequest('POST', '/api/daily', { body: { action: 'viewer' }, cookie, ip: '198.51.100.4' }));
     expect((await asAccount.json()).data).toEqual({ google: true, usedToday: 3, limit: 3 });
   });
 
   it('know the moderators from the MODERATORS setting, and let them see what has been reported', async () => {
     const signUp = async (username: string) =>
-      cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username } })));
+      cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount(username) })));
     // An account is listed only once it exists: a listed name that nobody has yet cannot be registered.
     const keeper = await signUp('keeper');
     vi.stubEnv('MODERATORS', 'Keeper, someone_else');
-    expect((await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username: 'someone_else' } }))).status).toBe(409);
+    expect((await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount('someone_else') }))).status).toBe(409);
     const player = await signUp('reported');
     const account = async (cookie: string) => (await (await getAccount(apiRequest('GET', '/api/account', { cookie }))).json()).data.account;
     expect(await account(keeper)).toMatchObject({ moderator: true, banned: false });
@@ -286,10 +290,65 @@ describe('the API routes', () => {
   });
 
   it('let an account start its one daily attempt, which the daily then says is under way', async () => {
-    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: { ...credentials, username: 'dailyplayer' } })));
+    const cookie = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body: newAccount('dailyplayer') })));
     const started = await postDaily(apiRequest('POST', '/api/daily', { body: { action: 'start' }, cookie }));
     expect((await started.json()).data).toEqual({ state: 'started', token: null });
     expect((await (await getDaily(apiRequest('GET', '/api/daily', { cookie }))).json()).data).toMatchObject({ state: 'started', yours: null });
+  });
+
+  it('email a forgotten password its reset link through Resend, and take the link for a new password', async () => {
+    vi.stubEnv('RESEND_API_KEY', 're_made_up_key');
+    vi.stubEnv('APP_URL', 'https://wherefall.example/');
+    const posted: Array<{ url: string; init: RequestInit | undefined }> = [];
+    vi.stubGlobal('fetch', async (url: string | URL | Request, init?: RequestInit) => {
+      posted.push({ url: String(url), init });
+      return new Response('{}', { status: 200 });
+    });
+    const body = newAccount('absent_minded');
+    const first = cookieFrom(await postRegister(apiRequest('POST', '/api/account/register', { body })));
+
+    const asked = await postReset(apiRequest('POST', '/api/account/reset', { body: { action: 'request', email: body.email, lang: 'fr' } }));
+    expect([asked.status, await asked.json()]).toEqual([200, { success: true, data: { requested: true } }]);
+    expect(posted).toHaveLength(1);
+    expect(posted[0]?.url).toBe('https://api.resend.com/emails');
+    expect(posted[0]?.init?.headers).toMatchObject({ Authorization: 'Bearer re_made_up_key' });
+    const mail = JSON.parse(String(posted[0]?.init?.body));
+    expect(mail).toMatchObject({ from: 'Wherefall <no-reply@n3el.dev>', to: [body.email], subject: 'Réinitialisez votre mot de passe Wherefall' });
+    const link = /https:\/\/wherefall\.example\/\?reset=[A-Za-z0-9_-]{43}/.exec(mail.text)?.[0] ?? '';
+    expect(mail.html).toContain(`href="${link}"`);
+
+    const token = new URL(link).searchParams.get('reset');
+    const password = 'another long password';
+    const done = await postReset(apiRequest('POST', '/api/account/reset', { body: { action: 'complete', token, password } }));
+    expect([done.status, await done.json()]).toEqual([200, { success: true, data: { username: 'absent_minded' } }]);
+    const account = async (cookie: string) => (await (await getAccount(apiRequest('GET', '/api/account', { cookie }))).json()).data.account;
+    expect(await account(cookieFrom(done))).toMatchObject({ username: 'absent_minded', email: body.email });
+    expect(await account(first)).toBeNull();
+    expect((await postLogin(apiRequest('POST', '/api/account/login', { body: { ...body, password } }))).status).toBe(200);
+    expect((await postReset(apiRequest('POST', '/api/account/reset', { body: { action: 'complete', token, password } }))).status).toBe(400);
+  });
+
+  it('write the reset link to the log, on this machine’s address, and call nobody when there is no key to send email with', async () => {
+    const fetched = vi.fn();
+    vi.stubGlobal('fetch', fetched);
+    const logged = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const body = newAccount('local_dev');
+    await postRegister(apiRequest('POST', '/api/account/register', { body }));
+
+    const asked = await postReset(apiRequest('POST', '/api/account/reset', { body: { action: 'request', email: body.email } }));
+    expect(asked.status).toBe(200);
+    expect(fetched).not.toHaveBeenCalled();
+    expect(logged.mock.calls.flat().join(' ')).toMatch(/local_dev: http:\/\/localhost:3000\/\?reset=[A-Za-z0-9_-]{43}$/);
+  });
+
+  it('answer with a plain 500 on the live site when the key or the address of the site is missing', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.stubEnv('VERCEL_ENV', 'production');
+
+    const response = await getAccount(apiRequest('GET', '/api/account'));
+    expect(response.status).toBe(500);
+    const [, error] = logged.mock.calls[0] ?? [];
+    expect(String(error)).toContain('RESEND_API_KEY: is not set; APP_URL: is not set');
   });
 
   it('refuses to save a game for a signed-out visitor', async () => {

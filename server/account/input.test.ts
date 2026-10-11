@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loginSchema, newUsernameSchema, recoveryClaimSchema, recoveryCodeSchema, registerSchema, savedGameSchema, usernameSchema } from './input.js';
+import { emailSchema, loginSchema, newUsernameSchema, recoveryClaimSchema, recoveryCodeSchema, registerSchema, savedGameSchema, usernameSchema } from './input.js';
 
 const game = (change: Record<string, unknown> = {}) => ({
   map: 'world',
@@ -15,30 +15,49 @@ const game = (change: Record<string, unknown> = {}) => ({
 
 const round = (change: Record<string, unknown>) => ({ id: 'place-1', lng: 2.35, lat: 48.85, guessLng: 2.4, guessLat: 48.9, ...change });
 
+describe('emailSchema', () => {
+  it('trims and lowercases an address, so one address is one account however it is typed', () => {
+    expect(emailSchema.parse('  Neel.S+maps@Example.COM ')).toBe('neel.s+maps@example.com');
+  });
+
+  it.each(['', '   ', 'neel', 'neel@', '@example.com', 'neel@example', 'ne el@example.com', 'neel@@example.com', 42, null])('rejects %j', (email) => {
+    expect(emailSchema.safeParse(email).success).toBe(false);
+  });
+
+  it('takes an address of up to 254 characters and no longer', () => {
+    const domain = '@example.com';
+    expect(emailSchema.safeParse(`${'a'.repeat(254 - domain.length)}${domain}`).success).toBe(true);
+    expect(emailSchema.safeParse(`${'a'.repeat(255 - domain.length)}${domain}`).success).toBe(false);
+  });
+});
+
 describe('registerSchema', () => {
-  it('trims and lowercases the username', () => {
-    expect(registerSchema.parse({ username: '  Neel_01 ', password: 'long enough' })).toEqual({
+  const EMAIL = 'neel@example.com';
+
+  it('trims and lowercases the username and the email', () => {
+    expect(registerSchema.parse({ username: '  Neel_01 ', password: 'long enough', email: ' Neel@Example.com ' })).toEqual({
       username: 'neel_01',
       password: 'long enough',
+      email: EMAIL,
     });
   });
 
   it.each(['ab', 'a'.repeat(21), 'has space', 'dash-ed', 'émile', '', '_abc', 'abc_', '_', '___', 'a__b', 'a_b__c'])('rejects the username %j', (username) => {
-    expect(registerSchema.safeParse({ username, password: 'long enough' }).success).toBe(false);
+    expect(registerSchema.safeParse({ username, password: 'long enough', email: EMAIL }).success).toBe(false);
   });
 
   it.each(['fuck', 'FUCKER', 'big_shit', 'shit_happens', 'a_bitch_b', 'cunt99'])('rejects the username %j for the word in it', (username) => {
-    expect(registerSchema.safeParse({ username, password: 'long enough' }).success).toBe(false);
+    expect(registerSchema.safeParse({ username, password: 'long enough', email: EMAIL }).success).toBe(false);
   });
 
   it('accepts usernames of 3 to 20 letters, numbers and single underscores between them', () => {
     for (const username of ['abc', 'a'.repeat(20), 'a_b', 'a_b_c_1', '007', 'scunthorpe', 'class_act']) {
-      expect(registerSchema.safeParse({ username, password: 'long enough' }).success).toBe(true);
+      expect(registerSchema.safeParse({ username, password: 'long enough', email: EMAIL }).success).toBe(true);
     }
   });
 
   it('takes a country code, and drops anything else given as one without refusing the rest', () => {
-    const country = (given: unknown) => registerSchema.parse({ username: 'neel', password: 'long enough', country: given }).country;
+    const country = (given: unknown) => registerSchema.parse({ username: 'neel', password: 'long enough', email: EMAIL, country: given }).country;
     expect(country('IN')).toBe('IN');
     expect(country(null)).toBeNull();
     for (const given of ['in', 'IND', 'es-419', '', 91, {}]) {
@@ -47,14 +66,20 @@ describe('registerSchema', () => {
   });
 
   it('wants a password of 8 to 200 characters, kept exactly as typed', () => {
-    expect(registerSchema.safeParse({ username: 'neel', password: '1234567' }).success).toBe(false);
-    expect(registerSchema.safeParse({ username: 'neel', password: 'x'.repeat(201) }).success).toBe(false);
-    expect(registerSchema.parse({ username: 'neel', password: '  Spaced 8 ' }).password).toBe('  Spaced 8 ');
+    expect(registerSchema.safeParse({ username: 'neel', password: '1234567', email: EMAIL }).success).toBe(false);
+    expect(registerSchema.safeParse({ username: 'neel', password: 'x'.repeat(201), email: EMAIL }).success).toBe(false);
+    expect(registerSchema.parse({ username: 'neel', password: '  Spaced 8 ', email: EMAIL }).password).toBe('  Spaced 8 ');
+  });
+
+  it('wants an email, and one that is an address', () => {
+    expect(registerSchema.safeParse({ username: 'neel', password: 'long enough' }).success).toBe(false);
+    expect(registerSchema.safeParse({ username: 'neel', password: 'long enough', email: null }).success).toBe(false);
+    expect(registerSchema.safeParse({ username: 'neel', password: 'long enough', email: 'not an address' }).success).toBe(false);
   });
 
   it('rejects anything that is not text', () => {
-    expect(registerSchema.safeParse({ username: 42, password: 'long enough' }).success).toBe(false);
-    expect(registerSchema.safeParse({ username: 'neel' }).success).toBe(false);
+    expect(registerSchema.safeParse({ username: 42, password: 'long enough', email: EMAIL }).success).toBe(false);
+    expect(registerSchema.safeParse({ username: 'neel', email: EMAIL }).success).toBe(false);
     expect(registerSchema.safeParse(null).success).toBe(false);
   });
 });

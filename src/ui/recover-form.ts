@@ -56,7 +56,8 @@ function sync(controls: Controls, busy: Busy, restorable: boolean): void {
 }
 
 /**
- * Forgot password: the username, the account's recovery code and a new password. The code may be
+ * Forgot password, by recovery code: the username, the account's code and a new password. It stands
+ * under the form that sends a reset link by email (see `forgot-form.ts`). The code may be
  * typed with or without its dashes, with spaces, in either case. Getting in spends the code, and
  * the server answers with a new one, which `onRecovered` is given to show. Every refusal is shown
  * in the server's words; when it says the account was deleted, the form offers to restore it with
@@ -101,7 +102,7 @@ export function recoverForm(options: RecoverOptions): HTMLFormElement {
     'form',
     {
       class: 'account-form recover-form',
-      attrs: { novalidate: '', 'aria-label': t('recovery.forgot') },
+      attrs: { novalidate: '', 'aria-label': t('recovery.withCode') },
       on: {
         submit: (event) => {
           event.preventDefault();
@@ -109,7 +110,7 @@ export function recoverForm(options: RecoverOptions): HTMLFormElement {
         },
       },
     },
-    el('div', { class: 'account-field' }, el('h3', { class: 'label', text: t('recovery.forgot') }), el('p', { class: 'fine', text: t('recovery.forgot.lede') })),
+    el('div', { class: 'account-field' }, el('h3', { class: 'label', text: t('recovery.withCode') }), el('p', { class: 'fine', text: t('recovery.forgot.lede') })),
     field(t('account.username'), username),
     field(t('recovery.title'), code, t('recovery.codeHint')),
     field(t('account.newPassword'), password, t('account.newPasswordHint')),

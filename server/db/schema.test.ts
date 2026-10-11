@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createPgliteDb, type Db } from './client.js';
-import { BEFORE_MULTIPLAYER, FIFTH_WAVE, FIRST_WAVE, FOURTH_WAVE, SECOND_WAVE, THIRD_WAVE } from './earlier-schemas.js';
+import { BEFORE_MULTIPLAYER, FIFTH_WAVE, FIRST_WAVE, FOURTH_WAVE, SECOND_WAVE, SIXTH_WAVE, THIRD_WAVE } from './earlier-schemas.js';
 import { SCHEMA_VERSION, SETUP_LOCK, migrate } from './schema.js';
 
 const WHEN = '2026-10-01T12:00:00.000Z';
@@ -16,6 +16,7 @@ const THIRD_WAVE_TABLES = ['community_maps', 'map_likes', 'map_reports', 'progre
 const FOURTH_WAVE_TABLES = ['player_reports', 'viewer_days'];
 const FIFTH_WAVE_TABLES = ['online_games', 'daily_attempts'];
 const SIXTH_WAVE_TABLES = ['queue_waits'];
+const RESET_TABLES = ['password_resets'];
 
 /**
  * The rows a database held before an upgrade, as they should read after it:
@@ -424,6 +425,67 @@ describe('migrate, on the live database after the fifth wave', () => {
     await migrate(db);
     await migrate(db);
     expect(await contents(all)).toEqual(before);
+  });
+});
+
+/** The same again after the sixth wave: an account with a recovery code and ended sessions, and a wait recorded. */
+async function afterSixthWave(): Promise<void> {
+  await afterFifthWave();
+  await run(SIXTH_WAVE);
+  await db.query(`UPDATE users SET session_version = 2, recovery_hash = 'hash' WHERE id = $1`, [USER]);
+  await db.query(`INSERT INTO queue_waits (kind, found_at, waited_ms) VALUES ('ranked', $1, 4200)`, [WHEN]);
+}
+
+describe('migrate, on the live database after the sixth wave', () => {
+  beforeEach(afterSixthWave);
+  const EARLIER = [
+    ...[...OLD_TABLES, ...FIRST_WAVE_TABLES, ...SECOND_WAVE_TABLES, ...THIRD_WAVE_TABLES],
+    ...[...FOURTH_WAVE_TABLES, ...FIFTH_WAVE_TABLES, ...SIXTH_WAVE_TABLES],
+  ];
+  const reset = (hash: string, userId: string) =>
+    db.query('INSERT INTO password_resets (token_hash, user_id, expires_at, created_at) VALUES ($1, $2, $3, $3)', [hash, userId, WHEN]);
+
+  it('gives every account and guest no email, adds the table of password resets empty, and changes no row', async () => {
+    const before = await contents(EARLIER);
+    await migrate(db);
+    const after = await contents(EARLIER);
+    expect(after).toMatchObject(before);
+    for (const table of EARLIER) {
+      expect(after[table]).toHaveLength(before[table]?.length ?? -1);
+      expect(after[table]).not.toEqual([]);
+    }
+    expect(after.users).toMatchObject((after.users ?? []).map(() => ({ email: null })));
+    expect(await contents(RESET_TABLES)).toEqual({ password_resets: [] });
+  });
+
+  it('changes nothing when run again and again, with emails and resets in use', async () => {
+    await migrate(db);
+    await db.query(`UPDATE users SET email = 'neel@example.com' WHERE id = $1`, [USER]);
+    await reset('one', USER);
+    const all = [...EARLIER, ...RESET_TABLES];
+    const before = await contents(all);
+
+    await migrate(db);
+    await migrate(db);
+    expect(await contents(all)).toEqual(before);
+  });
+
+  it('holds an email to one account, and lets any number of players have none', async () => {
+    await migrate(db);
+    const emails = () => db.query<{ email: string | null }>('SELECT email FROM users ORDER BY email');
+    expect((await emails()).filter(({ email }) => email === null).length).toBeGreaterThan(1);
+    await db.query(`UPDATE users SET email = 'neel@example.com' WHERE id = $1`, [USER]);
+    await expect(db.query(`UPDATE users SET email = 'neel@example.com' WHERE id = $1`, [OTHER])).rejects.toThrow();
+    await db.query(`UPDATE users SET email = 'other@example.com' WHERE id = $1`, [OTHER]);
+  });
+
+  it('holds a reset token to one row, and takes the resets of a deleted account with it', async () => {
+    await migrate(db);
+    await reset('one', USER);
+    await reset('two', OTHER);
+    await expect(reset('one', OTHER)).rejects.toThrow();
+    await db.query('DELETE FROM users WHERE id = $1', [USER]);
+    expect(await db.query('SELECT token_hash FROM password_resets')).toEqual([{ token_hash: 'two' }]);
   });
 });
 

@@ -71,6 +71,13 @@
   display: none;
 }
 
+/* forgot password: the form that sends a link by email, then the one that takes the recovery code */
+.forgot {
+  display: grid;
+  gap: 32px;
+  min-width: 0;
+}
+
 /* --- signed in -------------------------------------------------------------------------- */
 
 .account-who {

@@ -79,13 +79,13 @@ export const account = {
   'account.hideLastSeen': 'Hide my last seen',
   'account.hideLastSeen.note': 'Friends then see only whether you are online.',
 
-  // Wave 6: the recovery code, the only way back in without the password
+  // Wave 6: the recovery code, a way back in without the password
   'recovery.title': 'Recovery code',
   /** over a code that was just made: at sign-up, after getting back in with the old one, and on the account pane */
   'recovery.made.signup': 'Your account is ready. This is its recovery code.',
   'recovery.made.recovered': 'Your password is changed and you are signed in. The code you used no longer works. This is your new one.',
   'recovery.made.issued': 'This is your new recovery code. Any earlier one no longer works.',
-  'recovery.warning': 'Save it somewhere safe now. It is the only way back into your account if you forget your password, and it is not shown again.',
+  'recovery.warning': 'Save it somewhere safe now. It is a way back into your account if you forget your password, and it is not shown again.',
   'recovery.copy': 'Copy',
   'recovery.copied': 'Copied',
   'recovery.saved': 'I have saved it',
@@ -96,7 +96,7 @@ export const account = {
   'recovery.back': 'Back to sign in',
   'recovery.missing': 'Enter your username, your recovery code and a new password.',
   'recovery.has': 'Your account has a recovery code. A new one replaces it.',
-  'recovery.none': 'Your account has no recovery code. Without one there is no way back in if you forget your password.',
+  'recovery.none': 'Your account has no recovery code. Without one, the only way back in if you forget your password is a reset link sent to your email.',
   'recovery.issue': 'New recovery code',
   'recovery.issue.missing': 'Enter your current password to get a new code.',
 
@@ -116,4 +116,34 @@ export const account = {
   'reports.mine.hide': 'Hide my reports',
   'reports.mine.loading': 'Loading your reports',
   'reports.mine.empty': 'You have not reported anyone.',
+
+  // Email on the account: asked for at sign-up, added or changed on the account pane, and asked for after signing in without one
+  'account.email': 'Email',
+  'account.emailHint': 'Used only to send you a reset link if you forget your password.',
+  'account.missing.register': 'Enter a username, an email and a password.',
+  'email.none': 'Your account has no email. Without one, no reset link can be sent if you forget your password.',
+  'email.has': 'Reset links are sent to {email}.',
+  'email.add': 'Add email',
+  'email.change': 'Change email',
+  'email.new': 'New email',
+  'email.missing': 'Enter an email address.',
+  'email.missing.password': 'Enter the new email and your current password.',
+  'email.saved': 'Email saved.',
+  'email.prompt.title': 'Add an email',
+  'email.prompt': 'Add an email so you can reset your password if you forget it.',
+  'email.save': 'Save',
+  'email.save.busy': 'Saving',
+  'email.notNow': 'Not now',
+
+  // Forgot password, by email: asking for the link, and the form the link opens
+  'reset.request.title': 'Email me a reset link',
+  'reset.request.lede': 'Enter the email of your account. A link to choose a new password is sent to it.',
+  'reset.request.submit': 'Send reset link',
+  'reset.request.busy': 'Sending',
+  'reset.request.sent': 'If an account uses that address, a reset link is on its way.',
+  'recovery.withCode': 'Use your recovery code',
+  'reset.title': 'Choose a new password',
+  'reset.lede': 'Choose a new password for your account. You are signed in once it is set.',
+  'reset.missing': 'Enter a new password.',
+  'reset.again': 'Request a new link',
 } as const;

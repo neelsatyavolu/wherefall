@@ -24,9 +24,10 @@ import { queueEntryState, type QueueEntry } from './multiplayer/queue-view.ts';
 import { dailyGame, keepVisitorDaily, type DailyGame } from './ui/daily-game.ts';
 import { el, formatScore } from './ui/dom.ts';
 import { renderHome, type Home } from './ui/home.ts';
-import { hrefFor, viewFor, type NavId } from './ui/nav.ts';
+import { hrefFor, resetToken, viewFor, type NavId } from './ui/nav.ts';
 import { noticePanel } from './ui/panels.ts';
 import { googleSnapper, imageryProviders } from './ui/providers.ts';
+import { hideAddress } from './ui/referrer.ts';
 import { forgetLocationSets } from './ui/location-sets.ts';
 import { isOutdated, isStaleDaily, refusalNote, sentences, xpWords } from './ui/save-notes.ts';
 import { seenPlaces } from './ui/seen-store.ts';
@@ -437,4 +438,10 @@ window.addEventListener('popstate', route);
 // the language is settled before anything is drawn: forced by `?lang=`, else the player's choice, else the browser's
 await useLanguage(pickLanguage(new URLSearchParams(location.search).get('lang'), prefs.language(), navigator.languages));
 document.documentElement.lang = language();
+// A password-reset link carries its token in the address: until the account pane has taken it out,
+// no request this page makes says where it came from.
+if (resetToken(location.search) !== '') {
+  hideAddress();
+}
+
 void arrive();

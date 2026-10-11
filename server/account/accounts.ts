@@ -29,16 +29,17 @@ const normalise = (username: string): string => username.trim().toLowerCase();
 /**
  * Creates an account, and with it the recovery code that is the only way
  * back in without the password. The code is answered once, here, and kept
- * only as a hash. Null when the username is taken.
+ * only as a hash. Null when the username, or the email, is taken.
  */
 export async function register(
   q: Queryable,
-  input: Credentials & { country?: string | null; now: number },
+  input: Credentials & { email?: string | null; country?: string | null; now: number },
 ): Promise<{ id: string; recoveryCode: string } | null> {
   const id = randomUUID();
   const recoveryCode = newRecoveryCode();
   const [passwordHash, recoveryHash] = await Promise.all([hashPassword(input.password), hashRecoveryCode(recoveryCode)]);
-  const created = await insertUser(q, { id, username: normalise(input.username), passwordHash, createdAt: input.now, country: input.country, recoveryHash });
+  const { email, country, now: createdAt } = input;
+  const created = await insertUser(q, { id, username: normalise(input.username), passwordHash, createdAt, country, recoveryHash, email });
   return created ? { id, recoveryCode } : null;
 }
 

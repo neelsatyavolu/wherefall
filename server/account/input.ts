@@ -7,6 +7,8 @@ export const MIN_USERNAME_LENGTH = 3;
 export const MAX_USERNAME_LENGTH = 20;
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 200;
+/** The longest address a mail server will take. */
+export const MAX_EMAIL_LENGTH = 254;
 
 export const MAX_ROUND_SCORE = 5000;
 const MAX_ROUNDS = 10;
@@ -42,12 +44,19 @@ export const newPasswordSchema = z.string().min(MIN_PASSWORD_LENGTH).max(MAX_PAS
 /** A password being checked against the one stored: anything that could have been one. */
 export const givenPasswordSchema = z.string().min(1).max(MAX_PASSWORD_LENGTH);
 
+/** An email address, stored trimmed and in lower case, so one address is one account however it is typed. */
+export const emailSchema = z.string().trim().toLowerCase().pipe(z.email().max(MAX_EMAIL_LENGTH));
+
+/** What an email that will not do is answered with, wherever one is asked for. */
+export const EMAIL_RULE = 'Enter a valid email address.';
+
 /** A country by its two-letter code, as flags are looked up. */
 export const countrySchema = z.string().regex(/^[A-Z]{2}$/);
 
 export const registerSchema = z.object({
   username: newUsernameSchema,
   password: newPasswordSchema,
+  email: emailSchema,
   // The browser's guess from its locale, not something the player typed: one that is no code is dropped, not refused.
   country: countrySchema.nullable().optional().catch(null),
 });
