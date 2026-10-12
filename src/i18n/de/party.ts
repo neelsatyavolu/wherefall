@@ -14,13 +14,15 @@ export const party: Part<typeof english> = {
   'party.teams.none': 'Keine Teams',
   'party.teams.best': 'Bester Tipp',
   'party.teams.average': 'Durchschnitt',
-  'party.teams.note': 'Mit Teams teilen sich die Spieler in zwei Seiten auf. Ein Team bekommt für die Runde seinen besten Tipp oder den Durchschnitt aller seiner Tipps.',
+  'party.teams.coop': 'Koop',
+  'party.teams.note': 'Mit Teams teilen sich die Spieler in zwei Seiten auf. Ein Team bekommt für die Runde seinen besten Tipp oder den Durchschnitt aller seiner Tipps. Im Koop spielen alle zusammen, und eine Person gibt den Tipp ab, der zählt.',
 
   'party.line.chat': 'Chat',
   'party.line.reactions': 'nur Reaktionen',
   'party.line.off': 'kein Chat',
   'party.line.best': 'Teams nach bestem Tipp',
   'party.line.average': 'Teams nach Durchschnitt',
+  'party.line.coop': 'Koop',
 
   'party.settings.change': 'Einstellungen ändern',
   'party.settings.save': 'Einstellungen speichern',
@@ -47,6 +49,8 @@ export const party: Part<typeof english> = {
   'host.kickYes': 'Entfernen',
   'host.makeHost': 'Zum Host machen',
   'host.makeHostLabel': '{name} zum Host machen',
+  'host.makePicker': 'Tippen lassen',
+  'host.makePickerLabel': '{name} tippen lassen',
   'host.moreLabel': 'Aktionen für {name}',
   'host.endRound': 'Runde beenden',
 
@@ -63,4 +67,12 @@ export const party: Part<typeof english> = {
   'chat.teamTag': 'Team',
 
   // Wave 6
+
+  // Co-op: who places the guess, in the lobby, over a round and at the end
+  'tag.picker': 'tippt',
+  'coop.hint': 'Alle spielen zusammen. Eine Person gibt den Tipp ab, der zählt, und die Pins der anderen sind Vorschläge.',
+  'coop.youPick': 'Du gibst den Tipp für alle ab.',
+  'coop.theyPick': '{name} gibt den Tipp ab. Dein Pin ist ein Vorschlag.',
+  'coop.lock': '{name} tippt',
+  'outcome.coop': '{score} von {max} zusammen.',
 };

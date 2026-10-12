@@ -16,7 +16,7 @@ export const FIVE_PLACES = [
 
 /** What a guest left from before playing took an account may send: the way out, and nothing else. */
 const GUEST_ACTIONS = ['leave', 'leaveQueue'];
-const HOST_ACTIONS = ['configure', 'start', 'shuffle', 'kick', 'host', 'lock', 'endRound', 'lobby'];
+const HOST_ACTIONS = ['configure', 'start', 'shuffle', 'kick', 'host', 'picker', 'lock', 'endRound', 'lobby'];
 const RANKED_WINDOW = { start: 50, perSecond: 10 };
 
 type Body = Record<string, unknown>;
@@ -107,8 +107,10 @@ export class MatchServer {
   }
 
   private current(): MatchState {
+    // co-op: everyone else's pin; otherwise the pins of the player's own team
+    const coop = this.state.settings.teams === 'coop';
     const mates = this.state.players
-      .filter((p) => p.username !== this.state.you.username && p.team !== null && p.team === this.state.you.team)
+      .filter((p) => p.username !== this.state.you.username && (coop || (p.team !== null && p.team === this.state.you.team)))
       .flatMap((p) => (this.matePins[p.username] ? [{ username: p.username, ...this.matePins[p.username]!, guessed: p.guessed }] : []));
     return rules.seenBy({ ...this.state, mates, serverNow: this.at(0) });
   }
@@ -272,8 +274,10 @@ export class MatchServer {
 
   private guess(body: Body): MatchState {
     const mine = this.state.players.find((p) => p.username === this.state.you.username);
+    // in co-op a guess from anyone but the picker changes nothing
+    const counts = this.state.settings.teams !== 'coop' || this.state.picker === this.state.you.username;
     // a second guess for a round already guessed changes nothing
-    if (this.state.phase === 'playing' && body.round === this.state.round && !mine?.guessed) {
+    if (counts && this.state.phase === 'playing' && body.round === this.state.round && !mine?.guessed) {
       this.ownGuess = { lng: body.lng as number, lat: body.lat as number };
       this.opponentGuesses(this.state.you.username);
     }
@@ -313,6 +317,8 @@ export class MatchServer {
         return this.step(rules.kick(state, body.username));
       case 'host':
         return this.step(rules.handOver(state, body.username));
+      case 'picker':
+        return this.step(rules.namePicker(state, body.username));
       case 'mute':
         return this.step(rules.mute(state, body.username, body.muted));
       case 'lock':

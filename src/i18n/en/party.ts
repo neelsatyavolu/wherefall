@@ -12,7 +12,8 @@ export const party = {
   'party.teams.none': 'No teams',
   'party.teams.best': 'Best guess',
   'party.teams.average': 'Average',
-  'party.teams.note': 'With teams, the players split into two sides. A team scores its best guess of the round, or the average of all its guesses.',
+  'party.teams.coop': 'Co-op',
+  'party.teams.note': 'With teams, the players split into two sides. A team scores its best guess of the round, or the average of all its guesses. In co-op everyone plays together, and one player, the picker, places the guess that counts.',
 
   // The settings in one line, after the map, rounds, time and mode
   'party.line.chat': 'chat',
@@ -20,6 +21,7 @@ export const party = {
   'party.line.off': 'no chat',
   'party.line.best': 'teams by best guess',
   'party.line.average': 'teams by average',
+  'party.line.coop': 'co-op',
 
   // The lobby: settings, the lock, teams, queueing for 2v2 as a pair
   'party.settings.change': 'Change settings',
@@ -48,6 +50,8 @@ export const party = {
   'host.kickYes': 'Remove',
   'host.makeHost': 'Make host',
   'host.makeHostLabel': 'Make {name} the host',
+  'host.makePicker': 'Make picker',
+  'host.makePickerLabel': 'Make {name} the picker',
   'host.moreLabel': 'Actions for {name}',
   'host.endRound': 'End round',
 
@@ -67,4 +71,12 @@ export const party = {
   'chat.teamTag': 'team',
 
   // Wave 6
+
+  // Co-op: who places the guess, in the lobby, over a round and at the end
+  'tag.picker': 'picker',
+  'coop.hint': "Everyone plays together. The picker places the guess that counts, and everyone else's pin is a suggestion.",
+  'coop.youPick': 'You place the guess for everyone.',
+  'coop.theyPick': '{name} places the guess. Your pin is a suggestion.',
+  'coop.lock': '{name} guesses',
+  'outcome.coop': '{score} of {max} together.',
 } as const;

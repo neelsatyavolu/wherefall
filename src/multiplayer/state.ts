@@ -1,7 +1,8 @@
 import type { LngLat } from '../game/geo.ts';
 import type { ResolvedRound } from '../game/rounds.ts';
 import type { RoundResult } from '../game/session.ts';
-import { t, tn } from '../i18n/index.ts';
+import { MAX_ROUND_SCORE } from '../game/scoring.ts';
+import { formatNumber, t, tn } from '../i18n/index.ts';
 import type { ChatEntry, Communication, MatchState, Place } from './client.ts';
 
 /** Pure reading of a `MatchState`: what to show, who is ahead, how long is left. No requests, no DOM. */
@@ -89,6 +90,26 @@ export const secondsLeft = (ms: number) => Math.max(0, Math.ceil(ms / 1000));
 export const isCancelled = (state: MatchState) => state.phase === 'finished' && (state.places === null || (state.outcome?.dodgedBy ?? null) !== null);
 
 const you = (state: MatchState) => state.players.find((player) => player.username === state.you.username);
+
+/** True for a party everyone plays together, where the picker's guess is everyone's. */
+export const isCoop = (state: MatchState) => state.settings.teams === 'coop';
+
+/** Whether a guess from this player counts: always, but in co-op only the picker's does. */
+export const mayGuess = (state: MatchState) => !isCoop(state) || state.picker === state.you.username;
+
+/** Co-op: who places the guess, said to the player it is said to. Empty in every other match. */
+export function pickLine(state: MatchState): string {
+  if (!isCoop(state) || state.picker === null) {
+    return '';
+  }
+  return mayGuess(state) ? t('coop.youPick') : t('coop.theyPick', { name: state.picker });
+}
+
+/** True while the viewer has someone to show a pin to: on a team or in co-op, in a round being played, their own guess not yet in. */
+export function sharesPin(state: MatchState): boolean {
+  const together = isCoop(state) || (state.teams !== null && state.you.team !== null);
+  return together && state.phase === 'playing' && you(state)?.guessed !== true;
+}
 
 export function stageOf(state: MatchState, serverNowMs: number): Stage {
   const { phase, round } = state;
@@ -212,8 +233,37 @@ function totalOf(state: MatchState, username: string, throughRound: number): num
 
 const lastRound = (state: MatchState) => Math.max(-1, ...state.results.map((result) => result.round));
 
-/** One row per player for a revealed round, best score first. A player with no guess scores 0. */
+/** Co-op: what everyone has made together over every revealed round up to and including `throughRound`. */
+function totalTogether(state: MatchState, throughRound: number): number {
+  return state.results
+    .filter((result) => result.round <= throughRound)
+    .flatMap((result) => result.guesses)
+    .reduce((sum, guess) => sum + guess.score, 0);
+}
+
+/** Co-op's one row for a revealed round: the guess made together, by the name of whoever placed it (the picker, when nobody did). */
+function rowTogether(state: MatchState, round: number): RoundRow {
+  const guess = guessesOf(state, round).find((made) => made.lng !== null && made.lat !== null);
+  const username = guess?.username ?? state.picker ?? state.you.username;
+  return {
+    username,
+    isYou: username === state.you.username,
+    team: null,
+    guess: guess && guess.lng !== null && guess.lat !== null ? { lng: guess.lng, lat: guess.lat } : null,
+    distanceKm: guess?.distanceKm ?? null,
+    score: guess?.score ?? 0,
+    total: totalTogether(state, round),
+  };
+}
+
+/** The row a player's own score, sound and pin are read from: their own, and in co-op the one made together. */
+export const ownRow = (state: MatchState, rows: readonly RoundRow[]): RoundRow | undefined => (isCoop(state) ? rows[0] : rows.find((row) => row.isYou));
+
+/** One row per player for a revealed round, best score first. A player with no guess scores 0. Co-op has one row for everyone. */
 export function roundTable(state: MatchState, round: number): RoundRow[] {
+  if (isCoop(state)) {
+    return [rowTogether(state, round)];
+  }
   const guesses = guessesOf(state, round);
   const rows = state.players.map((player): RoundRow => {
     const guess = guesses.find((g) => g.username === player.username);
@@ -332,6 +382,10 @@ export function outcomeLine(state: MatchState): string {
   if (isCancelled(state)) {
     return t('outcome.cancelled');
   }
+  if (isCoop(state)) {
+    const max = state.results.length * MAX_ROUND_SCORE;
+    return t('outcome.coop', { score: formatNumber(totalTogether(state, lastRound(state))), max: formatNumber(max) });
+  }
   const { winners } = state.outcome;
   if (winners.length === 0) {
     return t('outcome.draw');
@@ -343,12 +397,12 @@ export function outcomeLine(state: MatchState): string {
   return won ? t('outcome.you') : tn('outcome.won', winners.length, { names: winners.reduce((first, second) => t('common.pair', { first, second })) });
 }
 
-/** The player's own guesses against the true places, in the shape the map and tables already draw. */
+/** The player's own guesses (in co-op, the ones made together) against the true places, in the shape the map and tables already draw. */
 export function ownResults(state: MatchState): RoundResult[] {
   const places = state.places ?? [];
   return state.results.flatMap((result) => {
     const location = places[result.round];
-    const row = roundTable(state, result.round).find((r) => r.isYou);
+    const row = ownRow(state, roundTable(state, result.round));
     return location && row ? [{ location, guess: row.guess, distanceKm: row.distanceKm, score: row.score, hinted: false }] : [];
   });
 }

@@ -44,17 +44,24 @@ export interface PlayerOffers {
   kick: boolean;
   /** hand the party to the player */
   makeHost: boolean;
+  /** co-op: make the player the one whose guess is everyone's */
+  makePicker: boolean;
 }
 
 /**
- * What the viewer may do to one player. Only a party's host is offered anything, and never on
- * themselves. A guest cannot host, and the party cannot change hands while its places are found.
+ * What the viewer may do to one player. Only a party's host is offered anything, and on themselves
+ * only the pick of a co-op party, to take it back. A guest cannot host, and the party cannot change
+ * hands while its places are found.
  */
 export function playerOffers(state: MatchState, player: Pick<MatchPlayer, 'username' | 'guest'>): PlayerOffers {
-  if (!hosting(state) || player.username === state.you.username) {
-    return { kick: false, makeHost: false };
+  if (!hosting(state)) {
+    return { kick: false, makeHost: false, makePicker: false };
   }
-  return { kick: true, makeHost: !player.guest && state.phase !== 'preparing' };
+  const makePicker = state.settings.teams === 'coop' && state.phase !== 'finished' && state.picker !== player.username;
+  if (player.username === state.you.username) {
+    return { kick: false, makeHost: false, makePicker };
+  }
+  return { kick: true, makeHost: !player.guest && state.phase !== 'preparing', makePicker };
 }
 
 export interface PartyOffers {
@@ -82,7 +89,7 @@ export function partyOffers(state: MatchState, serverNowMs: number): PartyOffers
   return {
     configure: lobby,
     lock: state.phase !== 'finished',
-    shuffle: lobby && state.settings.teams !== 'none',
+    shuffle: lobby && (state.settings.teams === 'best' || state.settings.teams === 'average'),
     endRound: state.phase === 'playing' && started,
     pair: lobby && state.players.length === PARTY_LIMITS.minPlayers && state.players.every((player) => !player.guest),
   };

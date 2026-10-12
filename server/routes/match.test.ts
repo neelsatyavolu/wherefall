@@ -196,6 +196,23 @@ describe('POST /api/match', () => {
     expect(await data(post({ action: 'leave', matchId: lobby.id }, friend, round))).toEqual({ left: true });
   });
 
+  it('plays a co-op party: the host names the picker, whose guess alone ends the round', async () => {
+    const lobby = await data(post({ action: 'create', settings: { ...SETTINGS, teams: 'coop' } }));
+    expect(lobby).toMatchObject({ settings: { teams: 'coop' }, teams: null, picker: 'neel' });
+    await data(post({ action: 'join', code: lobby.code }, friend));
+
+    expect(await data(post({ action: 'picker', matchId: lobby.id, username: 'friend' }))).toMatchObject({ picker: 'friend' });
+    expect(await refusal(post({ action: 'picker', matchId: lobby.id, username: 'friend' }, friend))).toEqual([403, 'Only the host can do that.']);
+    expect(await refusal(post({ action: 'picker', matchId: lobby.id }))).toEqual([400, 'Name a player in the match.']);
+
+    await data(post({ action: 'start', matchId: lobby.id }));
+    await data(post({ action: 'places', matchId: lobby.id, places: PLACES }));
+    const round = NOW + COUNTDOWN_MS;
+    const guess = { action: 'guess', matchId: lobby.id, round: 0, lng: FIRST.lng, lat: FIRST.lat };
+    expect(await data(post(guess, neel, round))).toMatchObject({ phase: 'playing' });
+    expect(await data(post(guess, friend, round))).toMatchObject({ phase: 'reveal' });
+  });
+
   it('opens a party on a country or on Africa', async () => {
     expect((await data(post({ action: 'create', settings: { ...SETTINGS, map: 'country:JP' } }))).settings.map).toBe('country:JP');
     expect((await data(post({ action: 'create', settings: { ...SETTINGS, map: 'africa' } }, friend))).settings.map).toBe('africa');

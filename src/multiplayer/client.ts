@@ -13,8 +13,11 @@ export const MATCH_KINDS = ['party', 'unranked', 'ranked', 'team'] as const;
 export const QUEUE_KINDS = ['unranked', 'ranked', 'team'] as const;
 /** What a party's players may say to each other: anything, the reactions only, or nothing. */
 export const COMMUNICATIONS = ['chat', 'reactions', 'off'] as const;
-/** A party's team mode: no teams, or two teams scored by their best guess or by their average. */
-export const TEAM_MODES = ['none', 'best', 'average'] as const;
+/**
+ * A party's team mode: no teams, two teams scored by their best guess or by their average, or
+ * co-op, where everyone plays together and one player (the picker) places the guess that counts.
+ */
+export const TEAM_MODES = ['none', 'best', 'average', 'coop'] as const;
 export const CHAT_SCOPES = ['all', 'team'] as const;
 /** What a host may choose: a time of 0 is no timer, any other is `minTime` to `maxTime` in steps of `timeStep`. */
 export const PARTY_LIMITS = { minPlayers: 2, maxPlayers: 40, minRounds: 1, maxRounds: 20, minTime: 10, maxTime: 300, timeStep: 10 } as const;
@@ -110,7 +113,9 @@ const matchStateSchema = z.object({
   ),
   /** 2v2 and party team modes, else null. `health` is for 2v2. Both count revealed rounds only */
   teams: z.array(z.object({ team: teamSchema, health: z.number().nullable(), total: z.number() })).nullable(),
-  /** while a round is played: teammates' pins as last sent, or their guess once made. Empty otherwise */
+  /** co-op: the player whose guess is everyone's. The host until they name another; null in every other match */
+  picker: z.string().nullable(),
+  /** while a round is played: the pins of teammates (in co-op, of everyone else) as last sent, or their guess once made. Empty otherwise */
   mates: z.array(z.object({ username: z.string(), lng: z.number(), lat: z.number(), guessed: z.boolean() })),
   /** null until posted */
   places: z.array(placeSchema).nullable(),
@@ -240,12 +245,12 @@ export function postPlaces(matchId: string, places: readonly Place[], fetchFn: t
   return matchAction(fetchFn, { action: 'places', matchId, places });
 }
 
-/** One guess per player per round; the server ignores later ones. */
+/** One guess per player per round; the server ignores later ones, and in co-op every one but the picker's. */
 export function sendGuess(matchId: string, round: number, guess: LngLat, fetchFn: typeof fetch = fetch): Reply<MatchState> {
   return matchAction(fetchFn, { action: 'guess', matchId, round, lng: guess.lng, lat: guess.lat });
 }
 
-/** Where the player's pin is now, for teammates to see. At most one a second. */
+/** Where the player's pin is now, for teammates (in co-op, everyone) to see. At most one a second. */
 export function sendPin(matchId: string, round: number, pin: LngLat, fetchFn: typeof fetch = fetch): Reply<MatchState> {
   return matchAction(fetchFn, { action: 'pin', matchId, round, lng: pin.lng, lat: pin.lat });
 }

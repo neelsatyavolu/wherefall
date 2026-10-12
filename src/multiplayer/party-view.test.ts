@@ -58,19 +58,19 @@ describe('playerOffers', () => {
   const party = matchState({ players: [player('neel'), player('sam'), guest(4821)] });
 
   it('offers the host a kick and a hand-over on another account', () => {
-    expect(playerOffers(party, player('sam'))).toEqual({ kick: true, makeHost: true });
+    expect(playerOffers(party, player('sam'))).toEqual({ kick: true, makeHost: true, makePicker: false });
   });
 
   it('never offers a hand-over to a guest, who cannot host', () => {
-    expect(playerOffers(party, guest(4821))).toEqual({ kick: true, makeHost: false });
+    expect(playerOffers(party, guest(4821))).toEqual({ kick: true, makeHost: false, makePicker: false });
   });
 
   it('offers nothing on the host themselves', () => {
-    expect(playerOffers(party, player('neel'))).toEqual({ kick: false, makeHost: false });
+    expect(playerOffers(party, player('neel'))).toEqual({ kick: false, makeHost: false, makePicker: false });
   });
 
   it('offers nothing to anyone who is not the host', () => {
-    expect(playerOffers(matchState({ you: MEMBER }), player('sam'))).toEqual({ kick: false, makeHost: false });
+    expect(playerOffers(matchState({ you: MEMBER }), player('sam'))).toEqual({ kick: false, makeHost: false, makePicker: false });
   });
 
   it('offers a kick in every phase, and a hand-over in all but the one where places are found', () => {
@@ -79,8 +79,31 @@ describe('playerOffers', () => {
     expect(offered.map((offer) => offer.makeHost)).toEqual([true, false, true, true, true]);
   });
 
+  describe('in co-op', () => {
+    const coop = matchState({ settings: settings({ teams: 'coop' }), picker: 'neel', players: [player('neel'), player('sam')] });
+
+    it('offers the host the pick for a player who does not have it', () => {
+      expect(playerOffers(coop, player('sam'))).toEqual({ kick: true, makeHost: true, makePicker: true });
+      expect(playerOffers({ ...coop, picker: 'sam' }, player('sam')).makePicker).toBe(false);
+    });
+
+    it('offers the host the pick back for themselves, and nothing else', () => {
+      expect(playerOffers(coop, player('neel'))).toEqual({ kick: false, makeHost: false, makePicker: false });
+      expect(playerOffers({ ...coop, picker: 'sam' }, player('neel'))).toEqual({ kick: false, makeHost: false, makePicker: true });
+    });
+
+    it('offers the pick to nobody but the host', () => {
+      expect(playerOffers({ ...coop, you: MEMBER }, player('sam')).makePicker).toBe(false);
+    });
+
+    it('offers the pick until the match is over', () => {
+      const offered = (['lobby', 'preparing', 'playing', 'reveal', 'finished'] as const).map((phase) => playerOffers({ ...coop, phase }, player('sam')).makePicker);
+      expect(offered).toEqual([true, true, true, true, false]);
+    });
+  });
+
   it('offers nothing outside a party, where nobody is the host', () => {
-    expect(playerOffers(rankedState({ you: viewer({ isHost: true }) }), player('sam'))).toEqual({ kick: false, makeHost: false });
+    expect(playerOffers(rankedState({ you: viewer({ isHost: true }) }), player('sam'))).toEqual({ kick: false, makeHost: false, makePicker: false });
   });
 });
 
@@ -94,6 +117,10 @@ describe('partyOffers', () => {
   it('offers the shuffle only with teams on', () => {
     expect(partyOffers(matchState({ settings: settings({ teams: 'best' }) }), now).shuffle).toBe(true);
     expect(partyOffers(matchState(), now).shuffle).toBe(false);
+  });
+
+  it('offers no shuffle in co-op, which has no teams to deal', () => {
+    expect(partyOffers(matchState({ settings: settings({ teams: 'coop' }) }), now).shuffle).toBe(false);
   });
 
   it('offers the pair queue to two accounts only: not alone, not three, not with a guest', () => {

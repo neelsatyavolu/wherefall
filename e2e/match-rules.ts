@@ -33,6 +33,7 @@ export const SAYS = {
   notYourself: 'You cannot do that to yourself.',
   guestHost: 'A guest cannot host.',
   teamsOff: 'Teams are off in this party.',
+  notCoop: 'This party is not co-op.',
   pairOnly: 'To queue as a pair, be the host of a party of exactly two.',
   dodgeLock: (seconds: number) => `You left two ranked matches before they began. You can queue again in ${seconds} seconds.`,
   accountsOnly: 'This party is for accounts only. Make an account to join.',
@@ -81,12 +82,16 @@ export function readSettings(raw: unknown): MatchSettings | Refusal {
 
 const smallerTeam = (state: MatchState): Team => (state.players.filter((p) => p.team === 0).length <= state.players.filter((p) => p.team === 1).length ? 0 : 1);
 
-/** A party's settings replaced. Turning teams off empties them; turning them on gives two empty teams. */
+/** True for a party played in two teams: not one with none, and not co-op, where everyone is on one side. */
+const twoTeams = (settings: MatchSettings) => settings.teams === 'best' || settings.teams === 'average';
+
+/** A party's settings replaced. Turning teams off empties them; turning them on gives two empty teams. Co-op has none, and a picker: the host, until another is named. */
 export function withSettings(state: MatchState, settings: MatchSettings): MatchState {
-  const teamed = settings.teams !== 'none';
+  const teamed = twoTeams(settings);
   return {
     ...state,
     settings,
+    picker: settings.teams === 'coop' ? (state.picker ?? state.you.username) : null,
     teams: teamed ? [teamRow(0, { health: null }), teamRow(1, { health: null })] : null,
     players: teamed ? state.players : state.players.map((p) => ({ ...p, team: null })),
     you: teamed ? state.you : { ...state.you, team: null },
@@ -103,7 +108,7 @@ function seat(state: MatchState, username: string, team: Team | null): MatchStat
 
 /** `team`: the player takes a seat, in the lobby of a party with teams. */
 export function chooseTeam(state: MatchState, team: unknown): Step {
-  if (state.settings.teams === 'none') {
+  if (!twoTeams(state.settings)) {
     return refusal(409, SAYS.teamsOff);
   }
   return state.phase === 'lobby' && (team === 0 || team === 1) ? seat(state, state.you.username, team) : state;
@@ -111,7 +116,7 @@ export function chooseTeam(state: MatchState, team: unknown): Step {
 
 /** `shuffle`: an even split. Here it is by turns, so a test knows who lands where. */
 export function shuffle(state: MatchState): Step {
-  if (state.settings.teams === 'none') {
+  if (!twoTeams(state.settings)) {
     return refusal(409, SAYS.teamsOff);
   }
   if (state.phase !== 'lobby') {
@@ -125,7 +130,7 @@ export function start(state: MatchState): Step {
   if (state.phase !== 'lobby') {
     return state;
   }
-  if (state.settings.teams === 'none') {
+  if (!twoTeams(state.settings)) {
     return { ...state, phase: 'preparing' };
   }
   const seated = state.players.filter((p) => p.team === null).reduce((next, p) => seat(next, p.username, smallerTeam(next)), state);
@@ -141,7 +146,22 @@ function target(state: MatchState, username: unknown): MatchState['players'][num
   return state.players.find((p) => p.username === username) ?? refusal(409, SAYS.noSuchPlayer);
 }
 
-/** `kick`: the player is in nobody's `players` and no `results`, earlier rounds included. */
+type Guesses = MatchState['results'][number]['guesses'];
+
+/** A round's guesses once a player is removed: theirs gone, or in co-op handed to the host, whose own empty row it replaces. */
+function withoutGuessesOf(state: MatchState, username: string, guesses: Guesses): Guesses {
+  const theirs = guesses.find((g) => g.username === username);
+  const rest = guesses.filter((g) => g.username !== username);
+  if (state.settings.teams !== 'coop' || !theirs || theirs.lng === null) {
+    return rest;
+  }
+  return rest.map((g) => (g.username === state.you.username ? { ...theirs, username: g.username } : g));
+}
+
+/**
+ * `kick`: the player is in nobody's `players` and no `results`, earlier rounds included. In co-op a
+ * guess is everyone's: the rounds a removed picker placed stay, in the host's name.
+ */
 export function kick(state: MatchState, username: unknown): Step {
   const found = target(state, username);
   if (isRefusal(found)) {
@@ -150,7 +170,9 @@ export function kick(state: MatchState, username: unknown): Step {
   return {
     ...state,
     players: state.players.filter((p) => p.username !== found.username),
-    results: state.results.map((result) => ({ ...result, guesses: result.guesses.filter((g) => g.username !== found.username) })),
+    // the pick of a co-op party starts again from the first seat, which here is the host's
+    picker: state.picker === found.username ? state.you.username : state.picker,
+    results: state.results.map((result) => ({ ...result, guesses: withoutGuessesOf(state, found.username, result.guesses) })),
     mates: state.mates.filter((m) => m.username !== found.username),
   };
 }
@@ -165,6 +187,18 @@ export function handOver(state: MatchState, username: unknown): Step {
     return refusal(409, SAYS.guestHost);
   }
   return state.phase === 'preparing' ? state : { ...state, you: { ...state.you, isHost: false, isResolver: false } };
+}
+
+/** `picker`: the host of a co-op party names whose guess is everyone's: any player in it, themselves included. */
+export function namePicker(state: MatchState, username: unknown): Step {
+  if (state.settings.teams !== 'coop') {
+    return refusal(409, SAYS.notCoop);
+  }
+  const found = state.players.find((p) => p.username === username);
+  if (!found) {
+    return refusal(409, SAYS.noSuchPlayer);
+  }
+  return state.phase === 'finished' ? state : { ...state, picker: found.username };
 }
 
 /** `mute`: that player's lines and reactions are left out of this player's chat from now on. */

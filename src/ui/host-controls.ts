@@ -6,8 +6,8 @@ import { el } from './dom.ts';
 import { icon } from './map-tools.ts';
 
 /**
- * What only a party's host has, as controls: a kick and a hand-over on each other player, and the
- * lock. Who is offered which is decided in `multiplayer/party-view.ts`; nothing here is drawn for
+ * What only a party's host has, as controls: a kick and a hand-over on each other player, the pick
+ * of a co-op party, and the lock. Who is offered which is decided in `multiplayer/party-view.ts`; nothing here is drawn for
  * anyone else. The lobby puts these in its rows, a match in its Host panel (`match-host.ts`).
  */
 
@@ -15,6 +15,7 @@ import { icon } from './map-tools.ts';
 export interface HostHandlers {
   onKick: (username: string) => Promise<string | null>;
   onMakeHost: (username: string) => Promise<string | null>;
+  onMakePicker: (username: string) => Promise<string | null>;
   onLock: (locked: boolean) => Promise<string | null>;
   onEndRound: () => Promise<string | null>;
 }
@@ -56,8 +57,8 @@ export function hostRow(who: Array<HTMLElement | null>, actions: HTMLElement | n
  * button of three dots, which opens them under the name. Kick asks first, in the row itself: there
  * the way back is the filled button, and only the removal is in the colour of danger.
  */
-export function playerActions(player: Pick<MatchPlayer, 'username'>, offers: PlayerOffers, handlers: Pick<HostHandlers, 'onKick' | 'onMakeHost'>, report: Report): HTMLElement | null {
-  if (!offers.kick && !offers.makeHost) {
+export function playerActions(player: Pick<MatchPlayer, 'username'>, offers: PlayerOffers, handlers: Pick<HostHandlers, 'onKick' | 'onMakeHost' | 'onMakePicker'>, report: Report): HTMLElement | null {
+  if (!offers.kick && !offers.makeHost && !offers.makePicker) {
     return null;
   }
   const name = player.username;
@@ -74,9 +75,10 @@ export function playerActions(player: Pick<MatchPlayer, 'username'>, offers: Pla
 
   const showButtons = () => {
     const makeHost = offers.makeHost ? requestButton('button ghost', t('host.makeHost'), t('host.makeHostLabel', { name }), () => handlers.onMakeHost(name), report) : null;
+    const makePicker = offers.makePicker ? requestButton('button ghost', t('host.makePicker'), t('host.makePickerLabel', { name }), () => handlers.onMakePicker(name), report) : null;
     const kick = offers.kick ? el('button', { class: 'button ghost', text: t('host.kick'), attrs: { type: 'button', 'aria-label': t('host.kickLabel', { name }) }, on: { click: showConfirm } }) : null;
     node.classList.remove('asking');
-    menu.replaceChildren(...[makeHost, kick].filter((button) => button !== null));
+    menu.replaceChildren(...[makePicker, makeHost, kick].filter((button) => button !== null));
   };
 
   function showConfirm(): void {

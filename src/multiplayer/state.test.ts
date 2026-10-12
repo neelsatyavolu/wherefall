@@ -7,13 +7,17 @@ import {
   isCancelled,
   isLastRound,
   latest,
+  mayGuess,
   msUntil,
   outcomeLine,
   ownResults,
+  ownRow,
+  pickLine,
   placesToLoad,
   roundTable,
   runningForMs,
   secondsLeft,
+  sharesPin,
   shortName,
   stageOf,
   standing,
@@ -22,7 +26,7 @@ import {
   toPlaces,
   unreadCount,
 } from './state.ts';
-import { KIND_SETTINGS, NOW, PLACES, at, chatEntry, guessRow, guest, matchState, noGuess, outcome, player, rankedState, settings, teamRow, teamState } from './testing.ts';
+import { KIND_SETTINGS, NOW, PLACES, at, chatEntry, guessRow, guest, matchState, noGuess, outcome, player, rankedState, settings, teamRow, teamState, viewer } from './testing.ts';
 
 const now = Date.parse(NOW);
 
@@ -476,6 +480,85 @@ describe('ownResults', () => {
     const results = [{ round: 0, guesses: [guessRow('neel', 3000, { lng: 1, lat: 2, distanceKm: 80 })] }];
     const state = matchState({ phase: 'reveal', round: 0, settings: settings({ rounds: 3 }), places: PLACES.slice(0, 1), results });
     expect(ownResults(state)).toEqual([{ location: PLACES[0], guess: { lng: 1, lat: 2 }, distanceKm: 80, score: 3000, hinted: false }]);
+  });
+});
+
+describe('co-op', () => {
+  /** A co-op party of three seen by "neel", with "sam" picking. */
+  const coop = (change = {}) =>
+    matchState({ settings: settings({ teams: 'coop' }), picker: 'sam', players: [player('neel'), player('sam'), player('ana')], ...change });
+  // sam placed the first round's guess; the pick had passed to neel by the second
+  const results = [
+    { round: 0, guesses: [noGuess('neel'), guessRow('sam', 3000, { lng: 1, lat: 2, distanceKm: 80 }), noGuess('ana')] },
+    { round: 1, guesses: [guessRow('neel', 4000, { lng: 3, lat: 4, distanceKm: 20 }), noGuess('sam'), noGuess('ana')] },
+  ];
+  const revealed = coop({ phase: 'reveal', round: 1, places: PLACES, picker: 'neel', results });
+
+  it('lets the picker guess and nobody else', () => {
+    expect(mayGuess(coop())).toBe(false);
+    expect(mayGuess(coop({ picker: 'neel' }))).toBe(true);
+  });
+
+  it('lets everyone guess in every other match', () => {
+    expect(mayGuess(matchState())).toBe(true);
+    expect(mayGuess(teamState())).toBe(true);
+  });
+
+  it('says who places the guess', () => {
+    expect(pickLine(coop())).toBe('sam places the guess. Your pin is a suggestion.');
+    expect(pickLine(coop({ picker: 'neel' }))).toBe('You place the guess for everyone.');
+  });
+
+  it('has nothing to say about a picker in any other match', () => {
+    expect(pickLine(matchState())).toBe('');
+  });
+
+  it('shares every pin while a round is played, as teammates do', () => {
+    expect(sharesPin(coop({ phase: 'playing' }))).toBe(true);
+    expect(sharesPin(coop({ phase: 'reveal' }))).toBe(false);
+    expect(sharesPin(teamState({ phase: 'playing' }))).toBe(true);
+    expect(sharesPin(teamState({ phase: 'playing', you: viewer({ team: null }) }))).toBe(false);
+    expect(sharesPin(matchState({ phase: 'playing' }))).toBe(false);
+  });
+
+  it('stops sharing a pin once the guess is in', () => {
+    expect(sharesPin(coop({ phase: 'playing', players: [player('neel', { guessed: true }), player('sam')] }))).toBe(false);
+  });
+
+  it('has one row for a revealed round: the guess made together, by the name of whoever placed it, with the running total', () => {
+    expect(roundTable(revealed, 0)).toEqual([{ username: 'sam', isYou: false, team: null, guess: { lng: 1, lat: 2 }, distanceKm: 80, score: 3000, total: 3000 }]);
+    expect(roundTable(revealed, 1)).toEqual([{ username: 'neel', isYou: true, team: null, guess: { lng: 3, lat: 4 }, distanceKm: 20, score: 4000, total: 7000 }]);
+  });
+
+  it('names the picker on a round nobody guessed in', () => {
+    const missed = coop({ phase: 'reveal', places: PLACES, results: [{ round: 0, guesses: [noGuess('neel'), noGuess('sam'), noGuess('ana')] }] });
+    expect(roundTable(missed, 0)).toEqual([{ username: 'sam', isYou: false, team: null, guess: null, distanceKm: null, score: 0, total: 0 }]);
+  });
+
+  it("is every player's own row, whoever placed the guess", () => {
+    expect(ownRow(revealed, roundTable(revealed, 0))?.username).toBe('sam');
+  });
+
+  it("is the player's own row alone in every other match", () => {
+    const state = matchState({ phase: 'reveal', places: PLACES, results: [{ round: 0, guesses: [guessRow('neel', 100), guessRow('sam', 4000)] }] });
+    expect(ownRow(state, roundTable(state, 0))?.username).toBe('neel');
+    const watching = { ...state, you: viewer({ username: 'kit' }) };
+    expect(ownRow(watching, roundTable(watching, 0))).toBeUndefined();
+  });
+
+  it("counts each round's guess as every player's own result", () => {
+    expect(ownResults({ ...revealed, phase: 'finished' })).toEqual([
+      { location: PLACES[0], guess: { lng: 1, lat: 2 }, distanceKm: 80, score: 3000, hinted: false },
+      { location: PLACES[1], guess: { lng: 3, lat: 4 }, distanceKm: 20, score: 4000, hinted: false },
+    ]);
+  });
+
+  it('ends on what the players made together, with no winner', () => {
+    expect(outcomeLine({ ...revealed, phase: 'finished', outcome: outcome([]) })).toBe('7,000 of 10,000 together.');
+  });
+
+  it('is still cancelled when it never began', () => {
+    expect(outcomeLine(coop({ phase: 'finished', outcome: outcome([]) }))).toBe('The match was cancelled before it began.');
   });
 });
 

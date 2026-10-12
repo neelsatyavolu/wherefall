@@ -10,7 +10,7 @@ import { onPhone, statusParts } from './match-status.ts';
 
 /**
  * What a party's host has over the round screen: a Host button that opens the lock and, for each
- * other player, a kick and a hand-over; and, while a round is played, the button that ends it. A
+ * other player, a kick, a hand-over and in co-op the pick; and, while a round is played, the button that ends it. A
  * round with no timer says so here, to everyone. Nobody but the host is shown a control.
  */
 
@@ -49,7 +49,7 @@ export function hostFold(handlers: HostHandlers, onOpen: () => void = () => {}) 
   /** The other players, each with what the host may do to them. Redrawn only when it would differ, so a question that is open stays open. */
   function drawPlayers(state: MatchState): void {
     const others = state.players.filter((player) => player.username !== state.you.username);
-    const key = JSON.stringify([others.map((player) => [player.username, player.country, player.guest]), state.phase === 'preparing']);
+    const key = JSON.stringify([others.map((player) => [player.username, player.country, player.guest]), state.phase === 'preparing', state.picker]);
     if (key === drawn) {
       return;
     }

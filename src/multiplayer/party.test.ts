@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { bodyOf, failure, fakeFetch, success } from '../account/testing.ts';
-import { backToLobby, chooseTeam, configureParty, endRound, kickPlayer, lockParty, makeHost, shuffleTeams } from './party.ts';
+import { backToLobby, chooseTeam, configureParty, endRound, kickPlayer, lockParty, makeHost, makePicker, shuffleTeams } from './party.ts';
 import { matchState } from './testing.ts';
 
 const state = matchState();
@@ -13,6 +13,7 @@ describe('what a party can be sent', () => {
     ['shuffle', () => shuffleTeams, ['m1'], { action: 'shuffle', matchId: 'm1' }],
     ['kick', () => kickPlayer, ['m1', 'sam'], { action: 'kick', matchId: 'm1', username: 'sam' }],
     ['host', () => makeHost, ['m1', 'sam'], { action: 'host', matchId: 'm1', username: 'sam' }],
+    ['picker', () => makePicker, ['m1', 'sam'], { action: 'picker', matchId: 'm1', username: 'sam' }],
     ['lock', () => lockParty, ['m1', true], { action: 'lock', matchId: 'm1', locked: true }],
     ['unlock', () => lockParty, ['m1', false], { action: 'lock', matchId: 'm1', locked: false }],
     ['endRound', () => endRound, ['m1'], { action: 'endRound', matchId: 'm1' }],

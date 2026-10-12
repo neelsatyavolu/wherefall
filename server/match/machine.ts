@@ -19,8 +19,9 @@ import {
 
 /**
  * How a match ended. `winners` are user ids, empty for a draw or a cancelled
- * match. `rated` is false when it was cancelled. `dodgedBy` is the player
- * who left a ranked duel before its first guess, which is what cancelled it.
+ * match. `rated` is false when it was cancelled, and in co-op, where there is
+ * nobody to beat. `dodgedBy` is the player who left a ranked duel before its
+ * first guess, which is what cancelled it.
  */
 export interface MatchResult {
   winners: string[];
@@ -39,11 +40,52 @@ const CANCELLED: MatchResult = { winners: [], rated: false, dodgedBy: null };
 
 export const isActive = (player: PlayerRecord, at: number): boolean => player.leftAt === null && player.lastSeenAt > at - INACTIVE_AFTER_MS;
 
-/** True for 2v2 and for a party played in teams. */
-export const hasTeams = (match: MatchRecord): boolean => match.kind === 'team' || match.settings.teams !== 'none';
+/** True for a party everyone plays together, where one player's guess is everyone's. */
+export const isCoop = (match: MatchRecord): boolean => match.settings.teams === 'coop';
 
-/** Who a player's points count for: their team where there are teams, themselves in every other match. */
-const sideOf = (match: MatchRecord, player: PlayerRecord): string => (hasTeams(match) ? `team${player.team}` : player.userId);
+/** True for 2v2 and for a party played in two teams. */
+export const hasTeams = (match: MatchRecord): boolean => match.kind === 'team' || match.settings.teams === 'best' || match.settings.teams === 'average';
+
+const TOGETHER = 'together';
+
+/** Who a player's points count for: their team where there are teams, everyone in co-op, themselves in every other match. */
+function sideOf(match: MatchRecord, player: PlayerRecord): string {
+  if (isCoop(match)) {
+    return TOGETHER;
+  }
+  return hasTeams(match) ? `team${player.team}` : player.userId;
+}
+
+/**
+ * Who picks in a co-op match: the player the host named while they are still
+ * in it, otherwise the host. Null in every other match.
+ */
+export function pickerOf(match: MatchRecord, players: PlayerRecord[]): PlayerRecord | null {
+  if (!isCoop(match)) {
+    return null;
+  }
+  const still = (userId: string | null): PlayerRecord | undefined => players.find((player) => player.userId === userId && player.leftAt === null);
+  return still(match.pickerId) ?? still(match.resolverId) ?? null;
+}
+
+/**
+ * A co-op match under way with its pick in the hands of someone who is there
+ * to make it at `at`: the picker while they are being heard from, otherwise
+ * the next player by seat who is, coming round to the first. The very same
+ * object comes back when the pick stays where it is.
+ */
+function withPicker(match: MatchRecord, players: PlayerRecord[], at: number): MatchRecord {
+  if (!isCoop(match) || match.phase === 'lobby' || match.phase === 'finished') {
+    return match;
+  }
+  const named = match.pickerId ?? match.resolverId;
+  // Someone who joined during this round plays from the next, so the pick is not theirs yet.
+  const able = players.filter((player) => isActive(player, at) && player.joinedRound <= match.round);
+  // A picker the host removed is no longer among the players, and the pick starts again from the first seat.
+  const seat = players.find((player) => player.userId === named)?.seat ?? -1;
+  const next = able.find((player) => player.userId === named) ?? able.find((player) => player.seat > seat) ?? able[0];
+  return next === undefined || next.userId === match.pickerId ? match : { ...match, pickerId: next.userId };
+}
 
 const membersOf = (match: MatchRecord, players: PlayerRecord[], side: string): string[] =>
   players.filter((player) => sideOf(match, player) === side).map((player) => player.userId);
@@ -129,8 +171,11 @@ function isLastRound(match: MatchRecord, players: PlayerRecord[], guesses: Guess
   return byHealth && [...standingsAfter(match, players, guesses, match.round + 1).values()].some((health) => health <= 0);
 }
 
-/** The result of a match played to the end: the side with the most wins, and a tie for first is a draw. */
+/** The result of a match played to the end: the side with the most wins, and a tie for first is a draw. Co-op has one side, and no winner. */
 function standings(match: MatchRecord, players: PlayerRecord[], guesses: GuessRecord[]): MatchResult {
+  if (isCoop(match)) {
+    return { winners: [], rated: false, dodgedBy: null };
+  }
   const totals = standingsAfter(match, players, guesses, match.round + 1);
   const top = Math.max(...totals.values());
   const [leader, ...tied] = [...totals].filter(([, total]) => total === top).map(([side]) => side);
@@ -172,11 +217,12 @@ function afterDeadline(match: MatchRecord, deadline: number, players: PlayerReco
   return { match: next, result: null };
 }
 
-/** The players a round is waiting on: active, in the game since before it, and without a guess in it yet. */
+/** The players a round is waiting on: active, in the game since before it, and without a guess in it yet. In co-op that is the picker alone. */
 function yetToGuess(match: MatchRecord, players: PlayerRecord[], guesses: GuessRecord[], now: number): { playing: number; waitingFor: number } {
   const guessed = new Set(guesses.filter((guess) => guess.round === match.round).map((guess) => guess.userId));
+  const picker = pickerOf(match, players);
   // Someone who joined during this round plays from the next, so nobody waits for them in this one.
-  const playing = players.filter((player) => isActive(player, now) && player.joinedRound <= match.round);
+  const playing = players.filter((player) => isActive(player, now) && player.joinedRound <= match.round && (picker === null || player === picker));
   return { playing: playing.length, waitingFor: playing.filter((player) => !guessed.has(player.userId)).length };
 }
 
@@ -202,7 +248,7 @@ export function cutShort(match: MatchRecord, players: PlayerRecord[], guesses: G
  * it was due, and who was still playing is judged as of that time.
  */
 export function advance(match: MatchRecord, players: PlayerRecord[], guesses: GuessRecord[], now: number): Advance {
-  let current = match;
+  let current = withPicker(match, players, now);
   for (;;) {
     if (current.phase === 'finished' || current.phase === 'lobby') {
       const empty = current.phase === 'lobby' ? abandoned(current, players, guesses, now) : null;

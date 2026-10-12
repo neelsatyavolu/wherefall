@@ -73,6 +73,8 @@ export interface MatchRecord {
   seed: string;
   /** The player who picks the places. In a party that is the host. */
   resolverId: string;
+  /** Co-op: the player whose guess is everyone's. Null until one is named, which leaves it to the host. */
+  pickerId: string | null;
   /** 0-based; the round being played or revealed. */
   round: number;
   prepareEndsAt: number | null;
@@ -161,7 +163,9 @@ export interface MatchState {
   }>;
   /** 2v2 and party team modes: each team's standing over the rounds revealed so far. */
   teams: Array<{ team: 0 | 1; health: number | null; total: number }> | null;
-  /** The asker's teammates' pins in the round being played. */
+  /** Co-op: the username of the player whose guess is everyone's. Null in every other match. */
+  picker: string | null;
+  /** The pins of the asker's teammates, or in co-op of everyone else, in the round being played. */
   mates: Array<{ username: string; lng: number; lat: number; guessed: boolean }>;
   places: Place[] | null;
   results: Array<{

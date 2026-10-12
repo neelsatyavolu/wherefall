@@ -14,6 +14,7 @@ import {
   leaveMatch,
   lock,
   mute,
+  namePicker,
   pickTeam,
   pin,
   SLOW_DOWN,
@@ -67,6 +68,7 @@ const INVALID: Record<MatchActionName, string> = {
   shuffle: NOT_A_MATCH,
   kick: 'Name a player in the match.',
   host: 'Name a player in the match.',
+  picker: 'Name a player in the match.',
   lock: 'Say whether the party is to be locked.',
   endRound: NOT_A_MATCH,
   lobby: NOT_A_MATCH,
@@ -113,6 +115,8 @@ async function perform(action: MatchAction, userId: string, { db, now }: Context
       return respond(await kick(db, userId, action.matchId, action.username, now));
     case 'host':
       return respond(await handOver(db, userId, action.matchId, action.username, now));
+    case 'picker':
+      return respond(await namePicker(db, userId, action.matchId, action.username, now));
     case 'lock':
       return respond(await lock(db, userId, action.matchId, action.locked, now));
     case 'endRound':

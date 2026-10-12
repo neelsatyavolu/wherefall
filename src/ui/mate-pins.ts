@@ -2,19 +2,14 @@ import './team.css';
 import type { LngLat } from '../game/geo.ts';
 import { PIN_INTERVAL_MS, type MatchState } from '../multiplayer/client.ts';
 import { throttleLatest } from '../multiplayer/pin-throttle.ts';
+import { sharesPin } from '../multiplayer/state.ts';
 import type { GuessMap, MatePin } from './guess-map.ts';
 
 /**
- * Teammates see each other's pin while a round is played. This sends the player's own pin as they
- * move it, at most once a second, and draws the pins the server hands back (`mates`) on the pin
- * map, each by its owner's name. In a match without teams it does nothing at all.
+ * Teammates, and in co-op everyone, see each other's pin while a round is played. This sends the
+ * player's own pin as they move it, at most once a second, and draws the pins the server hands back
+ * (`mates`) on the pin map, each by its owner's name. In any other match it does nothing at all.
  */
-
-/** True while the viewer has teammates to show a pin to: on a team, in a round being played, their own guess not yet in. */
-function sharesPin(state: MatchState): boolean {
-  const you = state.players.find((player) => player.username === state.you.username);
-  return state.teams !== null && state.you.team !== null && state.phase === 'playing' && you?.guessed !== true;
-}
 
 const toPins = (state: MatchState): MatePin[] =>
   state.phase === 'playing' ? state.mates.map((mate) => ({ point: { lng: mate.lng, lat: mate.lat }, label: mate.username, final: mate.guessed })) : [];

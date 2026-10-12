@@ -9,6 +9,7 @@ import {
   loadMatch,
   lockPlayers,
   lockRatings,
+  handGuesses,
   markKicked,
   markLeft,
   openMatchOf,
@@ -28,7 +29,7 @@ import { enqueue, recordDodge } from '../db/queue.js';
 import { isTooSoon, maskWords, withEntry, type Emote } from './chat.js';
 import { rate } from './elo.js';
 import type { Settings } from './input.js';
-import { advance, cutShort, hasTeams, isActive, revealed, type MatchResult } from './machine.js';
+import { advance, cutShort, hasTeams, isActive, isCoop, pickerOf, revealed, type MatchResult } from './machine.js';
 import type { SentPlace } from '../places/check.js';
 import { groundFor, type Ground } from './places.js';
 import { distanceKm, scoreForDistance } from './scoring.js';
@@ -56,6 +57,7 @@ const HOST_ONLY = refuse(403, 'Only the host can do that.');
 const NO_SUCH_PLAYER = refuse(409, 'There is no such player in this match.');
 const NOT_YOURSELF = refuse(409, 'You cannot do that to yourself.');
 const TEAMS_OFF = refuse(409, 'Teams are off in this party.');
+const NOT_COOP = refuse(409, 'This party is not co-op.');
 /** How many writes one player may send one match in a minute: far more than play needs, and few enough to stop a flood. */
 export const WRITES_PER_MINUTE = 240;
 export const SLOW_DOWN = 'Too many requests. Slow down a little.';
@@ -113,7 +115,8 @@ function xpFor(match: MatchRecord, player: PlayerRecord, guesses: GuessRecord[])
 /** One account's line in its history for a match that has just finished. */
 function historyOf(snapshot: Snapshot, result: MatchResult, player: PlayerRecord, changes: RatingChange[]): HistoryRow {
   const { match, players, guesses } = snapshot;
-  const mine = guesses.filter((guess) => guess.userId === player.userId);
+  // In co-op the one guess of a round is everyone's.
+  const mine = isCoop(match) ? guesses : guesses.filter((guess) => guess.userId === player.userId);
   // Every round that got as far as being played, whether or not this player guessed in it.
   const played = match.places === null ? [] : match.places.slice(0, match.round + 1);
   const rating = changes.find((change) => change.userId === player.userId);
@@ -317,7 +320,7 @@ export function getMatch(db: Db, userId: string, matchId: string, now: number): 
   return act(db, matchId, userId, now, async (_tx, { snapshot }) => accept(snapshot), false);
 }
 
-/** The host changes a party's settings in its lobby. Turning teams off takes everyone off theirs. */
+/** The host changes a party's settings in its lobby. Turning teams off, or making the party co-op, takes everyone off theirs. */
 export function configure(db: Db, userId: string, matchId: string, settings: Settings, now: number): Promise<Reply<MatchState>> {
   return act(
     db,
@@ -328,8 +331,9 @@ export function configure(db: Db, userId: string, matchId: string, settings: Set
       if (snapshot.match.phase !== 'lobby') {
         return accept(snapshot);
       }
-      const players = settings.teams === 'none' ? snapshot.players.map((player) => ({ ...player, team: null })) : snapshot.players;
-      if (settings.teams === 'none') {
+      const teamless = settings.teams === 'none' || settings.teams === 'coop';
+      const players = teamless ? snapshot.players.map((player) => ({ ...player, team: null })) : snapshot.players;
+      if (teamless) {
         await setTeams(tx, matchId, players.map(({ userId: id }) => ({ userId: id, team: null })));
       }
       return changed(tx, { ...snapshot, players }, { ...snapshot.match, settings });
@@ -439,8 +443,8 @@ function mayPlay({ match }: Snapshot, me: PlayerRecord, round: number, now: numb
 /**
  * Scores a player's guess for the round being played. A guess for any other
  * round, a second guess, or one outside the round's time is ignored: the
- * answer is the state as it is. A guess that leaves one player to go cuts
- * the round's remaining time.
+ * answer is the state as it is, and so is one from anyone but the picker in
+ * co-op. A guess that leaves one player to go cuts the round's remaining time.
  */
 export function guess(
   db: Db,
@@ -451,7 +455,9 @@ export function guess(
   return act(db, input.matchId, userId, now, async (tx, { snapshot, me }) => {
     const { match } = snapshot;
     const place = match.places?.[input.round];
-    if (!mayPlay(snapshot, me, input.round, now) || !place || match.scaleKm === null) {
+    const picker = pickerOf(match, snapshot.players);
+    const mayGuess = mayPlay(snapshot, me, input.round, now) && (picker === null || picker.userId === userId);
+    if (!mayGuess || !place || match.scaleKm === null) {
       return accept(snapshot);
     }
     const distance = distanceKm(place, input);
@@ -472,10 +478,10 @@ export function guess(
   });
 }
 
-/** Records where the player's pin is, for their teammates to see while the round is played. */
+/** Records where the player's pin is, for their teammates (in co-op, everyone) to see while the round is played. */
 export function pin(db: Db, userId: string, input: { matchId: string; round: number; lng: number; lat: number }, now: number): Promise<Reply<MatchState>> {
   return act(db, input.matchId, userId, now, async (tx, { snapshot, me }) => {
-    if (!hasTeams(snapshot.match) || !mayPlay(snapshot, me, input.round, now)) {
+    if (!(hasTeams(snapshot.match) || isCoop(snapshot.match)) || !mayPlay(snapshot, me, input.round, now)) {
       return accept(snapshot);
     }
     const placed = { round: input.round, lng: input.lng, lat: input.lat };
@@ -530,7 +536,11 @@ export function shuffleTeams(db: Db, userId: string, matchId: string, now: numbe
   );
 }
 
-/** The host removes a player, who may not come back to this party. */
+/**
+ * The host removes a player, who may not come back to this party. In co-op a
+ * guess is everyone's, so the rounds a removed picker placed stay, in the
+ * host's name.
+ */
 export function kick(db: Db, userId: string, matchId: string, username: string, now: number): Promise<Reply<MatchState>> {
   return act(
     db,
@@ -544,7 +554,12 @@ export function kick(db: Db, userId: string, matchId: string, username: string, 
       }
       const gone = target.data.userId;
       await markKicked(tx, matchId, gone, now);
-      return accept({ ...snapshot, players: snapshot.players.filter((player) => player.userId !== gone), barred: [...snapshot.barred, gone] });
+      const together = isCoop(snapshot.match);
+      if (together) {
+        await handGuesses(tx, matchId, gone, userId);
+      }
+      const guesses = together ? snapshot.guesses.map((made) => (made.userId === gone ? { ...made, userId } : made)) : snapshot.guesses;
+      return accept({ ...snapshot, guesses, players: snapshot.players.filter((player) => player.userId !== gone), barred: [...snapshot.barred, gone] });
     }),
   );
 }
@@ -566,6 +581,26 @@ export function handOver(db: Db, userId: string, matchId: string, username: stri
       }
       // While the places are being picked, the one picking them cannot change.
       return snapshot.match.phase === 'preparing' ? accept(snapshot) : changed(tx, snapshot, { ...snapshot.match, resolverId: target.data.userId });
+    }),
+  );
+}
+
+/** The host of a co-op party names the player whose guess is everyone's: anyone still in it, the host included. */
+export function namePicker(db: Db, userId: string, matchId: string, username: string, now: number): Promise<Reply<MatchState>> {
+  return act(
+    db,
+    matchId,
+    userId,
+    now,
+    asHost(userId, async (tx, { snapshot }) => {
+      if (!isCoop(snapshot.match)) {
+        return NOT_COOP;
+      }
+      const target = snapshot.players.find((player) => player.username === username && player.leftAt === null);
+      if (!target) {
+        return NO_SUCH_PLAYER;
+      }
+      return snapshot.match.phase === 'finished' ? accept(snapshot) : changed(tx, snapshot, { ...snapshot.match, pickerId: target.userId });
     }),
   );
 }

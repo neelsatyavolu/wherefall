@@ -14,13 +14,15 @@ export const party: Part<typeof english> = {
   'party.teams.none': 'Без команд',
   'party.teams.best': 'Лучший ответ',
   'party.teams.average': 'Среднее',
-  'party.teams.note': 'С командами игроки делятся на две стороны. Команда получает за раунд свой лучший ответ или среднее всех своих ответов.',
+  'party.teams.coop': 'Кооператив',
+  'party.teams.note': 'С командами игроки делятся на две стороны. Команда получает за раунд свой лучший ответ или среднее всех своих ответов. В кооперативе все играют вместе, и один игрок даёт ответ, который идёт в счёт.',
 
   'party.line.chat': 'чат',
   'party.line.reactions': 'только реакции',
   'party.line.off': 'без чата',
   'party.line.best': 'команды по лучшему ответу',
   'party.line.average': 'команды по среднему',
+  'party.line.coop': 'кооператив',
 
   'party.settings.change': 'Изменить настройки',
   'party.settings.save': 'Сохранить настройки',
@@ -47,6 +49,8 @@ export const party: Part<typeof english> = {
   'host.kickYes': 'Выгнать',
   'host.makeHost': 'Сделать хостом',
   'host.makeHostLabel': 'Сделать {name} хостом',
+  'host.makePicker': 'Пусть отвечает',
+  'host.makePickerLabel': 'Пусть отвечает {name}',
   'host.moreLabel': 'Действия: {name}',
   'host.endRound': 'Завершить раунд',
 
@@ -63,4 +67,12 @@ export const party: Part<typeof english> = {
   'chat.teamTag': 'команде',
 
   // Wave 6
+
+  // Co-op: who places the guess, in the lobby, over a round and at the end
+  'tag.picker': 'отвечает',
+  'coop.hint': 'Все играют вместе. Один игрок даёт ответ, который идёт в счёт, а метки остальных служат подсказками.',
+  'coop.youPick': 'Ты отвечаешь за всех.',
+  'coop.theyPick': 'Отвечает {name}. Твоя метка служит подсказкой.',
+  'coop.lock': 'Отвечает {name}',
+  'outcome.coop': '{score} из {max} вместе.',
 };

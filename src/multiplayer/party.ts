@@ -31,6 +31,11 @@ export function makeHost(matchId: string, username: string, fetchFn: typeof fetc
   return matchAction(fetchFn, { action: 'host', matchId, username });
 }
 
+/** Host of a co-op party, until it is over: names the player whose guess is everyone's. The host may name themselves. */
+export function makePicker(matchId: string, username: string, fetchFn: typeof fetch = fetch): Reply<MatchState> {
+  return matchAction(fetchFn, { action: 'picker', matchId, username });
+}
+
 /** Host: closes the party to new players, or opens it again. */
 export function lockParty(matchId: string, locked: boolean, fetchFn: typeof fetch = fetch): Reply<MatchState> {
   return matchAction(fetchFn, { action: 'lock', matchId, locked });

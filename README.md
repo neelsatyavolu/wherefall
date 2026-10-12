@@ -7,7 +7,7 @@ A free street-view guessing game. You are dropped into a street panorama somewhe
 What is in it:
 
 - **Solo:** singleplayer (world, four regions, any country with enough places, or a community map; 3, 5 or 10 rounds; timer off or 10 to 300 seconds; move, no-move, or no move/pan/zoom; up to two hints a game, each halving its round), country streak, Country Guesser and Continent Guesser, a tutorial, and a daily challenge (three rounds, one attempt a day, a streak, a leaderboard and a shareable result).
-- **Online:** ranked duels on a health system with ratings and leagues, public unranked games for up to 10 that can be joined under way, 2v2 with shared team health, and parties for up to 40 joined by code or friend invite, with host controls, team mode, chat and reactions.
+- **Online:** ranked duels on a health system with ratings and leagues, public unranked games for up to 10 that can be joined under way, 2v2 with shared team health, and parties for up to 40 joined by code or friend invite, with host controls, team mode, co-op (everyone plays together and one player, the picker, places the guess), chat and reactions.
 - **Community:** maps anyone can make from places with Street View (search, likes, a preview of the places), leaderboards, friends with online status, public profiles, reports and a moderation pane.
 - **Account (needed to play):** XP and levels, progress charts, game history for every mode with a replay map, a country flag, kilometres or miles, sound volume, password change, a one-time recovery code for a forgotten password (there is no email), "Sign out everywhere", and account deletion with a 30-day restore window.
 - **Everywhere:** five languages (English, Spanish, French, German, Russian), sounds, a pin map with streets, satellite, hybrid and terrain, and an installable app (web app manifest and service worker).
@@ -40,7 +40,7 @@ Two location sets, one per source:
 
 ## Multiplayer and daily challenge
 
-Parties (up to 40 players, join by code), matchmaking queues for unranked, ranked and 2v2, and a daily challenge with a leaderboard. Vercel Functions cannot hold connections open, so clients poll the match (every 1.5 seconds with up to 10 players, 2.5 with up to 20, 4 above that) and the server advances it on each request. Polling is also why a party stops at 40 players where WorldGuessr allows 200. The design and the API contracts are in `docs/superpowers/specs/` (`…-multiplayer.md`, then `…-wave-2.md` to `…-wave-6.md` with `…-wave-5-api.md` and `…-wave-6-api.md`; a later file wins where two differ).
+Parties (up to 40 players, join by code), matchmaking queues for unranked, ranked and 2v2, and a daily challenge with a leaderboard. Vercel Functions cannot hold connections open, so clients poll the match (every 1.5 seconds with up to 10 players, 2.5 with up to 20, 4 above that) and the server advances it on each request. Polling is also why a party stops at 40 players where WorldGuessr allows 200. The design and the API contracts are in `docs/superpowers/specs/` (`…-multiplayer.md`, then `…-wave-2.md` to `…-wave-6.md` with `…-wave-5-api.md` and `…-wave-6-api.md`, then `…-coop.md`; a later file wins where two differ).
 
 Moderators are the accounts named in the `MODERATORS` environment variable (comma-separated usernames). A listed name cannot be registered, so create the account first and list it after. A banned account can still play alone but not online.
 

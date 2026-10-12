@@ -3,7 +3,7 @@ import { t } from '../i18n/index.ts';
 import type { ImageryProvider, Place as Picture } from '../imagery/provider.ts';
 import { sendGuess, sendPin, type MatchState, type Place } from '../multiplayer/client.ts';
 import { versusOf, type ChatView } from '../multiplayer/match-view.ts';
-import { placesToLoad, secondsLeft, stageOf, type Stage } from '../multiplayer/state.ts';
+import { mayGuess, pickLine, placesToLoad, secondsLeft, stageOf, type Stage } from '../multiplayer/state.ts';
 import { foldedChat, type ChatHandlers } from './chat.ts';
 import { el } from './dom.ts';
 import type { HostHandlers } from './host-controls.ts';
@@ -182,7 +182,8 @@ export function startMatchPlay(root: HTMLElement, first: MatchState, deps: Match
   async function send(): Promise<void> {
     const round = shownRound;
     const pin = screen.pin;
-    if (!pin || sentRound === round || stageOf(state, deps.serverNow()).kind !== 'guessing') {
+    // in co-op the pin of anyone but the picker is a suggestion, and never goes in as a guess
+    if (!pin || sentRound === round || !mayGuess(state) || stageOf(state, deps.serverNow()).kind !== 'guessing') {
       return;
     }
     sentRound = round;
@@ -218,12 +219,15 @@ export function startMatchPlay(root: HTMLElement, first: MatchState, deps: Match
     if (stage.kind === 'starting') {
       return startsIn(stage.startsInMs);
     }
-    return viewMissing ? t('match.viewMissing') : '';
+    // co-op says who places the guess for as long as there is nothing else to say
+    return viewMissing ? t('match.viewMissing') : pickLine(state);
   }
 
   function roundTick(stage: RoundStage): void {
     const sent = sentRound === stage.round || stage.kind === 'waiting';
-    const locks = { starting: t('match.waitForStart'), guessing: null, waiting: t('match.guessSent'), timeup: t('match.timeUp') };
+    // co-op: the Guess button is the picker's alone, and says so to everyone else
+    const guessing = mayGuess(state) || state.picker === null ? null : t('coop.lock', { name: state.picker });
+    const locks = { starting: t('match.waitForStart'), guessing, waiting: t('match.guessSent'), timeup: t('match.timeUp') };
     // the clock is the server's: what is left is read from its end of the round on every tick, and a round with no timer shows none
     screen.setClock(stage.kind === 'timeup' ? 0 : stage.msLeft === null ? null : secondsLeft(stage.msLeft));
     screen.lockGuess(sent ? t('match.guessSent') : locks[stage.kind]);

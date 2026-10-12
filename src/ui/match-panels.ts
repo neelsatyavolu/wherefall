@@ -2,7 +2,7 @@ import './match-extras.css';
 import { t } from '../i18n/index.ts';
 import type { MatchState } from '../multiplayer/client.ts';
 import { xpForRound } from '../multiplayer/match-view.ts';
-import { healthRows, isLastRound, roundTable, type RoundRow } from '../multiplayer/state.ts';
+import { healthRows, isCoop, isLastRound, ownRow, roundTable, type RoundRow } from '../multiplayer/state.ts';
 import { el, formatScore } from './dom.ts';
 import { plainName } from './guest-parts.ts';
 import { ownRowStrip } from './match-own-row.ts';
@@ -113,7 +113,8 @@ function roundRows(state: MatchState, rows: readonly RoundRow[]): HTMLElement {
         el(
           'tr',
           row.isYou ? { class: 'own' } : {},
-          nameCell(row.username, countries.get(row.username), youTag(row.isYou)),
+          // co-op has the one row: the guess made together, by the name of the picker who placed it
+          nameCell(row.username, countries.get(row.username), youTag(row.isYou), isCoop(state) ? el('span', { class: 'tag', text: t('tag.picker') }) : null),
           teams ? el('td', { text: teamNumber(row.team) }) : null,
           el('td', { class: 'num', text: distanceText(row.distanceKm) }),
           // the player's own full score is marked as it is in a game alone
@@ -143,7 +144,7 @@ function xpLine(state: MatchState, own: RoundRow | undefined): HTMLElement | nul
  */
 export function revealPanel(state: MatchState, round: number, onLeave: () => void) {
   const rows = roundTable(state, round);
-  const own = rows.find((row) => row.isYou);
+  const own = ownRow(state, rows);
   const place = state.places?.[round];
   // a ranked duel and a 2v2 also end as soon as someone's health is gone
   const ending = isLastRound(state, round);
@@ -166,7 +167,7 @@ export function revealPanel(state: MatchState, round: number, onLeave: () => voi
   return {
     node,
     rows,
-    /** the player's own row, when they are in the table */
+    /** the player's own row, when they are in the table; in co-op, the one row there is */
     own,
     /** The reveal moves on by itself; this says when. */
     setCountdown(seconds: number): void {

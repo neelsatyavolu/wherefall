@@ -6,7 +6,7 @@ export const QUEUE_KINDS = ['unranked', 'ranked', 'team'] as const;
 // prettier-ignore
 export const MATCH_ACTIONS = [
   'create', 'configure', 'join', 'start', 'places', 'guess', 'pin', 'leave', 'queue', 'leaveQueue',
-  'chat', 'emote', 'mute', 'team', 'shuffle', 'kick', 'host', 'lock', 'endRound', 'lobby',
+  'chat', 'emote', 'mute', 'team', 'shuffle', 'kick', 'host', 'picker', 'lock', 'endRound', 'lobby',
 ] as const;
 
 const MAX_PLACE_ID_LENGTH = 200;
@@ -32,8 +32,11 @@ export const settingsSchema = z.object({
   rounds: z.number().int().min(1).max(MAX_ROUNDS),
   /** What players may say to each other. */
   communication: z.enum(['chat', 'reactions', 'off']).default('chat'),
-  /** Two teams, scored by their best guess or by the average of their guesses; or everyone for themselves. */
-  teams: z.enum(['none', 'best', 'average']).default('none'),
+  /**
+   * Two teams, scored by their best guess or by the average of their guesses; everyone for
+   * themselves; or everyone together (`coop`), with one player's guess counting for all.
+   */
+  teams: z.enum(['none', 'best', 'average', 'coop']).default('none'),
   /** Whether players with no account may join. */
   guests: z.boolean().default(true),
 });
@@ -76,6 +79,7 @@ export const matchActionSchema = z.discriminatedUnion('action', [
   on('shuffle', { matchId }),
   on('kick', { matchId, username: playerName }),
   on('host', { matchId, username: playerName }),
+  on('picker', { matchId, username: playerName }),
   on('lock', { matchId, locked: z.boolean() }),
   on('endRound', { matchId }),
   on('lobby', { matchId }),

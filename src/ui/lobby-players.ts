@@ -1,15 +1,16 @@
 import { t } from '../i18n/index.ts';
 import type { MatchPlayer, MatchState, Team } from '../multiplayer/client.ts';
 import { playerOffers, seating } from '../multiplayer/party-view.ts';
+import { isCoop } from '../multiplayer/state.ts';
 import { el } from './dom.ts';
 import { hostRow, playerActions, type HostHandlers, type Report } from './host-controls.ts';
 import { playerName } from './profile-link.ts';
 import { teamBoxes } from './team-picker.ts';
 
-/** Who is in a party's lobby: one list, or the two teams and who has none. The host's controls sit in the rows. */
+/** Who is in a party's lobby: one list, or the two teams and who has none. In co-op the list says who the picker is. The host's controls sit in the rows. */
 
 export interface PlayersHandlers {
-  host: Pick<HostHandlers, 'onKick' | 'onMakeHost'>;
+  host: Pick<HostHandlers, 'onKick' | 'onMakeHost' | 'onMakePicker'>;
   /** the viewer takes a seat on a team; resolves to an error to show, or null */
   onTeam: (team: Team) => Promise<string | null>;
 }
@@ -23,13 +24,15 @@ const drawnFrom = (state: MatchState) =>
     state.you.team,
     state.phase,
     state.settings.teams,
+    state.picker,
   ]);
 
 function tags(state: MatchState, player: MatchPlayer): Array<HTMLElement | null> {
   const isYou = player.username === state.you.username;
   // "you, host": two words of the catalog, each a text of its own
   const own = isYou ? el('span', { class: 'tag' }, t('tag.you'), ...(state.you.isHost ? [', ', t('tag.host')] : [])) : null;
-  return [own, player.active ? null : el('span', { class: 'tag', text: t('tag.away') })];
+  const picker = player.username === state.picker ? el('span', { class: 'tag', text: t('tag.picker') }) : null;
+  return [own, picker, player.active ? null : el('span', { class: 'tag', text: t('tag.away') })];
 }
 
 /** One player: flag and name (a guest has no profile, so theirs is not a link), what is to be said of them, and the host's actions. */
@@ -62,6 +65,7 @@ export function lobbyPlayers(handlers: PlayersHandlers, report: Report) {
       const seats = seating(state);
       node.replaceChildren(
         seats === null ? el('ul', { class: 'player-list' }, ...rows(state, state.players)) : teamBoxes(state, seats, (players) => rows(state, players), handlers.onTeam, report),
+        ...(isCoop(state) ? [el('p', { class: 'fine', text: t('coop.hint') })] : []),
       );
       lists().forEach((list, index) => {
         list.scrollTop = scrolled[index] ?? 0;

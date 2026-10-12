@@ -91,6 +91,7 @@ describe('createParty', () => {
       you: { username: 'alice', isHost: true, isResolver: true, team: null, guest: false, muted: [] },
       players: [{ username: 'alice', country: null, guest: false, team: null, total: 0, guessed: false, active: true, rating: null, health: null }],
       teams: null,
+      picker: null,
       mates: [],
       places: null,
       results: [],

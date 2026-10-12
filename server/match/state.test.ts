@@ -15,6 +15,7 @@ const match = (change: Partial<MatchRecord> = {}): MatchRecord => ({
   movedToQueue: null,
   seed: 'seed',
   resolverId: 'a',
+  pickerId: null,
   round: 1,
   prepareEndsAt: null,
   roundStartsAt: T,

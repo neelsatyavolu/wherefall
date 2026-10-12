@@ -1,7 +1,7 @@
 import { formatNumber, t } from '../i18n/index.ts';
 import type { MatchState, QueueKind } from '../multiplayer/client.ts';
 import { afterMatch, xpEarned } from '../multiplayer/match-view.ts';
-import { outcomeLine, standing, type StandingRow } from '../multiplayer/state.ts';
+import { isCoop, outcomeLine, standing, type StandingRow } from '../multiplayer/state.ts';
 import { el, formatScore } from './dom.ts';
 import { icon } from './map-tools.ts';
 import { ownRowStrip } from './match-own-row.ts';
@@ -71,7 +71,8 @@ function reportCell(username: string, onReport: OnReport, say: Say): HTMLElement
 /**
  * Every player, best first. A duel's health is not a column: its bars stay at the top of the
  * screen. `report` adds a last column with a button for each player who can be reported: nobody
- * can report themselves, and a guest has no account to report.
+ * can report themselves, and a guest has no account to report. Co-op has nobody ahead of anybody:
+ * its table is who played, with no places and no points of their own.
  */
 function standingRows(state: MatchState, report?: { onReport: OnReport; say: Say }): HTMLElement {
   const rows = standing(state);
@@ -81,11 +82,12 @@ function standingRows(state: MatchState, report?: { onReport: OnReport; say: Say
   const rated = rows.some((row) => row.rating !== null);
   const reportable = (row: StandingRow) => report !== undefined && !row.isYou && !isGuestName(row.username);
   const reports = rows.some(reportable);
+  const ranked = !isCoop(state);
   const cells: HeadCell[] = [
-    ['#', true],
+    ...(ranked ? [['#', true] as HeadCell] : []),
     [t('label.player'), false],
     ...(teams ? [[t('team.heading'), false] as HeadCell] : []),
-    [t('match.total'), true, 'col-total'],
+    ...(ranked ? [[t('match.total'), true, 'col-total'] as HeadCell] : []),
     ...(rated ? [[t('label.rating'), true, 'col-rating'] as HeadCell] : []),
     ...(reports ? [['', false, 'row-end'] as HeadCell] : []),
   ];
@@ -104,7 +106,7 @@ function standingRows(state: MatchState, report?: { onReport: OnReport; say: Say
         el(
           'tr',
           row.isYou ? { class: 'own' } : {},
-          el('td', { class: 'num', text: String(index + 1) }),
+          ranked ? el('td', { class: 'num', text: String(index + 1) }) : null,
           nameCell(
             row.username,
             countries.get(row.username),
@@ -113,7 +115,7 @@ function standingRows(state: MatchState, report?: { onReport: OnReport; say: Say
             row.active ? null : el('span', { class: 'tag', text: t('match.tag.left') }),
           ),
           teams ? el('td', { text: teamNumber(row.team) }) : null,
-          el('td', { class: 'num col-total', text: formatScore(row.total) }),
+          ranked ? el('td', { class: 'num col-total', text: formatScore(row.total) }) : null,
           ...(rated ? ratingCells(row.rating) : []),
           reports ? (report && reportable(row) ? reportCell(row.username, report.onReport, report.say) : el('td', { class: 'row-end' })) : null,
         ),

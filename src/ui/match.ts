@@ -4,7 +4,7 @@ import { t } from '../i18n/index.ts';
 import type { ImageryProvider } from '../imagery/provider.ts';
 import { NO_SUCH_MATCH, getMatch, leaveMatch, mutePlayer, queueAsPair, sendChat, sendEmote, startMatch, type MatchState, type Reply } from '../multiplayer/client.ts';
 import { chatView, returnsToQueue } from '../multiplayer/match-view.ts';
-import { backToLobby, chooseTeam, configureParty, endRound, kickPlayer, lockParty, makeHost, shuffleTeams } from '../multiplayer/party.ts';
+import { backToLobby, chooseTeam, configureParty, endRound, kickPlayer, lockParty, makeHost, makePicker, shuffleTeams } from '../multiplayer/party.ts';
 import { partyJoinRound } from '../multiplayer/party-view.ts';
 import { abortable, pollInterval, startPolling } from '../multiplayer/poll.ts';
 import type { QueueEntry } from '../multiplayer/queue-view.ts';
@@ -81,6 +81,7 @@ export function runMatch(root: HTMLElement, entry: MatchState | string, deps: Ma
   const host: HostHandlers = {
     onKick: (username) => act(kickPlayer(id, username)),
     onMakeHost: (username) => act(makeHost(id, username)),
+    onMakePicker: (username) => act(makePicker(id, username)),
     onLock: (locked) => act(lockParty(id, locked)),
     onEndRound: () => act(endRound(id)),
   };

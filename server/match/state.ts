@@ -1,5 +1,5 @@
 import { healthAfter, teamHealthAfter } from './health.js';
-import { hasTeams, isActive, sideTotals } from './machine.js';
+import { hasTeams, isActive, isCoop, pickerOf, sideTotals } from './machine.js';
 import type { GuessRecord, MatchRecord, MatchState, PlayerRecord, Snapshot } from './types.js';
 
 const iso = (ms: number | null): string | null => (ms === null ? null : new Date(ms).toISOString());
@@ -26,12 +26,14 @@ function teamsOf(match: MatchRecord, players: PlayerRecord[], guesses: GuessReco
 }
 
 /**
- * Where the asker's teammates have their pins in the round being played:
- * their guess once they have made it, otherwise where they last said their
- * pin was. Never an opponent's, and nothing outside a round.
+ * Where the asker's teammates (in co-op, everyone else) have their pins in
+ * the round being played: their guess once they have made it, otherwise
+ * where they last said their pin was. Never an opponent's, and nothing
+ * outside a round.
  */
 function matesOf({ match, players, guesses }: Snapshot, you: PlayerRecord): MatchState['mates'] {
-  if (match.phase !== 'playing' || !hasTeams(match) || you.team === null) {
+  const together = isCoop(match) || (hasTeams(match) && you.team !== null);
+  if (match.phase !== 'playing' || !together) {
     return [];
   }
   return players
@@ -93,6 +95,7 @@ export function matchState(snapshot: Snapshot, you: PlayerRecord, now: number): 
       health: health?.get(player.userId) ?? null,
     })),
     teams: teamsOf(match, players, guesses, revealed),
+    picker: pickerOf(match, players)?.username ?? null,
     mates: matesOf(snapshot, you),
     // Only the places reached so far: the ones still to come are nobody's to read ahead.
     places: match.places === null ? null : match.places.slice(0, match.round + 1),

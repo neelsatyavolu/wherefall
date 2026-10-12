@@ -14,13 +14,15 @@ export const party: Part<typeof english> = {
   'party.teams.none': 'Sans équipes',
   'party.teams.best': 'Meilleure réponse',
   'party.teams.average': 'Moyenne',
-  'party.teams.note': 'Avec des équipes, les joueurs se répartissent en deux camps. Une équipe marque sa meilleure réponse de la manche, ou la moyenne de toutes ses réponses.',
+  'party.teams.coop': 'Coopératif',
+  'party.teams.note': 'Avec des équipes, les joueurs se répartissent en deux camps. Une équipe marque sa meilleure réponse de la manche, ou la moyenne de toutes ses réponses. En coopératif, tout le monde joue ensemble et une seule personne place la réponse qui compte.',
 
   'party.line.chat': 'chat',
   'party.line.reactions': 'réactions seules',
   'party.line.off': 'sans chat',
   'party.line.best': 'équipes à la meilleure réponse',
   'party.line.average': 'équipes à la moyenne',
+  'party.line.coop': 'coopératif',
 
   'party.settings.change': 'Modifier les réglages',
   'party.settings.save': 'Enregistrer les réglages',
@@ -47,6 +49,8 @@ export const party: Part<typeof english> = {
   'host.kickYes': 'Exclure',
   'host.makeHost': 'Nommer hôte',
   'host.makeHostLabel': 'Nommer {name} hôte',
+  'host.makePicker': 'Faire répondre',
+  'host.makePickerLabel': 'Faire répondre {name}',
   'host.moreLabel': 'Actions pour {name}',
   'host.endRound': 'Terminer la manche',
 
@@ -63,4 +67,12 @@ export const party: Part<typeof english> = {
   'chat.teamTag': 'équipe',
 
   // Wave 6
+
+  // Co-op: who places the guess, in the lobby, over a round and at the end
+  'tag.picker': 'répond',
+  'coop.hint': 'Tout le monde joue ensemble. Une personne place la réponse qui compte, et les repères des autres sont des suggestions.',
+  'coop.youPick': 'Vous placez la réponse pour tout le monde.',
+  'coop.theyPick': '{name} place la réponse. Votre repère est une suggestion.',
+  'coop.lock': '{name} répond',
+  'outcome.coop': '{score} sur {max} ensemble.',
 };

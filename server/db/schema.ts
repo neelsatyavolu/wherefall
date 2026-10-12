@@ -335,6 +335,8 @@ const STATEMENTS = [
 
   // Whether a party takes players with no account.
   `ALTER TABLE matches ADD COLUMN IF NOT EXISTS guests boolean NOT NULL DEFAULT true`,
+  // Co-op: the player whose guess is everyone's. Null leaves it to the host.
+  `ALTER TABLE matches ADD COLUMN IF NOT EXISTS picker_id uuid`,
   // How many writes the player has sent the match since `acts_from`: the per-seat rate limit, kept with the heartbeat.
   `ALTER TABLE match_players ADD COLUMN IF NOT EXISTS acts integer NOT NULL DEFAULT 0`,
   `ALTER TABLE match_players ADD COLUMN IF NOT EXISTS acts_from timestamptz`,

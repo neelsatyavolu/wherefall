@@ -73,6 +73,7 @@ export function matchState(change: Partial<MatchState> = {}): MatchState {
     you: viewer({ isHost: true, isResolver: true }),
     players: [player('neel'), player('sam')],
     teams: null,
+    picker: null,
     mates: [],
     places: null,
     results: [],

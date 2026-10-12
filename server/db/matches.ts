@@ -33,6 +33,7 @@ function rowToMatch(row: Row): MatchRecord {
     locked: row.locked as boolean,
     seed: row.seed as string,
     resolverId: row.resolver_id as string,
+    pickerId: row.picker_id as string | null,
     round: row.round as number,
     prepareEndsAt: msOrNull(row.prepare_ends_at),
     roundStartsAt: msOrNull(row.round_starts_at),
@@ -142,7 +143,7 @@ export async function saveMatch(tx: Queryable, match: MatchRecord): Promise<void
     `UPDATE matches SET phase = $2, resolver_id = $3, round = $4, prepare_ends_at = $5::timestamptz, round_starts_at = $6::timestamptz,
             round_ends_at = $7::timestamptz, reveal_ends_at = $8::timestamptz, places = $9::jsonb, scale_km = $10,
             outcome = $11::jsonb, finished_at = $12::timestamptz, map = $13, mode = $14, time_limit = $15, rounds = $16,
-            communication = $17, teams = $18, locked = $19, moved_to_queue = $20, guests = $21
+            communication = $17, teams = $18, locked = $19, moved_to_queue = $20, guests = $21, picker_id = $22
       WHERE id = $1`,
     [
       match.id,
@@ -166,6 +167,7 @@ export async function saveMatch(tx: Queryable, match: MatchRecord): Promise<void
       match.locked,
       match.movedToQueue,
       settings.guests,
+      match.pickerId,
     ],
   );
 }
@@ -306,6 +308,11 @@ export async function insertGuess(tx: Queryable, matchId: string, guess: GuessRe
     [matchId, guess.userId, guess.round, guess.lng, guess.lat, guess.distanceKm, guess.score],
   );
   return rows.length === 1;
+}
+
+/** Puts one player's guesses in a match in another's name. Only where the two never guessed in the same round, as in co-op. */
+export async function handGuesses(tx: Queryable, matchId: string, fromUserId: string, toUserId: string): Promise<void> {
+  await tx.query('UPDATE match_guesses SET user_id = $3 WHERE match_id = $1 AND user_id = $2', [matchId, fromUserId, toUserId]);
 }
 
 /** The unfinished match the player is in, if any. */

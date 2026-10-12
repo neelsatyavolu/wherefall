@@ -36,6 +36,7 @@ export function newMatch(kind: MatchKind, settings: Settings, resolverId: string
     // The same alphabet as a singleplayer seed, so the resolver picks places with it exactly as singleplayer does.
     seed: randomBytes(SEED_BYTES).toString('hex'),
     resolverId,
+    pickerId: null,
     round: 0,
     roundStartsAt: null,
     roundEndsAt: null,
