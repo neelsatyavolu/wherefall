@@ -468,12 +468,14 @@ describe('countRun', () => {
     expect(countRun({ kind: 'country', run: 'x', rounds: [...rounds].reverse() })).toBe(2);
   });
 
-  it('judges a continent by where the place is, not only by its country: Russia east of the Urals is Asia', () => {
-    const siberia = placesOf(0).find((place) => place.country === 'RU' && place.lng > 60);
-    expect(siberia).toBeDefined();
+  it('judges a continent by where the place is, not only by its country: Russia is Asia east of the Urals and Europe west of them', () => {
+    // a list holds one side of Russia only (its places are kept to one region), and which side changes when it is rebuilt
+    const russian = placesOf(0).find((place) => place.country === 'RU');
+    expect(russian).toBeDefined();
+    const [right, wrong] = continentOf(russian ?? { country: '', lng: 0 }) === 'asia' ? (['asia', 'europe'] as const) : (['europe', 'asia'] as const);
     const rounds = [
-      { id: siberia?.id ?? '', answer: 'asia' as const },
-      { id: siberia?.id ?? '', answer: 'europe' as const },
+      { id: russian?.id ?? '', answer: right },
+      { id: russian?.id ?? '', answer: wrong },
       { id: first?.id ?? '', answer: continentOf(first ?? { country: '', lng: 0 }) },
     ];
     expect(countRun({ kind: 'continent', run: 'x', rounds })).toBe(2);

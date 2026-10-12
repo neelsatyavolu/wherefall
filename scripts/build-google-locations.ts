@@ -5,6 +5,8 @@
 //
 // How it works: random points are dropped inside each country and Google is asked for the
 // nearest outdoor panorama (the Street View Static API's metadata lookup, which is free).
+// Most of the points are dropped in the country's towns and cities (GeoNames' list of them), the
+// more populous the more often; the rest anywhere, which by area is mostly open country.
 // Only Google's own captures are kept; user-uploaded photo spheres are skipped.
 // The key must have the Street View Static API enabled. It is never written anywhere.
 import { writeFile } from 'node:fs/promises';
@@ -12,6 +14,7 @@ import { pathToFileURL } from 'node:url';
 import { featuresContaining, iso1A2Code } from '@rapideditor/country-coder';
 import { createRng, type Rng } from '../src/game/rng.ts';
 import { areaFromHits, quotaForArea, randomGlobePoint, regionForGroups, settleRegions } from './lib/sampling.ts';
+import { parseTowns, pointInTown, populationDraw, unzipSingle, type Town } from './lib/towns.ts';
 
 const KEY = process.env.GOOGLE_MAPS_KEY;
 if (!KEY) {
@@ -27,6 +30,12 @@ const OUTPUT = process.env.LOCATIONS_OUT
 const REFERER = process.env.GOOGLE_MAPS_REFERER ?? 'https://plonk-two.vercel.app/';
 
 const METADATA = 'https://maps.googleapis.com/maps/api/streetview/metadata';
+/** GeoNames' populated places of 1,000 people and more (CC BY 4.0) */
+const TOWNS = 'https://download.geonames.org/export/dump/cities1000.zip';
+/** this share of a country's places is looked for in its towns and cities; the rest anywhere on its roads */
+const TOWN_SHARE = 0.7;
+/** a lookup in a town reaches only this far, so the place found is in the town and not on a road out of it */
+const TOWN_RADIUS_M = 500;
 const GLOBE_SAMPLES = 600_000;
 /** lookup radius starts small, so places are not all on the edge of coverage, and widens where roads are sparse */
 const START_RADIUS_M = 2_000;
@@ -113,10 +122,35 @@ interface Country {
   /** points known to lie inside, used as seeds for drawing more */
   inside: Point[];
   areaKm2: number;
+  /** its towns and cities; a territory with none of a thousand people has none */
+  towns: readonly Town[];
+}
+
+/** The world's towns and cities, by the country each is in. */
+async function townsByCountry(): Promise<Map<string, Town[]>> {
+  const response = await fetch(TOWNS);
+  if (!response.ok) {
+    throw new Error(`GeoNames answered ${response.status}`);
+  }
+  const byCode = new Map<string, Town[]>();
+  for (const town of parseTowns(unzipSingle(Buffer.from(await response.arrayBuffer())).toString('utf8'))) {
+    const code = territoryCode(town.lng, town.lat);
+    if (!code) {
+      continue;
+    }
+    // appended in place, as in the survey below
+    const towns = byCode.get(code);
+    if (towns) {
+      towns.push(town);
+    } else {
+      byCode.set(code, [town]);
+    }
+  }
+  return byCode;
 }
 
 /** Throws points all over the globe and sorts them by country: gives each country's area and where it is. */
-function surveyCountries(rng: Rng): Country[] {
+function surveyCountries(rng: Rng, towns: ReadonlyMap<string, readonly Town[]>): Country[] {
   const byCode = new Map<string, Point[]>();
   for (let i = 0; i < GLOBE_SAMPLES; i++) {
     const point = randomGlobePoint(rng);
@@ -133,7 +167,7 @@ function surveyCountries(rng: Rng): Country[] {
     }
   }
   return [...byCode]
-    .map(([code, inside]) => ({ code, inside, areaKm2: areaFromHits(inside.length, GLOBE_SAMPLES) }))
+    .map(([code, inside]) => ({ code, inside, areaKm2: areaFromHits(inside.length, GLOBE_SAMPLES), towns: towns.get(code) ?? [] }))
     .sort((a, b) => a.code.localeCompare(b.code));
 }
 
@@ -174,6 +208,41 @@ async function sampleCountry(country: Country): Promise<Row[]> {
   let sinceWidened = 0;
   let acceptedSinceWidened = 0;
 
+  /** Looks the points up together and keeps what is usable, up to `limit` places in all. Gives how many it kept. */
+  const lookUp = async (points: readonly Point[], reach: number, limit: number): Promise<number> => {
+    const results = await Promise.all(points.map((point) => nearestPanorama(point, reach)));
+    let accepted = 0;
+    for (const found of results) {
+      if (rows.length >= limit || !found || !officialAndUsable(found, country.code)) {
+        continue;
+      }
+      const bucket = `${Math.round(found.location.lng / SPACING_DEG)}:${Math.round(found.location.lat / SPACING_DEG)}`;
+      if (!occupied.has(bucket)) {
+        occupied.add(bucket);
+        accepted++;
+        rows.push([found.pano_id, Number(found.location.lng.toFixed(6)), Number(found.location.lat.toFixed(6)), country.code]);
+      }
+    }
+    return accepted;
+  };
+
+  // Towns first. Points spread over a country by area fall almost all in open country, so on their
+  // own they give a set of farm tracks and forest roads. Where the towns have no coverage, or are
+  // too few to hold their share, the lookups below fill the country's quota from anywhere.
+  const townQuota = country.towns.length > 0 ? Math.round(quota * TOWN_SHARE) : 0;
+  const drawTown = townQuota > 0 ? populationDraw(country.towns) : null;
+  for (let attempt = 0; drawTown && rows.length < townQuota && attempt < townQuota * ATTEMPTS_PER_LOCATION; attempt += BATCH) {
+    await lookUp(
+      Array.from({ length: BATCH }, () => pointInTown(drawTown(rng), rng)),
+      TOWN_RADIUS_M,
+      townQuota,
+    );
+    if (rows.length === 0 && attempt + BATCH >= GIVE_UP_AFTER) {
+      break;
+    }
+  }
+  const inTowns = rows.length;
+
   // A country's outline includes its coastal waters, and much of some countries has no roads.
   // Following what has already been found keeps most lookups on land that Google has driven,
   // while the rest still explore the whole country.
@@ -187,20 +256,8 @@ async function sampleCountry(country: Country): Promise<Row[]> {
 
   for (let attempt = 0; rows.length < quota && attempt < quota * ATTEMPTS_PER_LOCATION; attempt += BATCH) {
     // one lookup at a time would take a large country a quarter of an hour
-    const points = Array.from({ length: BATCH }, nextPoint);
-    const results = await Promise.all(points.map((point) => nearestPanorama(point, radius)));
+    acceptedSinceWidened += await lookUp(Array.from({ length: BATCH }, nextPoint), radius, quota);
     sinceWidened += BATCH;
-    for (const found of results) {
-      if (rows.length >= quota || !found || !officialAndUsable(found, country.code)) {
-        continue;
-      }
-      const bucket = `${Math.round(found.location.lng / SPACING_DEG)}:${Math.round(found.location.lat / SPACING_DEG)}`;
-      if (!occupied.has(bucket)) {
-        occupied.add(bucket);
-        acceptedSinceWidened++;
-        rows.push([found.pano_id, Number(found.location.lng.toFixed(6)), Number(found.location.lat.toFixed(6)), country.code]);
-      }
-    }
     const struggling = sinceWidened >= WIDEN_AFTER && acceptedSinceWidened / sinceWidened < MIN_ACCEPT_RATE;
     if (struggling && radius < MAX_RADIUS_M) {
       radius *= 4;
@@ -211,14 +268,14 @@ async function sampleCountry(country: Country): Promise<Row[]> {
     }
   }
   if (rows.length > 0) {
-    log(`${country.code}: ${rows.length}/${quota} (area ${Math.round(country.areaKm2).toLocaleString('en-US')} km², radius ${radius / 1000} km)`);
+    log(`${country.code}: ${rows.length}/${quota}, ${inTowns} in towns (area ${Math.round(country.areaKm2).toLocaleString('en-US')} km², radius ${radius / 1000} km)`);
   }
   return rows;
 }
 
 // --- main ------------------------------------------------------------------------------------
 
-const countries = surveyCountries(createRng(SEED)).filter((country) => !ONLY || ONLY.includes(country.code));
+const countries = surveyCountries(createRng(SEED), await townsByCountry()).filter((country) => !ONLY || ONLY.includes(country.code));
 log(`Sampling ${countries.length} countries and territories (seed ${SEED})`);
 
 const queue = [...countries];

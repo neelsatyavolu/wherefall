@@ -34,7 +34,7 @@ The server counts Google viewers per UTC day and tells browsers to use Panoramax
 
 Two location sets, one per source:
 
-- `public/locations.google.json`: about 24,000 places with official Google coverage in 127 countries and territories. Built by `scripts/build-google-locations.ts`, which drops random points in every country and asks Google's free coverage lookup for the nearest outdoor panorama of its own.
+- `public/locations.google.json`: about 27,000 places with official Google coverage in 131 countries and territories. Built by `scripts/build-google-locations.ts`, which drops random points in every country and asks Google's free coverage lookup for the nearest outdoor panorama of its own. About 70% of a country's places are looked for in its towns and cities (the [GeoNames](https://www.geonames.org) list of places with 1,000 people or more, CC BY 4.0), the more populous the more often; the rest anywhere in the country, which is mostly open country.
 - `public/locations.json`: about 4,300 places in 47 countries and territories, sampled from Panoramax and used when the game falls back to it.
 - `public/cities.json`: about 7,300 cities from [Natural Earth](https://www.naturalearthdata.com) (public domain). The guess map names them while it is zoomed out further than zoom 7, where its tiles carry only a handful of cities to a screen.
 
