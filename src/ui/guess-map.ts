@@ -1,4 +1,5 @@
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './map.css';
 import type { LngLat } from '../game/geo.ts';
@@ -87,6 +88,7 @@ interface Fitted {
 const EMPTY = { type: 'FeatureCollection' as const, features: [] };
 
 // set before the first map is made, which is the only time the library reads it
+maplibregl.setWorkerUrl(mapWorkerUrl);
 maplibregl.setWorkerCount(workerCountFor(navigator.hardwareConcurrency));
 
 let warmed = false;
@@ -411,7 +413,9 @@ export class GuessMap {
   private paintStreets(paint: (layer: maplibregl.LayerSpecification) => Record<string, unknown>): void {
     for (const layer of this.served?.layers ?? []) {
       if (this.map.getLayer(layer.id)) {
-        Object.entries(paint(layer)).forEach(([name, value]) => this.map.setPaintProperty(layer.id, name, value));
+        Object.entries(paint(layer)).forEach(([name, value]) =>
+          this.map.setPaintProperty(layer.id, name as Parameters<maplibregl.Map['setPaintProperty']>[1], value as Parameters<maplibregl.Map['setPaintProperty']>[2]),
+        );
       }
     }
   }

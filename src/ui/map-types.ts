@@ -1,4 +1,4 @@
-import type maplibregl from 'maplibre-gl';
+import type * as maplibregl from 'maplibre-gl';
 import { t } from '../i18n/index.ts';
 import { el, withNodes } from './dom.ts';
 import { MAP_TYPES, type MapType } from './prefs.ts';
