@@ -8,7 +8,7 @@
   display: grid;
   place-items: center;
   border: 2px solid var(--bg);
-  font: 500 12px/1 var(--font-mono);
+  font: 500 12px/1 var(--font-sans);
   cursor: inherit;
 }
 
@@ -179,6 +179,7 @@
 .history-map {
   height: min(60vh, 480px);
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
 }
 
 /* a map on a page lets the page scroll past it, and says so in the page's own type when a bare wheel or one finger is tried on it */
@@ -203,6 +204,7 @@
 .map-zoom {
   display: flex;
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
   pointer-events: auto;
 }
 
@@ -215,10 +217,10 @@
   width: 32px;
   height: 32px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--radius-control);
   background: var(--bg);
   color: var(--fg-2);
-  font: 500 14px/1 var(--font-mono);
+  font: 500 14px/1 var(--font-sans);
   cursor: pointer;
   transition:
     background-color 150ms var(--ease),

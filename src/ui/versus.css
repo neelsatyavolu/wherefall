@@ -25,6 +25,7 @@
   padding: 28px 24px;
   background: var(--bg);
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
 }
 
 .versus-card {
@@ -39,12 +40,12 @@
 }
 
 .versus-name {
-  font: 500 21px/1.3 var(--font-mono);
+  font: 500 21px/1.3 var(--font-sans);
   overflow-wrap: anywhere;
 }
 
 .versus-rating {
-  font: 500 28px/1.1 var(--font-mono);
+  font: 500 28px/1.1 var(--font-sans);
   font-variant-numeric: tabular-nums;
 }
 
@@ -53,14 +54,12 @@
 }
 
 .versus-league {
-  font: 12px/1.3 var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 12px/1.3 var(--font-sans);
   color: var(--fg-3);
 }
 
 .versus-word {
-  font: italic 21px/1 var(--font-serif);
+  font: 500 21px/1 var(--font-sans);
   color: var(--fg-2);
 }
 

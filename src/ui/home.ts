@@ -24,6 +24,7 @@ import { mapsPane } from './maps-pane.ts';
 import { createPartyPane, joinPartyPane, queuePane } from './multiplayer-panes.ts';
 import { install, watchInstall } from '../pwa.ts';
 import { moderationPane } from './moderation-pane.ts';
+import { themeToggle } from './theme.ts';
 import { NAV_GROUPS, RESTRICTED, hrefFor, navFor, navGroupName, navName, partyCode, resetToken, sameView, type NavId, type View } from './nav.ts';
 import { onlineCount } from './online-count.ts';
 import { playersOnly, type Pane } from './pane.ts';
@@ -326,7 +327,7 @@ export function renderHome(initial: View, handlers: HomeHandlers, checkResume: b
   const node = el(
     'div',
     { class: 'shell' },
-    el('aside', { class: 'sidebar' }, el('h1', { class: 'wordmark' }, 'Wherefall', el('span', { class: 'caret', attrs: { 'aria-hidden': 'true' } })), guestHost, toggle, nav, online.node),
+    el('aside', { class: 'sidebar' }, el('div', { class: 'sidebar-head' }, el('h1', { class: 'wordmark' }, 'Wherefall', el('span', { class: 'caret', attrs: { 'aria-hidden': 'true' } })), themeToggle()), guestHost, toggle, nav, online.node),
     el('main', { class: 'pane' }, el('div', { class: 'pane-column' }, resumeHost, paneHost)),
   );
   // a link to somewhere in the app (a profile, a map's page) opens in place, keeping the browser's history

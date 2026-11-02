@@ -12,9 +12,8 @@
 /* the size of a pane's title: the lobby is one more screen of the same kind */
 .screen-title {
   margin: 0;
-  font: 500 28px/1.1 var(--font-mono);
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
+  font: 400 clamp(40px, 5vw, 56px)/1 var(--font-serif);
+  letter-spacing: -0.02em;
 }
 
 .lobby-invite {
@@ -22,10 +21,11 @@
   gap: 16px;
   padding: 16px;
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
 }
 
 .lobby-code {
-  font-size: 40px;
+  font: 400 40px/1.1 var(--font-mono);
   letter-spacing: 0.08em;
 }
 
@@ -105,7 +105,8 @@
   gap: 8px;
   background: var(--bg);
   border: 1px solid var(--border-strong);
-  font: 14px/1.4 var(--font-mono);
+  border-radius: var(--radius-control);
+  font: 14px/1.4 var(--font-sans);
   color: var(--fg);
   overflow-wrap: anywhere;
 }
@@ -133,6 +134,8 @@
   flex-direction: column;
   background: var(--bg);
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  overflow: hidden;
 }
 
 /* "3 / 8 guessed": a line of status that opens and folds the list of names */
@@ -145,7 +148,7 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--radius-control);
   background: none;
   text-align: left;
   cursor: pointer;
@@ -166,7 +169,7 @@
 .round-label::after {
   content: '+';
   margin-left: 12px;
-  font: 14px/1 var(--font-mono);
+  font: 14px/1 var(--font-sans);
   color: var(--fg-3);
 }
 
@@ -190,7 +193,7 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  font: 14px/1.4 var(--font-mono);
+  font: 14px/1.4 var(--font-sans);
 }
 
 /* a long name goes onto a second line beside its flag, not under it */
@@ -247,6 +250,7 @@
   grid-template-columns: 1fr 1fr;
   background: var(--bg);
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
 }
 
 .health-row {
@@ -254,7 +258,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 2px 8px;
   padding: 8px 14px;
-  font: 14px/1.4 var(--font-mono);
+  font: 14px/1.4 var(--font-sans);
 }
 
 .health-row + .health-row {

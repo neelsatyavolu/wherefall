@@ -1,47 +1,85 @@
-/* Machine & Ink: warm ink canvas, mono chrome, serif voice, one blue accent, flat and sharp. */
+/* Blackletter (~/DESIGN.md): true black canvas, Geist for everything, Geist Serif for the one big headline, one blue accent. */
+@font-face {
+  font-family: 'Geist Serif';
+  src: url('./fonts/GeistSerifVF.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 :root {
-  --bg: #0e0e0d;
-  --surface: rgba(242, 240, 234, 0.035);
-  --surface-hover: rgba(242, 240, 234, 0.06);
-  --fg: #f2f0ea;
-  --fg-2: rgba(242, 240, 234, 0.68);
-  /* fine print is set in this at 12px: 0.52 is 5.1:1 on the canvas, where 0.45 was 4.1:1 */
-  --fg-3: rgba(242, 240, 234, 0.52);
-  --fg-4: rgba(242, 240, 234, 0.28);
-  --border: rgba(242, 240, 234, 0.1);
-  --border-strong: rgba(242, 240, 234, 0.22);
+  --bg: #000000;
+  --surface: #0a0a0c;
+  --surface-hover: #111114;
+  --fg: #fcfdff;
+  --fg-2: rgba(252, 253, 255, 0.7);
+  /* fine print is set in this at 12px: the mute grey, 8.4:1 on the canvas */
+  --fg-3: #a1a4a5;
+  --fg-4: #464a4d;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.14);
   --accent: #4c8dff;
-  --accent-muted: rgba(76, 141, 255, 0.45);
-  --danger: #e5483a;
-  --ok: #4fbf85;
+  --accent-hover: #6fa3ff;
+  --accent-muted: rgba(76, 141, 255, 0.55);
+  --tint: rgba(76, 141, 255, 0.12);
+  --primary-hover: #e8f0ff;
+  --danger: #ff4d5e;
+  --ok: #3dd68c;
+  --warn: #ffc53d;
   --font-mono: 'Geist Mono', ui-monospace, Menlo, monospace;
   --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: 'Newsreader', Georgia, serif;
+  --font-serif: 'Geist Serif', Georgia, serif;
+  --radius-control: 8px;
+  --radius-card: 12px;
   --ease: cubic-bezier(0.2, 0, 0, 1);
-  --gutter: 20px;
+  --gutter: 24px;
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
-    --bg: #f7f5ef;
+    --bg: #fcfcfd;
     --surface: #ffffff;
-    --surface-hover: rgba(22, 22, 26, 0.04);
-    --fg: #16161a;
-    /* 0.62 is 4.9:1 on the paper, where 0.45 was 2.9:1; the step above it moves up with it */
-    --fg-2: rgba(22, 22, 26, 0.76);
-    --fg-3: rgba(22, 22, 26, 0.62);
-    --fg-4: rgba(22, 22, 26, 0.28);
-    --border: rgba(22, 22, 26, 0.12);
-    --border-strong: rgba(22, 22, 26, 0.24);
-    /* dark enough for the paper to be read on it (5.3:1) and for it to be read on the paper */
-    --accent: #245fd0;
-    --accent-muted: rgba(36, 95, 208, 0.4);
-    --danger: #c8352a;
-    /* the dark scheme's green is 2.1:1 on the paper; this one is 4.9:1, so it can be text */
-    --ok: #1f7a4d;
+    --surface-hover: #f4f5f7;
+    --fg: #0a0a0c;
+    /* the body ink: a clear step above the mute grey of fine print */
+    --fg-2: rgba(10, 10, 12, 0.82);
+    --fg-3: #5f6366;
+    --fg-4: #c4c7ca;
+    --border: rgba(0, 0, 0, 0.06);
+    --border-strong: rgba(0, 0, 0, 0.12);
+    /* the darker blue, so it reads as a link on the light canvas and the canvas reads on it */
+    --accent: #2f6fe0;
+    --accent-hover: #2459ba;
+    --accent-muted: rgba(47, 111, 224, 0.45);
+    --tint: rgba(47, 111, 224, 0.08);
+    --primary-hover: #26262b;
+    --danger: #d92d3f;
+    --ok: #14915a;
+    --warn: #b7791f;
     color-scheme: light;
   }
+}
+
+/* the theme picked in the sidebar wins over the system's */
+:root[data-theme='light'] {
+  --bg: #fcfcfd;
+  --surface: #ffffff;
+  --surface-hover: #f4f5f7;
+  --fg: #0a0a0c;
+  --fg-2: rgba(10, 10, 12, 0.82);
+  --fg-3: #5f6366;
+  --fg-4: #c4c7ca;
+  --border: rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.12);
+  --accent: #2f6fe0;
+  --accent-hover: #2459ba;
+  --accent-muted: rgba(47, 111, 224, 0.45);
+  --tint: rgba(47, 111, 224, 0.08);
+  --primary-hover: #26262b;
+  --danger: #d92d3f;
+  --ok: #14915a;
+  --warn: #b7791f;
+  color-scheme: light;
 }
 
 *,
@@ -59,13 +97,24 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font: 15px/1.5 var(--font-sans);
+  font: 15px/1.55 var(--font-sans);
+  letter-spacing: -0.005em;
   -webkit-font-smoothing: antialiased;
 }
 
+:where(a) {
+  color: var(--accent);
+  transition: color 150ms var(--ease);
+}
+
+:where(a):hover {
+  color: var(--accent-hover);
+}
+
 :focus-visible {
-  outline: 2px solid var(--accent-muted);
+  outline: 3px solid var(--accent-muted);
   outline-offset: 2px;
+  border-radius: var(--radius-control);
 }
 
 [hidden] {
@@ -74,15 +123,13 @@ body {
 
 .label {
   margin: 0;
-  font: 12px/1.3 var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 13px/1.4 var(--font-sans);
   color: var(--fg-3);
 }
 
 .prose {
   margin: 0;
-  font: 17px/1.5 var(--font-serif);
+  font: 17px/1.6 var(--font-sans);
   color: var(--fg-2);
   max-width: 65ch;
 }
@@ -103,15 +150,16 @@ body {
 
 .button {
   appearance: none;
+  min-height: 36px;
   border: 1px solid transparent;
-  border-radius: 0;
-  padding: 8px 14px;
-  font: 500 14px/1.4 var(--font-sans);
+  border-radius: var(--radius-control);
+  padding: 8px 16px;
+  font: 500 14px/1.43 var(--font-sans);
   cursor: pointer;
   transition:
     background-color 150ms var(--ease),
     border-color 150ms var(--ease),
-    opacity 150ms var(--ease);
+    color 150ms var(--ease);
 }
 
 .button.primary {
@@ -126,7 +174,7 @@ body {
 }
 
 .button.ghost {
-  background: var(--bg);
+  background: var(--surface-hover);
   color: var(--fg);
   border-color: var(--border-strong);
 }
@@ -149,9 +197,12 @@ body {
   background: var(--surface-hover);
 }
 
-.button.primary:hover,
+.button.primary:hover {
+  background: var(--primary-hover);
+}
+
 .button.accent:hover {
-  opacity: 0.88;
+  background: var(--accent-hover);
 }
 
 .button:disabled {
@@ -165,18 +216,20 @@ body {
 /* --- home ------------------------------------------------------------------------------- */
 
 .home {
-  max-width: 720px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 72px var(--gutter) 48px;
+  padding: 128px var(--gutter) 96px;
   display: grid;
   gap: 32px;
 }
 
+/* the welcome's headline: the one big serif line of the site (the sidebar sets its own, small, in Geist) */
 .wordmark {
   margin: 0;
-  font: 500 40px/1.02 var(--font-mono);
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
+  font: 400 clamp(56px, 9vw, 96px)/1 var(--font-serif);
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  text-wrap: balance;
 }
 
 .caret {
@@ -185,19 +238,14 @@ body {
   height: 0.82em;
   margin-left: 0.08em;
   background: var(--accent);
+  border-radius: 2px;
   vertical-align: baseline;
-  animation: blink 1s steps(1) infinite;
-}
-
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
 }
 
 .lede {
   margin: 0;
-  font: 21px/1.5 var(--font-serif);
+  font: 19px/1.45 var(--font-sans);
+  letter-spacing: -0.01em;
   color: var(--fg-2);
   max-width: 34em;
   text-wrap: pretty;
@@ -207,13 +255,17 @@ body {
   display: grid;
   gap: 8px;
   justify-items: start;
-  padding: 16px;
+  padding: 24px;
+  background: var(--surface);
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
 }
 
 .challenge-detail {
   margin: 0 0 8px;
-  font: 17px/1.3 var(--font-mono);
+  font: 500 18px/1.35 var(--font-sans);
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
 }
 
 .setup {
@@ -239,7 +291,9 @@ body {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  overflow: hidden;
 }
 
 .choice {
@@ -264,7 +318,7 @@ body {
   place-items: center;
   min-height: 40px;
   padding: 8px 12px;
-  font: 14px/1.3 var(--font-mono);
+  font: 14px/1.3 var(--font-sans);
   color: var(--fg-2);
   text-align: center;
   transition: background-color 150ms var(--ease);
@@ -286,7 +340,7 @@ body {
 
 .status-inline {
   margin: 0;
-  font: 14px/1.4 var(--font-mono);
+  font: 14px/1.4 var(--font-sans);
   color: var(--fg-2);
 }
 
@@ -299,15 +353,17 @@ body {
   overflow: auto;
   display: grid;
   gap: 16px;
-  padding: 20px;
+  padding: 24px;
   background: var(--bg);
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
   animation: enter 250ms var(--ease);
 }
 
 @keyframes enter {
   from {
     opacity: 0;
+    transform: translateY(8px);
   }
 }
 
@@ -324,9 +380,9 @@ body {
 }
 
 .figure-value {
-  font: 500 28px/1.1 var(--font-mono);
+  font: 500 28px/1.1 var(--font-sans);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
   overflow-wrap: anywhere;
 }
 
@@ -341,7 +397,9 @@ body {
 
 .bar {
   height: 2px;
-  background: var(--border);
+  background: var(--border-strong);
+  border-radius: 9999px;
+  overflow: hidden;
 }
 
 .bar-fill {
@@ -365,14 +423,12 @@ body {
 .rounds {
   width: 100%;
   border-collapse: collapse;
-  font: 14px/1.4 var(--font-mono);
+  font: 14px/1.4 var(--font-sans);
   font-variant-numeric: tabular-nums;
 }
 
 .rounds th {
-  font: 12px/1.3 var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 12px/1.3 var(--font-sans);
   color: var(--fg-3);
   font-weight: 400;
 }
@@ -396,20 +452,19 @@ body {
 
 .link-field {
   width: 100%;
-  padding: 8px 10px;
-  background: transparent;
+  padding: 8px 12px;
+  background: var(--surface);
   color: var(--fg);
-  border: 1px solid var(--border);
-  font: 12px/1.4 var(--font-mono);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  font: 12px/1.4 var(--font-sans);
 }
 
 
 /* a small note beside a name or a number: you, host, won, away, hint */
 .tag {
   margin-left: 8px;
-  font: 12px/1.3 var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 12px/1.3 var(--font-sans);
   color: var(--fg-3);
   white-space: nowrap;
 }
@@ -423,8 +478,8 @@ body {
 .flag-code {
   padding: 1px 4px;
   border: 1px solid var(--border);
+  border-radius: 4px;
   font: 11px/1.3 var(--font-mono);
-  letter-spacing: 0.06em;
   color: var(--fg-3);
 }
 
@@ -448,7 +503,7 @@ body {
   min-height: 48px;
   padding: 8px 0;
   border-bottom: 1px solid var(--border);
-  font: 14px/1.4 var(--font-mono);
+  font: 14px/1.4 var(--font-sans);
 }
 
 .player-row .tag {

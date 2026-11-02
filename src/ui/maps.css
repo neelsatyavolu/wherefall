@@ -30,6 +30,7 @@
 .street-view {
   height: min(60vh, 480px);
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
   background: var(--surface);
 }
 
@@ -54,7 +55,7 @@
 
 .field-count {
   flex: none;
-  font: 12px/1.5 var(--font-mono);
+  font: 12px/1.5 var(--font-sans);
   font-variant-numeric: tabular-nums;
   color: var(--fg-3);
   white-space: nowrap;
@@ -96,7 +97,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font: 14px/1.5 var(--font-mono);
+  font: 14px/1.5 var(--font-sans);
   color: var(--fg-2);
 }
 

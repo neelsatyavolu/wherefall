@@ -20,6 +20,7 @@
   grid-template-rows: minmax(0, 1fr) auto auto;
   background: var(--bg);
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
   transition:
     width 150ms var(--ease),
     height 150ms var(--ease);
@@ -135,6 +136,7 @@
   right: 8px;
   max-width: min(280px, calc(100% - 16px));
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
 }
 
 @media (max-width: 720px) {

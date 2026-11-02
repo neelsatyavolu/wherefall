@@ -46,7 +46,8 @@
   padding: 6px 12px;
   background: var(--bg);
   border: 1px solid var(--border-strong);
-  font: 14px/1.4 var(--font-mono);
+  border-radius: 9999px;
+  font: 14px/1.4 var(--font-sans);
   color: var(--fg-2);
   /* its length is set where the reaction is shown, to the time it stands there */
   animation: reaction-float 2600ms linear both;

@@ -66,9 +66,9 @@
 .move-arrow {
   display: grid;
   place-items: center;
-  background: rgba(14, 14, 13, 0.72);
-  border: 1px solid rgba(242, 240, 234, 0.5);
-  color: #f2f0ea;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(252, 253, 255, 0.5);
+  color: #fcfdff;
   cursor: pointer;
   transition:
     background-color 150ms var(--ease),
@@ -76,8 +76,8 @@
 }
 
 .move-arrow:hover {
-  background: #f2f0ea;
-  color: #0e0e0d;
+  background: #fcfdff;
+  color: #000000;
 }
 
 .move-arrow-crossing {
@@ -158,7 +158,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  font: 500 12px/1 var(--font-mono);
+  font: 500 12px/1 var(--font-sans);
   color: var(--fg-2);
 }
 
@@ -184,7 +184,8 @@
   gap: 8px;
   background: var(--bg);
   border: 1px solid var(--border-strong);
-  font: 14px/1.4 var(--font-mono);
+  border-radius: var(--radius-control);
+  font: 14px/1.4 var(--font-sans);
   color: var(--fg);
 }
 
@@ -231,7 +232,7 @@ dialog.confirm {
   max-width: min(420px, calc(100% - 32px));
   padding: 24px;
   border: 1px solid var(--border-strong);
-  border-radius: 0;
+  border-radius: var(--radius-card);
   background: var(--bg);
   color: var(--fg);
 }
@@ -242,7 +243,7 @@ dialog.confirm[open] {
 }
 
 dialog.confirm::backdrop {
-  background: rgba(14, 14, 13, 0.62);
+  background: rgba(0, 0, 0, 0.62);
 }
 
 /* the answer that cannot be taken back: quiet, and in the colour of danger */
@@ -269,11 +270,12 @@ dialog.confirm .button.danger {
   padding: 14px 16px;
   background: var(--bg);
   border: 1px solid var(--accent);
+  border-radius: var(--radius-card);
 }
 
 .coach-text {
   margin: 0;
-  font: 17px/1.5 var(--font-serif);
+  font: 17px/1.5 var(--font-sans);
   color: var(--fg);
 }
 

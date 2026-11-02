@@ -8,7 +8,7 @@
 /** What the map is drawn on: an ink-dark ground with pale lines, or paper with dark ones. */
 export type Ground = 'dark' | 'light';
 
-/** The canvas and the ink of each scheme, as `styles.css` has them. */
+/** The map's own canvas and ink for each ground (the map keeps its look; the page chrome follows `styles.css`). */
 export const GROUND_TOKENS: Readonly<Record<Ground, { bg: string; fg: string }>> = {
   dark: { bg: '#0e0e0d', fg: '#f2f0ea' },
   light: { bg: '#f7f5ef', fg: '#16161a' },

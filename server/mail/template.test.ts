@@ -62,7 +62,7 @@ describe('renderEmail', () => {
   it('is laid out with tables and inline styles only, in the colors of the site', () => {
     const { html } = renderEmail(COPY);
     expect(html).not.toMatch(/<style|<link|<script|<img/);
-    for (const color of ['#0E0E0D', '#F2F0EA', '#A9A8A3', '#757470', '#252523', '#4C8DFF']) {
+    for (const color of ['#000000', '#FCFDFF', '#D9DADB', '#A1A4A5', '#242424', '#4C8DFF']) {
       expect(html).toContain(color);
     }
   });

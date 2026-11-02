@@ -9,7 +9,7 @@
 
 .pager-page {
   margin: 0;
-  font: 14px/1.4 var(--font-mono);
+  font: 14px/1.4 var(--font-sans);
   font-variant-numeric: tabular-nums;
   color: var(--fg-2);
 }

@@ -28,16 +28,17 @@ export interface RenderedEmail {
   text: string;
 }
 
-const BG = '#0E0E0D';
-const FG = '#F2F0EA';
-const FG_2 = '#A9A8A3';
-const FG_3 = '#757470';
-const BORDER = '#252523';
+// Blackletter (~/DESIGN.md), flattened onto the black canvas: ink, body (86%), mute, hairline-strong, accent.
+const BG = '#000000';
+const FG = '#FCFDFF';
+const FG_2 = '#D9DADB';
+const FG_3 = '#A1A4A5';
+const BORDER = '#242424';
 const ACCENT = '#4C8DFF';
 
-const MONO = "'Geist Mono',ui-monospace,Menlo,Consolas,monospace";
-const SANS = "'Geist',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif";
-const SERIF = "'Newsreader',Georgia,'Times New Roman',serif";
+// web fonts do not load reliably in mail: Georgia for the display line, the system sans for the rest
+const SANS = "ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif";
+const SERIF = "Georgia,'Times New Roman',serif";
 
 const ESCAPES: Record<string, string> = {
   '&': '&amp;',
@@ -72,15 +73,15 @@ function renderHtml(copy: EmailCopy): string {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${BG}" style="background:${BG};">
 <tr><td align="center" style="padding:48px 24px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;text-align:left;">
-<tr><td style="padding-bottom:24px;border-bottom:1px solid ${BORDER};font-family:${MONO};font-size:12px;line-height:16px;letter-spacing:0.08em;text-transform:uppercase;color:${FG_2};">${app}<span style="color:${ACCENT};">&#9615;</span></td></tr>
-<tr><td style="padding-top:32px;font-family:${MONO};font-size:28px;line-height:31px;font-weight:500;letter-spacing:-0.01em;text-transform:uppercase;color:${FG};">${escapeHtml(copy.heading)}</td></tr>
-<tr><td style="padding-top:16px;font-family:${SERIF};font-size:17px;line-height:27px;color:${FG};">${escapeHtml(copy.body)}</td></tr>
+<tr><td style="padding-bottom:24px;border-bottom:1px solid ${BORDER};font-family:${SANS};font-size:15px;line-height:20px;font-weight:500;letter-spacing:-0.02em;color:${FG};">${app}<span style="color:${ACCENT};">&#9615;</span></td></tr>
+<tr><td style="padding-top:32px;font-family:${SERIF};font-size:40px;line-height:40px;font-weight:400;letter-spacing:-0.02em;color:${FG};">${escapeHtml(copy.heading)}</td></tr>
+<tr><td style="padding-top:16px;font-family:${SANS};font-size:17px;line-height:27px;color:${FG_2};">${escapeHtml(copy.body)}</td></tr>
 <tr><td style="padding-top:32px;">
-<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${ACCENT}" style="background:${ACCENT};"><a href="${url}" style="display:inline-block;padding:12px 18px;font-family:${SANS};font-size:14px;line-height:16px;font-weight:500;color:${BG};text-decoration:none;">${escapeHtml(copy.button)}</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${ACCENT}" style="background:${ACCENT};border-radius:8px;"><a href="${url}" style="display:inline-block;padding:12px 18px;border-radius:8px;font-family:${SANS};font-size:14px;line-height:16px;font-weight:500;color:${BG};text-decoration:none;">${escapeHtml(copy.button)}</a></td></tr></table>
 </td></tr>
 <tr><td style="padding-top:32px;font-family:${SANS};font-size:13px;line-height:20px;color:${FG_2};">${escapeHtml(copy.linkHint)}</td></tr>
-<tr><td style="padding-top:4px;font-family:${MONO};font-size:12px;line-height:18px;word-break:break-all;"><a href="${url}" style="color:${FG_2};text-decoration:underline;">${url}</a></td></tr>
-<tr><td style="padding-top:32px;"><div style="border-top:1px solid ${BORDER};padding-top:16px;font-family:${MONO};font-size:12px;line-height:18px;color:${FG_3};">${escapeHtml(copy.footer)}</div></td></tr>
+<tr><td style="padding-top:4px;font-family:${SANS};font-size:12px;line-height:18px;word-break:break-all;"><a href="${url}" style="color:${ACCENT};text-decoration:underline;">${url}</a></td></tr>
+<tr><td style="padding-top:32px;"><div style="border-top:1px solid ${BORDER};padding-top:16px;font-family:${SANS};font-size:12px;line-height:18px;color:${FG_3};">${escapeHtml(copy.footer)}</div></td></tr>
 </table>
 </td></tr>
 </table>

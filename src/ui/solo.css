@@ -13,7 +13,7 @@
   margin: 0;
   padding: 0;
   background: transparent;
-  border-radius: 0;
+  border-radius: 9999px;
   cursor: pointer;
 }
 
@@ -34,7 +34,7 @@
   margin-top: -11px;
   background: var(--fg);
   border: 0;
-  border-radius: 0;
+  border-radius: 9999px;
 }
 
 .slider::-moz-range-thumb {
@@ -42,7 +42,7 @@
   height: 24px;
   background: var(--fg);
   border: 0;
-  border-radius: 0;
+  border-radius: 9999px;
 }
 
 .slider:focus-visible {
@@ -72,7 +72,7 @@
 .time-value,
 .volume-value {
   display: block;
-  font: 500 17px/1.3 var(--font-mono);
+  font: 500 17px/1.3 var(--font-sans);
   font-variant-numeric: tabular-nums;
   color: var(--fg);
 }
@@ -93,8 +93,8 @@
   background: transparent;
   color: var(--fg);
   border: 1px solid var(--border-strong);
-  border-radius: 0;
-  font: 500 17px/1 var(--font-mono);
+  border-radius: var(--radius-control);
+  font: 500 17px/1 var(--font-sans);
   cursor: pointer;
   transition: background-color 150ms var(--ease);
 }
@@ -172,9 +172,7 @@
 }
 
 .about-change dt {
-  font: 12px/1.3 var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 12px/1.3 var(--font-sans);
   color: var(--fg-3);
 }
 
