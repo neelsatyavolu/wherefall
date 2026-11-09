@@ -4,7 +4,7 @@
 .pin {
   min-width: 16px;
   height: 16px;
-  padding: 0 3px;
+  padding: 0 4px;
   display: grid;
   place-items: center;
   border: 2px solid var(--bg);
@@ -38,7 +38,7 @@
 .pin.bare {
   min-width: 16px;
   height: 16px;
-  padding: 0 3px;
+  padding: 0 4px;
   cursor: pointer;
 }
 
@@ -216,6 +216,7 @@
   appearance: none;
   width: 32px;
   height: 32px;
+  padding: 0;
   border: 0;
   border-radius: var(--radius-control);
   background: var(--bg);

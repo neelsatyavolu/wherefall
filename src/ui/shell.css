@@ -12,7 +12,7 @@
   align-self: start;
   height: 100vh;
   overflow-y: auto;
-  padding: 56px 0 8px;
+  padding: 48px 0 8px;
   border-right: 1px solid var(--border);
 }
 
@@ -62,7 +62,7 @@
 
 .nav-label {
   margin: 0;
-  padding: 0 var(--gutter) 6px;
+  padding: 0 var(--gutter) 4px;
 }
 
 .nav-item {
@@ -71,7 +71,7 @@
   justify-content: space-between;
   gap: 8px;
   min-height: 36px;
-  padding: 6px var(--gutter) 6px calc(var(--gutter) - 2px);
+  padding: 8px var(--gutter) 8px calc(var(--gutter) - 2px);
   border-left: 2px solid transparent;
   font: 14px/1.4 var(--font-sans);
   color: var(--fg-2);
@@ -99,7 +99,7 @@
 /* how many requests and invites are waiting on the friends pane */
 .badge {
   min-width: 20px;
-  padding: 1px 6px;
+  padding: 0 8px;
   background: var(--accent);
   color: var(--bg);
   font: 500 12px/1.5 var(--font-sans);
@@ -116,7 +116,7 @@
 
 .pane {
   min-width: 0;
-  padding: 56px 48px 96px;
+  padding: 48px 48px 96px;
 }
 
 /* one column for every pane, at the left of the room beside the sidebar, so each starts on the same line */
@@ -278,7 +278,7 @@ a.button {
 
 .intro-steps {
   margin: 0;
-  padding-left: 1.4em;
+  padding-left: 24px;
   font: 17px/1.5 var(--font-sans);
   color: var(--fg-2);
 }
@@ -336,7 +336,7 @@ a.button {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 9px 12px;
+  padding: 8px 12px;
   font: 14px/1.4 var(--font-sans);
   color: var(--fg-2);
 }
@@ -545,7 +545,7 @@ textarea.account-input {
 .reasons {
   flex-basis: 100%;
   margin: 0;
-  padding-left: 1.2em;
+  padding-left: 24px;
   font: 15px/1.5 var(--font-sans);
   color: var(--fg-2);
 }
@@ -594,7 +594,7 @@ textarea.account-input {
     gap: 12px;
     width: 100%;
     min-height: 48px;
-    padding: 0 14px;
+    padding: 0 16px;
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-control);
     background: var(--surface);
@@ -607,7 +607,7 @@ textarea.account-input {
   .menu-word {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     font-size: 12px;
     color: var(--fg-2);
   }
@@ -646,12 +646,12 @@ textarea.account-input {
   }
 
   .nav-label {
-    padding-inline: 14px;
+    padding-inline: 16px;
   }
 
   .nav-item {
     min-height: 44px;
-    padding-inline: 12px 14px;
+    padding-inline: 14px 16px;
   }
 
   .pane {
@@ -703,8 +703,8 @@ textarea.account-input {
 
   .pane :is(.player-row, .rounds) .profile-link {
     min-width: 0;
-    padding-inline: 10px;
-    margin-inline: -10px;
+    padding-inline: 12px;
+    margin-inline: -12px;
   }
 
   /* the row gives its own padding up to them, so it is no taller for it */

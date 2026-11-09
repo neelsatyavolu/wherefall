@@ -9,7 +9,7 @@
 
 @media (max-width: 720px) {
   /*
-   * 56px: a 44px button and 6px either side of it. The bar is the canvas with a hairline over it, and
+   * 61px: a 44px button, 8px either side of it and the hairline. The bar is the canvas with a hairline over it, and
    * the button keeps its own width, so the accent stays a small mark rather than a band across the screen.
    */
   .action-bar {
@@ -19,9 +19,9 @@
     bottom: 0;
     left: 0;
     box-sizing: border-box;
-    min-height: 56px;
+    min-height: 61px;
     /* a phone's home indicator, or a browser bar drawn over the page, is kept clear of */
-    padding: 5px var(--gutter) calc(6px + env(safe-area-inset-bottom, 0px));
+    padding: 8px var(--gutter) calc(8px + env(safe-area-inset-bottom, 0px));
     background: var(--bg);
     border-top: 1px solid var(--border-strong);
   }
@@ -32,7 +32,7 @@
 
   /* the page ends above the bar, so its last lines can be scrolled clear of it */
   .pane:has(.action-bar) {
-    padding-bottom: calc(64px + 56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(64px + 61px + env(safe-area-inset-bottom, 0px));
   }
 
   /* with the menu open the bar goes back into the page: the list is not to be covered */

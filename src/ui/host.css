@@ -46,7 +46,7 @@
 }
 
 .host-actions .button {
-  padding: 4px 10px;
+  padding: 4px 12px;
 }
 
 /* on a wide row both actions stand at its end, and there is nothing to open */
@@ -68,7 +68,7 @@
   gap: 8px;
   justify-content: start;
   justify-items: start;
-  padding-bottom: 10px;
+  padding-bottom: 12px;
 }
 
 @container players (max-width: 400px) {
@@ -100,7 +100,7 @@
     grid-column: 1 / -1;
     display: flex;
     justify-content: flex-start;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
   }
 
   .host-actions.open .host-menu .button {
@@ -153,7 +153,7 @@
 
 /* over a round, in the rail (`.match-side` in match.css): that it has no timer, and the host's End round */
 .round-bar {
-  padding: 10px 14px;
+  padding: 12px 16px;
   display: grid;
   gap: 8px;
   justify-items: start;
@@ -207,7 +207,7 @@
 
   /* on a phone the bar is one line: the status at the left, opening downwards, and End round at the right */
   .round-bar {
-    padding: 0 0 0 14px;
+    padding: 0 0 0 16px;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
     gap: 0 12px;
@@ -222,7 +222,7 @@
   }
 
   .round-note {
-    margin: 0 0 10px;
+    margin: 0 0 12px;
   }
 
   .round-bar > .button {
@@ -235,7 +235,7 @@
 
   .round-bar .account-error {
     grid-column: 1 / -1;
-    padding: 0 14px 10px 0;
+    padding: 0 16px 12px 0;
   }
 
   /* while the chat is open the Host button steps aside: it would otherwise stand on the view, wherever the chat's panel pushed it */

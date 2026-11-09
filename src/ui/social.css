@@ -37,7 +37,7 @@
  */
 .online-count {
   position: absolute;
-  top: 24px;
+  top: 16px;
   left: var(--gutter);
   display: flex;
   align-items: center;

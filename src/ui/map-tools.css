@@ -3,13 +3,13 @@
 /* the left side of the tools: sizes with keep-open and full screen, and the map types under them */
 .map-side {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   justify-items: start;
 }
 
 .map-row {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .map-hold,
@@ -34,7 +34,7 @@
 /* a map type is named in a word, so its button is as wide as the word */
 .map-tool.map-type {
   width: auto;
-  padding: 0 10px;
+  padding: 0 12px;
   font: 500 12px/1 var(--font-sans);
 }
 

@@ -129,7 +129,7 @@ async function expectStanding(page: Page, scene: Scene, say: Catalog): Promise<v
   await expect(panel(page).locator('.panel-actions > *')).toHaveClass([/button accent/, /button ghost/]);
   await expect(panel(page).locator('.button.accent')).toHaveCount(1);
   const [foot, first] = [await boxOf(page, '.panel-host .panel-actions'), await boxOf(page, '.panel-host .panel-actions > :first-child')];
-  expect(first.left - foot.left).toBeLessThanOrEqual(21);
+  expect(first.left - foot.left).toBeLessThanOrEqual(25);
   // reporting is a button at the end of a row, one for each player with an account but the viewer
   const reportable = scene.names.filter((name) => name !== 'neel' && !name.includes('#')).length;
   await expect(panel(page).locator('tbody td:last-child .report-button')).toHaveCount(reportable);

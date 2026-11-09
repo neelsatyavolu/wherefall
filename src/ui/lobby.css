@@ -9,7 +9,7 @@
   /* 880 of content, inside the padding */
   max-width: 976px;
   margin: 0;
-  padding: 56px 48px 96px;
+  padding: 48px 48px 96px;
   display: grid;
   gap: 32px;
 }

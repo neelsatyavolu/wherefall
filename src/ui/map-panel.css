@@ -128,13 +128,26 @@
   visibility: hidden;
 }
 
+/* with the map over the whole screen its zoom buttons keep the screen's edge, like everything else over it */
+.play[data-phase='result'] .map-tools,
+.play[data-phase='summary'] .map-tools,
+.play[data-phase='guessing'] .map-panel.full .map-tools {
+  right: var(--edge);
+  left: var(--edge);
+}
+
+.play[data-phase='result'] .map-tools,
+.play[data-phase='summary'] .map-tools {
+  top: var(--edge);
+}
+
 /* over a result the map fills the screen: the credit moves clear of the panel, under the zoom buttons */
 .play[data-phase='result'] .map-credit,
 .play[data-phase='summary'] .map-credit {
   position: absolute;
-  top: 84px;
-  right: 8px;
-  max-width: min(280px, calc(100% - 16px));
+  top: calc(var(--edge) + 74px);
+  right: var(--edge);
+  max-width: min(280px, calc(100% - 2 * var(--edge)));
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-control);
 }
@@ -164,14 +177,19 @@
     border-width: 1px 0 0;
   }
 
+  /* the sheet runs the width of the screen: its tools keep the screen's edge, like the bar under them */
+  .play[data-phase='guessing'] .map-panel.open:not(.full) .map-tools {
+    inset: var(--edge) var(--edge) auto;
+  }
+
   .play[data-phase='guessing']:has(.map-panel.open) .map-toggle {
     display: none;
   }
 
   .guess-bar {
     align-items: center;
-    min-height: 56px;
-    padding: 6px var(--edge);
+    min-height: 61px;
+    padding: 8px var(--edge);
   }
 
   .map-close {
@@ -200,7 +218,7 @@
    * the height to clear; the match's own styles (chat.css) use it.
    */
   .play[data-phase='guessing']:has(.map-panel.open) {
-    --sheet-bar: 56px;
+    --sheet-bar: 61px;
   }
 
   .play[data-phase='result'] .map-panel,
@@ -216,7 +234,7 @@
 
   .play[data-phase='result'] .map-credit,
   .play[data-phase='summary'] .map-credit {
-    top: 172px;
+    top: calc(var(--hud-foot) + 98px);
   }
 
   /* a panel has the foot of the screen then: the map's own credit moves up under the HUD, across from the zoom buttons */
@@ -225,6 +243,6 @@
     top: var(--hud-foot);
     right: auto;
     bottom: auto;
-    left: 8px;
+    left: var(--edge);
   }
 }

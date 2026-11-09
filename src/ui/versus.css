@@ -22,7 +22,7 @@
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 24px;
-  padding: 28px 24px;
+  padding: 32px 24px;
   background: var(--bg);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-card);
@@ -30,7 +30,7 @@
 
 .versus-card {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -83,7 +83,7 @@
   /* on a phone the two stand one above the other, each across the whole box */
   .versus-box {
     grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
+    gap: 16px;
     padding: 20px 16px;
   }
 

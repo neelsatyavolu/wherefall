@@ -37,7 +37,7 @@
 .chat-toast {
   margin: 0;
   max-width: 280px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   background: var(--bg);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-control);
@@ -129,7 +129,7 @@
 
 .chat-form .chat-input {
   min-width: 0;
-  padding: 7px 10px;
+  padding: 8px 12px;
   font-size: 15px;
 }
 
@@ -156,8 +156,8 @@
 }
 
 .chat-scope .choice span {
-  padding-top: 6px;
-  padding-bottom: 6px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 /* a line that only the sender's team was sent */
@@ -235,7 +235,7 @@
    * map-panel.css sets on the screen while the sheet is open.
    */
   .play[data-phase='guessing']:has(.map-panel.open) .match-corner {
-    bottom: calc(var(--sheet-bar, 56px) + 8px);
+    bottom: calc(var(--sheet-bar, 61px) + 8px);
   }
 
   .chat.folded {

@@ -27,7 +27,7 @@
 .account-input {
   appearance: none;
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 12px;
   background: var(--surface);
   color: var(--fg);
   caret-color: var(--accent);
@@ -101,7 +101,7 @@
 }
 
 .account-who .flag {
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
 /* cells share hairlines rather than sitting in separate boxes */
@@ -171,6 +171,11 @@
   max-width: 640px;
 }
 
+/* a note with nothing in it yet (a setting's outcome, before there is one) takes no row, so no setting has a gap the others do not; it stays in the page, where a reader hears what comes into it */
+.settings p:empty {
+  position: absolute;
+}
+
 /* --- the two groups of settings: saved with the account, kept in this browser ---------------- */
 
 .settings-group {
@@ -193,7 +198,7 @@
 }
 
 .country-option .flag {
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
 /* --- the recovery code: shown once, typed back to get in without the password ----------------- */

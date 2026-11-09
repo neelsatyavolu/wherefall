@@ -47,7 +47,7 @@
 
 .team-head .button {
   margin-left: auto;
-  padding: 4px 10px;
+  padding: 4px 12px;
 }
 
 .team-box .player-list {
@@ -83,7 +83,7 @@
 
 /* a teammate's pin while it can still move: outlined, by name. Clicks pass through it to the map */
 .pin.pin-mate {
-  padding: 0 6px;
+  padding: 0 8px;
   background: var(--bg);
   color: var(--fg);
   border: 1px dashed var(--fg);

@@ -121,7 +121,7 @@ async function expectPanelRules(page: Page, phone: boolean): Promise<void> {
   await expect(panel.locator('.button.primary')).toHaveCount(0);
   const [actions, first] = [await box(page, '.panel-actions'), await box(page, '.panel-actions > :first-child')];
   expect(Math.abs(actions.bottom - at.bottom)).toBeLessThanOrEqual(1.5);
-  expect(first.left - at.left).toBeLessThanOrEqual(22);
+  expect(first.left - at.left).toBeLessThanOrEqual(25);
   // no button is left alone beside an empty cell
   const rows = await page.evaluate(() => {
     const tops = [...document.querySelectorAll('.panel-actions > *')].map((node) => Math.round(node.getBoundingClientRect().top));

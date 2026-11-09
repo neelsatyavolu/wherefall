@@ -154,7 +154,7 @@
 
 .daily-plot {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .daily-bars {
@@ -251,7 +251,7 @@ li:has(> .daily-mark:not([hidden])) > .nav-item {
 }
 
 .daily-mark[data-state='atRisk'] {
-  padding: 2px 5px;
+  padding: 0 4px;
   border: 1px solid var(--border-strong);
   color: var(--fg);
 }
