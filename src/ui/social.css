@@ -43,7 +43,7 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  font: 12px/1.3 var(--font-sans);
+  font: 12px/1.3 var(--font-mono);
   font-variant-numeric: tabular-nums;
   color: var(--fg-3);
 }
@@ -263,9 +263,10 @@
     position: relative;
   }
 
+  /* beside the theme toggle, never under it: the toggle is 44px wide on a phone */
   .online-count {
-    top: 20px;
-    right: var(--gutter);
+    top: 31px;
+    right: calc(var(--gutter) + 44px + 12px);
     left: auto;
     height: 22px;
   }
