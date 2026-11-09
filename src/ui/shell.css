@@ -26,7 +26,7 @@
 }
 
 .sidebar .wordmark {
-  font: 500 20px/1.2 var(--font-sans);
+  font: 500 21px/1.2 var(--font-serif);
   letter-spacing: -0.02em;
 }
 
@@ -351,7 +351,7 @@ a.button {
 }
 
 .country-option input:focus-visible + span {
-  outline: 2px solid var(--accent-muted);
+  outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 

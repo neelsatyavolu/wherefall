@@ -1,35 +1,33 @@
-/* Blackletter (~/DESIGN.md): true black canvas, Geist for everything, Geist Serif for the one big headline, one blue accent. */
-@font-face {
-  font-family: 'Geist Serif';
-  src: url('./fonts/GeistSerifVF.woff2') format('woff2');
-  font-weight: 100 900;
-  font-display: swap;
-}
+/* Ink & Instrument (~/DESIGN.md v3): warm off-black or paper, Newsreader for what is read, Geist for controls, Geist Mono for every number and label, one blue accent. */
 
 :root {
-  --bg: #000000;
-  --surface: #0a0a0c;
-  --surface-hover: #111114;
-  --fg: #fcfdff;
-  --fg-2: rgba(252, 253, 255, 0.7);
-  /* fine print is set in this at 12px: the mute grey, 8.4:1 on the canvas */
-  --fg-3: #a1a4a5;
-  --fg-4: #464a4d;
-  --border: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.14);
+  --bg: #0e0e0d;
+  --surface: #141413;
+  --surface-hover: #1a1a18;
+  --fg: #f2f0ea;
+  --fg-2: rgba(242, 240, 234, 0.86);
+  /* fine print and labels: the mute step */
+  --fg-3: rgba(242, 240, 234, 0.55);
+  /* disabled only */
+  --fg-4: rgba(242, 240, 234, 0.28);
+  --border: rgba(242, 240, 234, 0.08);
+  --border-strong: rgba(242, 240, 234, 0.18);
+  /* input and segmented-control borders: 3:1 against the surface */
+  --field: rgba(242, 240, 234, 0.42);
   --accent: #4c8dff;
   --accent-hover: #6fa3ff;
   --accent-muted: rgba(76, 141, 255, 0.55);
-  --tint: rgba(76, 141, 255, 0.12);
-  --primary-hover: #e8f0ff;
-  --danger: #ff4d5e;
-  --ok: #3dd68c;
-  --warn: #ffc53d;
+  --tint: rgba(76, 141, 255, 0.1);
+  --primary-hover: #e4e1d9;
+  --scrim: rgba(9, 9, 8, 0.7);
+  --danger: #ee5a4b;
+  --ok: #4fbf85;
+  --warn: #d9a23a;
   --font-mono: 'Geist Mono', ui-monospace, Menlo, monospace;
   --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: 'Geist Serif', Georgia, serif;
-  --radius-control: 8px;
-  --radius-card: 12px;
+  --font-serif: 'Newsreader', Georgia, serif;
+  --radius-control: 4px;
+  --radius-card: 6px;
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --gutter: 24px;
   color-scheme: dark;
@@ -37,48 +35,50 @@
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
-    --bg: #fcfcfd;
-    --surface: #ffffff;
-    --surface-hover: #f4f5f7;
-    --fg: #0a0a0c;
-    /* the body ink: a clear step above the mute grey of fine print */
-    --fg-2: rgba(10, 10, 12, 0.82);
-    --fg-3: #5f6366;
-    --fg-4: #c4c7ca;
-    --border: rgba(0, 0, 0, 0.06);
-    --border-strong: rgba(0, 0, 0, 0.12);
-    /* the darker blue, so it reads as a link on the light canvas and the canvas reads on it */
-    --accent: #2f6fe0;
-    --accent-hover: #2459ba;
-    --accent-muted: rgba(47, 111, 224, 0.45);
-    --tint: rgba(47, 111, 224, 0.08);
-    --primary-hover: #26262b;
-    --danger: #d92d3f;
-    --ok: #14915a;
-    --warn: #b7791f;
+    --bg: #f7f5ef;
+    --surface: #fbfaf6;
+    --surface-hover: #efece4;
+    --fg: #16161a;
+    --fg-2: rgba(22, 22, 26, 0.86);
+    --fg-3: rgba(22, 22, 26, 0.64);
+    --fg-4: rgba(22, 22, 26, 0.28);
+    --border: rgba(22, 22, 26, 0.1);
+    --border-strong: rgba(22, 22, 26, 0.22);
+    --field: rgba(22, 22, 26, 0.5);
+    --accent: #2a63cc;
+    --accent-hover: #1f4fa8;
+    --accent-muted: rgba(42, 99, 204, 0.45);
+    --tint: rgba(42, 99, 204, 0.09);
+    --primary-hover: #2a2a2f;
+    --scrim: rgba(22, 22, 26, 0.4);
+    --danger: #bc2e23;
+    --ok: #1a7048;
+    --warn: #8a5e12;
     color-scheme: light;
   }
 }
 
 /* the theme picked in the sidebar wins over the system's */
 :root[data-theme='light'] {
-  --bg: #fcfcfd;
-  --surface: #ffffff;
-  --surface-hover: #f4f5f7;
-  --fg: #0a0a0c;
-  --fg-2: rgba(10, 10, 12, 0.82);
-  --fg-3: #5f6366;
-  --fg-4: #c4c7ca;
-  --border: rgba(0, 0, 0, 0.06);
-  --border-strong: rgba(0, 0, 0, 0.12);
-  --accent: #2f6fe0;
-  --accent-hover: #2459ba;
-  --accent-muted: rgba(47, 111, 224, 0.45);
-  --tint: rgba(47, 111, 224, 0.08);
-  --primary-hover: #26262b;
-  --danger: #d92d3f;
-  --ok: #14915a;
-  --warn: #b7791f;
+  --bg: #f7f5ef;
+  --surface: #fbfaf6;
+  --surface-hover: #efece4;
+  --fg: #16161a;
+  --fg-2: rgba(22, 22, 26, 0.86);
+  --fg-3: rgba(22, 22, 26, 0.64);
+  --fg-4: rgba(22, 22, 26, 0.28);
+  --border: rgba(22, 22, 26, 0.1);
+  --border-strong: rgba(22, 22, 26, 0.22);
+  --field: rgba(22, 22, 26, 0.5);
+  --accent: #2a63cc;
+  --accent-hover: #1f4fa8;
+  --accent-muted: rgba(42, 99, 204, 0.45);
+  --tint: rgba(42, 99, 204, 0.09);
+  --primary-hover: #2a2a2f;
+  --scrim: rgba(22, 22, 26, 0.4);
+  --danger: #bc2e23;
+  --ok: #1a7048;
+  --warn: #8a5e12;
   color-scheme: light;
 }
 
@@ -112,9 +112,8 @@ body {
 }
 
 :focus-visible {
-  outline: 3px solid var(--accent-muted);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: var(--radius-control);
 }
 
 [hidden] {
@@ -123,7 +122,7 @@ body {
 
 .label {
   margin: 0;
-  font: 13px/1.4 var(--font-sans);
+  font: 12px/1.4 var(--font-mono);
   color: var(--fg-3);
 }
 
@@ -226,8 +225,8 @@ body {
 /* the welcome's headline: the one big serif line of the site (the sidebar sets its own, small, in Geist) */
 .wordmark {
   margin: 0;
-  font: 400 clamp(56px, 9vw, 96px)/1 var(--font-serif);
-  letter-spacing: -0.02em;
+  font: 400 clamp(44px, 6.5vw, 72px)/1.04 var(--font-serif);
+  letter-spacing: -0.015em;
   color: var(--fg);
   text-wrap: balance;
 }
@@ -291,7 +290,7 @@ body {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--field);
   border-radius: var(--radius-control);
   overflow: hidden;
 }
@@ -334,7 +333,7 @@ body {
 }
 
 .choice input:focus-visible + span {
-  outline: 2px solid var(--accent-muted);
+  outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 

@@ -243,7 +243,7 @@ dialog.confirm[open] {
 }
 
 dialog.confirm::backdrop {
-  background: rgba(0, 0, 0, 0.62);
+  background: var(--scrim);
 }
 
 /* the answer that cannot be taken back: quiet, and in the colour of danger */
